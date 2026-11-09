@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tanie loty z Poznania</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1420;--card:#152033;--card2:#1b2940;--line:#253552;--tx:#e8eef8;--mut:#8ea0bd;--acc:#ffb547;--acc2:#3dd6a3;--hot:#ff6b5a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.45 Inter,system-ui,sans-serif;padding-bottom:84px;min-height:100vh}
+h1,h2,h3{font-family:"Space Grotesk",sans-serif}
+header{padding:20px 16px 14px;background:linear-gradient(160deg,#1c2c48 0%,#0d1420 70%)}
+header h1{font-size:24px;letter-spacing:-.5px}
+header h1 span{color:var(--acc)}
+header p{color:var(--mut);font-size:13px;margin-top:4px}
+main{padding:0 14px;max-width:640px;margin:0 auto}
+section{display:none}section.on{display:block}
+h2{font-size:18px;margin:18px 0 10px}
+.note{color:var(--mut);font-size:12.5px;margin:6px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.deal{display:flex;gap:12px;align-items:center}
+.deal .price{font:700 22px "Space Grotesk";color:var(--acc);min-width:84px;text-align:right}
+.deal .price small{display:block;font:500 11px Inter;color:var(--mut)}
+.deal .info{flex:1;min-width:0}
+.deal .city{font-weight:600;font-size:16px}
+.deal .meta{color:var(--mut);font-size:12.5px}
+.tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:20px;background:var(--card2);color:var(--mut);margin:4px 4px 0 0}
+.tag.hot{background:rgba(255,107,90,.15);color:var(--hot)}
+.tag.new{background:rgba(61,214,163,.15);color:var(--acc2)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{appearance:none;border:1px solid var(--line);background:var(--card2);color:var(--tx);border-radius:12px;padding:10px 12px;font:600 13.5px Inter;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.pri{background:var(--acc);color:#1a1200;border-color:var(--acc)}
+.btn.sm{padding:7px 10px;font-size:12.5px;border-radius:10px}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.links a{justify-content:center}
+label{display:block;font-size:12.5px;color:var(--mut);margin:12px 0 5px}
+select,input[type=number],input[type=date]{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:11px;font:15px Inter}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:transparent;color:var(--mut);border-radius:20px;padding:7px 12px;font:500 13px Inter;cursor:pointer}
+.chip.on{background:var(--acc);color:#1a1200;border-color:var(--acc)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.range{display:flex;align-items:center;gap:10px}
+.range input{flex:1;accent-color:var(--acc)}
+.range b{min-width:70px;text-align:right;color:var(--acc)}
+.dest{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dest .c{font-weight:600}
+.dest .s{color:var(--mut);font-size:12.5px}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(13,20,32,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:0;color:var(--mut);font:500 11px Inter;padding:6px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button svg{width:22px;height:22px}
+nav button.on{color:var(--acc)}
+.empty{color:var(--mut);text-align:center;padding:24px 8px}
+.toggle{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px}
+.toggle input{width:20px;height:20px;accent-color:var(--acc)}
+.hol{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hol .d{color:var(--mut);font-size:12.5px}
+a.plain{color:var(--acc)}
+.foot{color:var(--mut);font-size:11.5px;margin:18px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>✈ Loty z <span>POZ</span></h1>
+  <p>Okazje i szybkie wyszukiwanie tanich lotów z Poznania-Ławicy</p>
+</header>
+<main>
+
+<!-- OKAZJE -->
+<section id="s-deals" class="on">
+  <h2>🔥 Okazje z Poznania</h2>
+  <p class="note">Ceny w obie strony za osobę, znalezione w serwisach z okazjami (stan 9.11.2026). Tanie bilety znikają szybko — kliknij „Sprawdź”, żeby zobaczyć aktualną cenę.</p>
+  <label>Maks. cena</label>
+  <div class="range"><input id="dealMax" type="range" min="100" max="400" step="10" value="400"><b id="dealMaxV">400 zł</b></div>
+  <div class="chips" id="dealMonth" style="margin-top:12px"></div>
+  <div id="dealList" style="margin-top:12px"></div>
+</section>
+
+<!-- SZUKAJ -->
+<section id="s-search">
+  <h2>🔎 Szukaj tanich lotów</h2>
+  <div class="card">
+    <label>Dokąd</label>
+    <select id="qTo"></select>
+    <label>Kiedy</label>
+    <div class="chips" id="qMode">
+      <button class="chip on" data-v="month">Cały miesiąc</button>
+      <button class="chip" data-v="dates">Konkretne daty</button>
+    </div>
+    <div id="qMonthBox"><label>Miesiąc</label><select id="qMonth"></select></div>
+    <div id="qDatesBox" style="display:none" class="two">
+      <div><label>Wylot</label><input type="date" id="qD1"></div>
+      <div><label>Powrót</label><input type="date" id="qD2"></div>
+    </div>
+    <label>Długość wyjazdu</label>
+    <div class="chips" id="qLen">
+      <button class="chip" data-v="1-1">1 dzień</button>
+      <button class="chip on" data-v="2-4">Weekend 2–4</button>
+      <button class="chip" data-v="5-8">Tydzień</button>
+      <button class="chip" data-v="9-16">Dłużej</button>
+    </div>
+    <label>Budżet (w obie strony)</label>
+    <div class="range"><input id="qBudget" type="range" min="100" max="1500" step="50" value="400"><b id="qBudgetV">400 zł</b></div>
+    <div class="toggle"><input type="checkbox" id="qDirect" checked><span>Tylko bez przesiadek</span></div>
+    <div class="links" id="qLinks"></div>
+    <div class="row" style="margin-top:10px"><button class="btn sm" id="qSave">⭐ Zapisz to wyszukiwanie</button></div>
+  </div>
+  <p class="note">Najlepsze do polowania na okazje: <b>Azair</b> (szuka wszystkich tanich połączeń w zakresie dat) i <b>Skyscanner/Kiwi „Gdziekolwiek”</b>. Ryanair i Wizz Air otwierają stronę przewoźnika.</p>
+
+  <h2>📅 Wolne dni 2026/27</h2>
+  <p class="note">Kliknij, żeby wpisać daty do wyszukiwarki.</p>
+  <div id="holList"></div>
+</section>
+
+<!-- KIERUNKI -->
+<section id="s-dest">
+  <h2>🗺 Kierunki z Ławicy</h2>
+  <div class="chips" id="dFilter">
+    <button class="chip on" data-v="all">Wszystkie</button>
+    <button class="chip" data-v="warm">☀ Ciepło</button>
+    <button class="chip" data-v="city">🏛 City break</button>
+    <button class="chip" data-v="uk">🇬🇧 Wyspy</button>
+    <button class="chip" data-v="north">❄ Północ</button>
+    <button class="chip" data-v="new">✨ Nowe</button>
+  </div>
+  <p class="note">„Dobra cena” = cena w obie strony, przy której warto brać bez zastanowienia (orientacyjnie). Siatka połączeń zmienia się sezonowo.</p>
+  <div id="dList"></div>
+</section>
+
+<!-- ZAPISANE -->
+<section id="s-saved">
+  <h2>⭐ Moje wyszukiwania</h2>
+  <p class="note">Zapisane wyszukiwania — sprawdzaj je co kilka dni jednym kliknięciem. Zapisują się tylko w tej przeglądarce.</p>
+  <div id="savedList"></div>
+  <h2>📣 Gdzie śledzić okazje</h2>
+  <div class="card">
+    <div class="row">
+      <a class="btn sm" href="https://www.tanie-loty.com.pl/okazje/loty-z-poznania" target="_blank" rel="noopener">tanie-loty.com.pl</a>
+      <a class="btn sm" href="https://www.fly4free.pl/" target="_blank" rel="noopener">Fly4free</a>
+      <a class="btn sm" href="https://www.pepper.pl/grupa/loty" target="_blank" rel="noopener">Pepper – loty</a>
+      <a class="btn sm" href="https://www.kayak.pl/loty/Poznan-Lawica-POZ/Caly-swiat-000" target="_blank" rel="noopener">Kayak: POZ → świat</a>
+      <a class="btn sm" href="https://poznanairport.pl/" target="_blank" rel="noopener">Lotnisko Ławica</a>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:15px;margin-bottom:6px">💡 Jak łapać okazje</h3>
+    <div class="note" style="margin:0">
+      • Szukaj całym miesiącem, nie konkretną datą — najtańsze są zwykle wt/śr/sob.<br>
+      • Ryanair/Wizz robią krótkie wyprzedaże (często 24–48 h) — wtedy loty po 100–200 zł.<br>
+      • Bilet bez bagażu = tylko mały plecak pod siedzenie. Walizka kabinowa to dopłata.<br>
+      • Europa: kupuj zwykle 4–10 tygodni wcześniej; dalsze wakacje wcześniej.<br>
+      • Beauvais (BVA) to ~80 km od Paryża, Torp (TRF) ~110 km od Oslo — dolicz dojazd.
+    </div>
+  </div>
+</section>
+
+<p class="foot">Apka nie pobiera cen na żywo — kieruje do wyszukiwarek z gotowymi parametrami. Ceny okazji pochodzą z serwisów okazji (9.11.2026) i mogły się zmienić.</p>
+</main>
+
+<nav>
+  <button class="on" data-s="s-deals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 3 3 3 5"/></svg>Okazje</button>
+  <button data-s="s-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Szukaj</button>
+  <button data-s="s-dest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/><circle cx="12" cy="12" r="10"/></svg>Kierunki</button>
+  <button data-s="s-saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Moje</button>
+</nav>
+
+<script>
+// ---------- DANE ----------
+const DEST = [
+ // code, name, azairName, country, groups, goodPrice, note
+ ["STN","Londyn Stansted","London [STN]","Wielka Brytania",["uk","city"],200,"Ryanair"],
+ ["LTN","Londyn Luton","London [LTN]","Wielka Brytania",["uk","city"],220,"Wizz Air"],
+ ["DUB","Dublin","Dublin [DUB]","Irlandia",["uk","city"],250,""],
+ ["SNN","Shannon","Shannon [SNN]","Irlandia",["uk","new"],250,"Ryanair · nowość zima 26/27"],
+ ["EDI","Edynburg","Edinburgh [EDI]","Szkocja",["uk","city"],260,""],
+ ["LBA","Leeds","Leeds [LBA]","Wielka Brytania",["uk"],220,""],
+ ["BHX","Birmingham","Birmingham [BHX]","Wielka Brytania",["uk"],220,""],
+ ["BRS","Bristol","Bristol [BRS]","Wielka Brytania",["uk"],260,""],
+ ["BCN","Barcelona","Barcelona [BCN]","Hiszpania",["city","warm","new"],300,"Ryanair · nowość zima 26/27"],
+ ["VLC","Walencja","Valencia [VLC]","Hiszpania",["city","warm"],300,"Ryanair"],
+ ["ALC","Alicante","Alicante [ALC]","Hiszpania",["warm"],350,""],
+ ["AGP","Malaga","Malaga [AGP]","Hiszpania",["warm"],350,""],
+ ["TFS","Teneryfa","Tenerife [TFS]","Wyspy Kanaryjskie",["warm"],550,""],
+ ["LPA","Gran Canaria","Gran Canaria [LPA]","Wyspy Kanaryjskie",["warm"],550,""],
+ ["OPO","Porto","Porto [OPO]","Portugalia",["city","warm","new"],300,"Ryanair · nowość zima 26/27"],
+ ["LIS","Lizbona","Lisbon [LIS]","Portugalia",["city","warm"],350,""],
+ ["FAO","Faro","Faro [FAO]","Portugalia",["warm","new"],350,"Ryanair · od 30.03.2027"],
+ ["MLA","Malta","Malta [MLA]","Malta",["warm","city"],250,""],
+ ["PFO","Pafos","Paphos [PFO]","Cypr",["warm"],300,""],
+ ["BGY","Mediolan Bergamo","Milan [BGY]","Włochy",["city"],200,"Ryanair"],
+ ["CIA","Rzym Ciampino","Rome [CIA]","Włochy",["city","warm"],260,""],
+ ["BRI","Bari","Bari [BRI]","Włochy",["city","warm"],250,""],
+ ["TIA","Tirana","Tirana [TIA]","Albania",["city","warm","new"],250,"Ryanair · nowość"],
+ ["BVA","Paryż Beauvais","Paris [BVA]","Francja",["city"],220,"Ryanair"],
+ ["BSL","Bazylea","Basel [BSL]","Szwajcaria",["city","new"],300,"Wizz Air · od 21.09.2026"],
+ ["EIN","Eindhoven","Eindhoven [EIN]","Holandia",["city"],220,""],
+ ["KUT","Kutaisi","Kutaisi [KUT]","Gruzja",["warm","city"],300,"Wizz Air"],
+ ["TRF","Oslo Torp","Oslo [TRF]","Norwegia",["north"],200,"Ryanair"],
+ ["ARN","Sztokholm","Stockholm [ARN]","Szwecja",["north","city"],250,""],
+ ["CPH","Kopenhaga","Copenhagen [CPH]","Dania",["north","city"],220,""],
+ ["DBV","Dubrownik","Dubrovnik [DBV]","Chorwacja",["warm"],300,"sezonowo latem"],
+ ["PUY","Pula","Pula [PUY]","Chorwacja",["warm"],250,"sezonowo latem"],
+ ["FRA","Frankfurt","Frankfurt [FRA]","Niemcy (hub)",["city"],600,"Lufthansa · przesiadki na świat"],
+ ["AMS","Amsterdam","Amsterdam [AMS]","Holandia (hub)",["city"],600,"KLM · przesiadki na świat"],
+];
+const DMAP = Object.fromEntries(DEST.map(d=>[d[0],d]));
+
+// Okazje znalezione 9.11.2026 (tanie-loty.com.pl, Pepper.pl, Kayak)
+const DEALS = [
+ {to:"ARN",city:"Sztokholm",p:148,d1:"2026-12-21",d2:"2026-12-29",src:"tanie-loty.com.pl",hot:1,tag:"Święta"},
+ {to:"MLA",city:"Malta",p:155,d1:"2026-11-29",d2:"2026-12-05",src:"Pepper.pl / Kayak",hot:1,tag:"Ciepło"},
+ {to:"KUT",city:"Kutaisi (Gruzja)",p:161,d1:"2026-11-26",d2:"2026-12-19",range:1,src:"tanie-loty.com.pl",tag:"terminy w tym okresie"},
+ {to:"BVA",city:"Paryż Beauvais",p:179,d1:"2026-11-15",d2:"2026-11-22",src:"Kayak",tag:"City break"},
+ {to:"BRI",city:"Bari",p:184,d1:"2027-01-10",d2:"2027-01-15",src:"tanie-loty.com.pl",tag:"Włochy"},
+ {to:"PAR",city:"Paryż",p:196,d1:"2026-11-29",d2:"2026-12-04",src:"tanie-loty.com.pl",tag:"City break"},
+ {to:"PFO",city:"Pafos (Cypr)",p:214,d1:"2026-12-14",d2:"2026-12-22",src:"tanie-loty.com.pl",tag:"Ciepło"},
+ {to:"ROM",city:"Rzym",p:246,d1:"2026-12-24",d2:"2027-01-07",range:1,src:"tanie-loty.com.pl",tag:"Święta"},
+ {to:"OPO",city:"Porto",p:267,d1:"2026-12-13",d2:"2026-12-16",src:"tanie-loty.com.pl",tag:"Nowa trasa"},
+ {to:"STN",city:"Londyn Stansted",p:272,d1:"2026-12-29",d2:"2027-01-04",src:"tanie-loty.com.pl",tag:"Sylwester"},
+];
+
+const HOLS = [
+ {n:"Święta Bożego Narodzenia",d1:"2026-12-23",d2:"2026-12-27",info:"24–26.12 (czw–sob) wolne, 1 dzień urlopu"},
+ {n:"Sylwester / Nowy Rok",d1:"2026-12-31",d2:"2027-01-03",info:"1.01 piątek — długi weekend"},
+ {n:"Trzech Króli",d1:"2027-01-02",d2:"2027-01-06",info:"6.01 środa — 2 dni urlopu = 5 dni"},
+ {n:"Wielkanoc 2027",d1:"2027-03-26",d2:"2027-03-29",info:"28–29.03 — piątek urlopu = 4 dni"},
+ {n:"Majówka 2027",d1:"2027-04-30",d2:"2027-05-03",info:"1.05 sobota, 3.05 poniedziałek"},
+ {n:"Boże Ciało 2027",d1:"2027-05-27",d2:"2027-05-30",info:"27.05 czwartek — 1 dzień urlopu"},
+];
+
+const MONTHS = ["styczeń","luty","marzec","kwiecień","maj","czerwiec","lipiec","sierpień","wrzesień","październik","listopad","grudzień"];
+const MONTHS_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+// ---------- POMOCNICZE ----------
+const $ = s=>document.querySelector(s);
+const pad = n=>String(n).padStart(2,"0");
+const iso = d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const pl = s=>{const [y,m,d]=s.split("-");return +d+"."+m+"."+y.slice(2)};
+const dmy = s=>{const [y,m,d]=s.split("-");return (+d)+"."+(+m)+"."+y};
+const ymd6 = s=>s.slice(2).replace(/-/g,"");
+const nights = (a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
+const store = {
+  get(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return def}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// ---------- BUDOWANIE LINKÓW ----------
+// q = {to:"BCN"|"" (gdziekolwiek), d1,d2 (ISO), month:"2026-12"|null, len:"2-4", budget, direct}
+function links(q){
+  const to = q.to || "";
+  const d = DMAP[to];
+  const [lmin,lmax] = q.len.split("-").map(Number);
+  let d1,d2,monthLabel,monthEN;
+  if(q.month){
+    const [y,m]=q.month.split("-").map(Number);
+    d1 = `${y}-${pad(m)}-01`;
+    const last = new Date(y,m,0).getDate();
+    d2 = `${y}-${pad(m)}-${pad(last)}`;
+    monthEN = MONTHS_EN[m-1]+" "+y;
+  } else { d1=q.d1; d2=q.d2; }
+  const out = [];
+
+  // Google Flights
+  let gq;
+  if(!to){ gq = q.month ? `Flights from Poznan to anywhere in ${monthEN}` : `Flights from Poznan to anywhere on ${d1} through ${d2}`;
+    out.push(["Google Flights 🌍",`https://www.google.com/travel/explore?q=${encodeURIComponent(gq)}&hl=pl&curr=PLN`]); }
+  else { gq = q.month ? `Flights from POZ to ${to} in ${monthEN}${q.direct?" nonstop":""}` : `Flights from POZ to ${to} on ${d1} through ${d2}${q.direct?" nonstop":""}`;
+    out.push(["Google Flights",`https://www.google.com/travel/flights?q=${encodeURIComponent(gq)}&hl=pl&curr=PLN`]); }
+
+  // Skyscanner
+  const sTo = to ? to.toLowerCase() : "anywhere";
+  let sk;
+  if(q.month){ const ym=q.month.slice(2).replace("-",""); sk=`https://www.skyscanner.pl/transport/loty/poz/${sTo}/?adultsv2=1&cabinclass=economy&rtn=1&oym=${ym}&iym=${ym}&preferdirects=${q.direct}`; }
+  else sk=`https://www.skyscanner.pl/transport/loty/poz/${sTo}/${ymd6(d1)}/${ymd6(d2)}/?adultsv2=1&cabinclass=economy&rtn=1&preferdirects=${q.direct}`;
+  out.push(["Skyscanner",sk]);
+
+  // Azair – najlepszy do okazji
+  const p = new URLSearchParams({searchtype:"flexi",tp:"0",isOneway:"return",
+    srcAirport:"Poznan [POZ]",srcTypedText:"poz",srcFreeTypedText:"",srcMC:"",
+    dstAirport: d? d[2] : "Anywhere [XXX]", anywhere: d? "false":"true", dstTypedText: d? to.toLowerCase():"xxx", dstFreeTypedText:"", dstMC:"",
+    depmonth:d1.slice(0,7).replace("-",""), depdate:dmy(d1), aid:"0",
+    arrmonth:d2.slice(0,7).replace("-",""), arrdate:dmy(d2),
+    minDaysStay:String(q.month?lmin:Math.max(0,nights(d1,d2))), maxDaysStay:String(q.month?lmax:Math.max(0,nights(d1,d2))),
+    dep0:"true",dep1:"true",dep2:"true",dep3:"true",dep4:"true",dep5:"true",dep6:"true",
+    arr0:"true",arr1:"true",arr2:"true",arr3:"true",arr4:"true",arr5:"true",arr6:"true",
+    samedep:"true",samearr:"true",minHourStay:"0:45",maxHourStay:"23:20",
+    minHourOutbound:"0:00",maxHourOutbound:"24:00",minHourInbound:"0:00",maxHourInbound:"24:00",
+    autoprice:"true",adults:"1",children:"0",infants:"0",maxChng:q.direct?"0":"1",currency:"PLN",lang:"pl",indexSubmit:"Search"});
+  out.push(["Azair 🔥","https://www.azair.eu/azfin.php?"+p.toString()]);
+
+  // Kiwi
+  const kd = q.month ? `${d1}_${d2}` : d1;
+  const kr = q.month ? `${d1}_${addDays(d2,lmax)}` : d2;
+  out.push(["Kiwi.com",`https://www.kiwi.com/pl/search/results/poznan-polska/${to?to.toLowerCase():"anywhere"}/${kd}/${kr}?sortBy=price${q.direct?"&stopNumber=0%7Etrue":""}`]);
+
+  // Ryanair fare finder
+  const rp = new URLSearchParams({originIata:"POZ",destinationIata:to||"ANY",isReturn:"true",isMacDestination:"false",promoCode:"",
+    adults:"1",teens:"0",children:"0",infants:"0",dateOut:d1,dateIn:q.month?addDays(d2,lmax):d2,daysTrip:String(lmax),
+    nightsFrom:String(lmin),nightsTo:String(lmax),dayOfWeek:"",isExactDate:q.month?"false":"true",
+    outboundFromHour:"00:00",outboundToHour:"23:59",inboundFromHour:"00:00",inboundToHour:"23:59",
+    priceValueTo:String(q.budget),currency:"PLN",isFlexibleDay:"false"});
+  out.push(["Ryanair",`https://www.ryanair.com/pl/pl/fare-finder?${rp.toString()}`]);
+  out.push(["Wizz Air","https://wizzair.com/pl-pl"]);
+  return out;
+}
+function addDays(s,n){const d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return iso(d)}
+
+// ---------- NAWIGACJA ----------
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>show(b.dataset.s));
+function show(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id===id));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.s===id));
+  window.scrollTo(0,0);
+  if(id==="s-saved") renderSaved();
+}
+function chipGroup(el,cb){el.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{el.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");cb(c.dataset.v)})}
+
+// ---------- OKAZJE ----------
+let dealMonth="all";
+function renderDeals(){
+  const max=+$("#dealMax").value; $("#dealMaxV").textContent=max+" zł";
+  const list=DEALS.filter(d=>d.p<=max && (dealMonth==="all"||d.d1.slice(0,7)===dealMonth)).sort((a,b)=>a.p-b.p);
+  $("#dealList").innerHTML = list.length? list.map((d,i)=>{
+    const n=nights(d.d1,d.d2);
+    const when = d.range? `w okresie ${pl(d.d1)} – ${pl(d.d2)}` : `${pl(d.d1)} → ${pl(d.d2)} · ${n} ${n===1?"noc":"nocy"}`;
+    return `<div class="card"><div class="deal">
+      <div class="info"><div class="city">POZ → ${esc(d.city)}</div>
+      <div class="meta">${when}</div>
+      <div>${d.hot?'<span class="tag hot">🔥 hit</span>':""}<span class="tag">${esc(d.tag)}</span><span class="tag">źródło: ${esc(d.src)}</span></div></div>
+      <div class="price">${d.p} zł<small>w 2 strony</small></div></div>
+      <div class="row" style="margin-top:10px"><button class="btn pri sm" data-deal="${DEALS.indexOf(d)}">Sprawdź cenę ↗</button><button class="btn sm" data-dsearch="${DEALS.indexOf(d)}">Szukaj podobnych</button></div>
+    </div>`}).join("") : `<div class="empty">Brak okazji w tym filtrze.</div>`;
+  $("#dealList").querySelectorAll("[data-deal]").forEach(b=>b.onclick=()=>{
+    const d=DEALS[b.dataset.deal];
+    const q = d.range? `Flights from POZ to ${d.to} in ${MONTHS_EN[+d.d1.slice(5,7)-1]} ${d.d1.slice(0,4)}` : `Flights from POZ to ${d.to} on ${d.d1} through ${d.d2}`;
+    openUrl(`https://www.google.com/travel/flights?q=${encodeURIComponent(q)}&hl=pl&curr=PLN`);
+  });
+  $("#dealList").querySelectorAll("[data-dsearch]").forEach(b=>b.onclick=()=>{
+    const d=DEALS[b.dataset.dsearch];
+    const code = DMAP[d.to]?d.to : (d.to==="PAR"?"BVA":d.to==="ROM"?"CIA":"");
+    fillSearch({to:code,month:d.d1.slice(0,7)});
+  });
+}
+function openUrl(u){const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove()}
+(function(){
+  const ms=[...new Set(DEALS.map(d=>d.d1.slice(0,7)))].sort();
+  $("#dealMonth").innerHTML=`<button class="chip on" data-v="all">Wszystkie</button>`+ms.map(m=>`<button class="chip" data-v="${m}">${MONTHS[+m.slice(5)-1]}</button>`).join("");
+  chipGroup($("#dealMonth"),v=>{dealMonth=v;renderDeals()});
+  $("#dealMax").oninput=renderDeals;
+})();
+
+// ---------- SZUKAJ ----------
+const Q={to:"",mode:"month",month:"",d1:"",d2:"",len:"2-4",budget:400,direct:true};
+(function(){
+  $("#qTo").innerHTML=`<option value="">🌍 Gdziekolwiek (najtaniej)</option>`+[...DEST].sort((a,b)=>a[1].localeCompare(b[1],"pl")).map(d=>`<option value="${d[0]}">${d[1]} (${d[0]}) – ${d[3]}</option>`).join("");
+  const now=new Date(); let opts="";
+  for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()+i,1);const v=d.getFullYear()+"-"+pad(d.getMonth()+1);opts+=`<option value="${v}">${MONTHS[d.getMonth()]} ${d.getFullYear()}</option>`}
+  $("#qMonth").innerHTML=opts;
+  const nm=new Date(now.getFullYear(),now.getMonth()+1,1); Q.month=nm.getFullYear()+"-"+pad(nm.getMonth()+1); $("#qMonth").value=Q.month;
+  const a=new Date(now);a.setDate(a.getDate()+14);const b=new Date(a);b.setDate(b.getDate()+3);
+  Q.d1=iso(a);Q.d2=iso(b);$("#qD1").value=Q.d1;$("#qD2").value=Q.d2;
+  $("#qTo").onchange=e=>{Q.to=e.target.value;renderLinks()};
+  $("#qMonth").onchange=e=>{Q.month=e.target.value;renderLinks()};
+  $("#qD1").onchange=e=>{Q.d1=e.target.value;if(Q.d2<Q.d1){Q.d2=addDays(Q.d1,3);$("#qD2").value=Q.d2}renderLinks()};
+  $("#qD2").onchange=e=>{Q.d2=e.target.value;renderLinks()};
+  $("#qBudget").oninput=e=>{Q.budget=+e.target.value;renderLinks()};
+  $("#qDirect").onchange=e=>{Q.direct=e.target.checked;renderLinks()};
+  chipGroup($("#qMode"),v=>{Q.mode=v;$("#qMonthBox").style.display=v==="month"?"":"none";$("#qDatesBox").style.display=v==="dates"?"grid":"none";renderLinks()});
+  chipGroup($("#qLen"),v=>{Q.len=v;renderLinks()});
+  $("#qSave").onclick=()=>{
+    const s=store.get("poz_saved",[]);
+    const item={...Q,id:Date.now()};
+    s.unshift(item);store.set("poz_saved",s.slice(0,30));
+    $("#qSave").textContent="✓ Zapisano w „Moje”";setTimeout(()=>$("#qSave").textContent="⭐ Zapisz to wyszukiwanie",1800);
+  };
+  renderLinks();
+})();
+function qObj(src){return {to:src.to,month:src.mode==="month"?src.month:null,d1:src.d1,d2:src.d2,len:src.len,budget:src.budget,direct:src.direct}}
+function renderLinks(){
+  $("#qBudgetV").textContent=Q.budget+" zł";
+  $("#qLinks").innerHTML=links(qObj(Q)).map(([n,u],i)=>`<a class="btn ${i<3?"pri":""}" href="${esc(u)}" target="_blank" rel="noopener">${n} ↗</a>`).join("");
+}
+function fillSearch(o){
+  if(o.to!==undefined){Q.to=o.to;$("#qTo").value=o.to}
+  if(o.month){Q.mode="month";Q.month=o.month;
+    if(![...$("#qMonth").options].some(x=>x.value===o.month)){$("#qMonth").insertAdjacentHTML("beforeend",`<option value="${o.month}">${MONTHS[+o.month.slice(5)-1]} ${o.month.slice(0,4)}</option>`)}
+    $("#qMonth").value=o.month;}
+  if(o.d1){Q.mode="dates";Q.d1=o.d1;Q.d2=o.d2;$("#qD1").value=o.d1;$("#qD2").value=o.d2}
+  $("#qMode").querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.v===Q.mode));
+  $("#qMonthBox").style.display=Q.mode==="month"?"":"none";$("#qDatesBox").style.display=Q.mode==="dates"?"grid":"none";
+  renderLinks();show("s-search");
+}
+$("#holList").innerHTML=HOLS.map((h,i)=>`<div class="card hol"><div><div style="font-weight:600">${h.n}</div><div class="d">${pl(h.d1)} – ${pl(h.d2)} · ${h.info}</div></div><button class="btn sm" data-h="${i}">Szukaj</button></div>`).join("");
+$("#holList").querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{const h=HOLS[b.dataset.h];fillSearch({d1:h.d1,d2:h.d2})});
+
+// ---------- KIERUNKI ----------
+let dF="all";
+function renderDest(){
+  const l=DEST.filter(d=>dF==="all"||d[4].includes(dF));
+  $("#dList").innerHTML=l.map(d=>`<div class="card dest"><div><div class="c">${d[1]} <span class="s">${d[0]}</span></div>
+    <div class="s">${d[3]}${d[6]?" · "+esc(d[6]):""}</div>
+    <div>${d[4].includes("new")?'<span class="tag new">✨ nowość</span>':""}<span class="tag">dobra cena: do ${d[5]} zł</span></div></div>
+    <button class="btn sm" data-to="${d[0]}">Szukaj</button></div>`).join("");
+  $("#dList").querySelectorAll("[data-to]").forEach(b=>b.onclick=()=>{const d=DMAP[b.dataset.to];Q.budget=d[5];$("#qBudget").value=d[5];fillSearch({to:d[0]})});
+}
+chipGroup($("#dFilter"),v=>{dF=v;renderDest()});renderDest();
+
+// ---------- ZAPISANE ----------
+function renderSaved(){
+  const s=store.get("poz_saved",[]);
+  if(!s.length){$("#savedList").innerHTML=`<div class="empty">Nic jeszcze nie zapisałeś. W zakładce „Szukaj” ustaw kierunek i termin, potem „⭐ Zapisz”.</div>`;return}
+  $("#savedList").innerHTML=s.map(x=>{
+    const d=DMAP[x.to];const name=d?d[1]:"Gdziekolwiek";
+    const when=x.mode==="month"?`${MONTHS[+x.month.slice(5)-1]} ${x.month.slice(0,4)}`:`${pl(x.d1)} – ${pl(x.d2)}`;
+    const L=links(qObj(x));
+    return `<div class="card"><div class="dest"><div><div class="c">POZ → ${name}</div><div class="s">${when} · ${x.len.replace("-","–")} dni · do ${x.budget} zł${x.direct?" · bez przesiadek":""}</div></div>
+      <button class="btn sm" data-del="${x.id}">✕</button></div>
+      <div class="row" style="margin-top:10px">${L.slice(0,4).map(([n,u])=>`<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">${n}</a>`).join("")}</div></div>`}).join("");
+  $("#savedList").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{store.set("poz_saved",store.get("poz_saved",[]).filter(x=>String(x.id)!==b.dataset.del));renderSaved()});
+}
+
+renderDeals();
+</script>
+</body>
+</html>
