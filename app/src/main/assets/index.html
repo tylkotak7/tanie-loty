@@ -131,6 +131,44 @@ a.plain{color:var(--acc)}
   <div id="dList"></div>
 </section>
 
+<!-- ALERTY -->
+<section id="s-alerts">
+  <h2>🔔 Alerty o tanich lotach</h2>
+  <div id="alNoApp" class="card">
+    <div style="font-weight:600;margin-bottom:6px">Działa w apce na Androida</div>
+    <div class="note" style="margin:0">Po zainstalowaniu apki „Tanie loty” telefon sam co kilka godzin sprawdza ceny Ryanaira z Poznania i Wrocławia i wysyła powiadomienie, gdy pojawi się lot poniżej Twojej ceny.</div>
+  </div>
+  <div id="alApp" style="display:none">
+    <div class="card">
+      <label>Wyloty z</label>
+      <div class="chips" id="alOrig">
+        <button class="chip" data-v="POZ">Poznań</button>
+        <button class="chip" data-v="WRO">Wrocław</button>
+      </div>
+      <label>Powiadom, gdy lot w obie strony kosztuje maks.</label>
+      <div class="range"><input id="alMax" type="range" min="100" max="800" step="10" value="250"><b id="alMaxV">250 zł</b></div>
+      <div class="two">
+        <div><label>Wyjazd od (dni)</label><select id="alMin"></select></div>
+        <div><label>do (dni)</label><select id="alMaxD"></select></div>
+      </div>
+      <div class="two">
+        <div><label>Szukaj w terminach</label><select id="alMonths"><option value="1">najbliższy miesiąc</option><option value="2">2 miesiące</option><option value="3">3 miesiące</option><option value="6">6 miesięcy</option></select></div>
+        <div><label>Sprawdzaj co</label><select id="alEvery"><option value="3">3 godziny</option><option value="6">6 godzin</option><option value="12">12 godzin</option><option value="24">raz dziennie</option></select></div>
+      </div>
+      <div class="toggle"><input type="checkbox" id="alOn"><span><b>Powiadomienia włączone</b></span></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn pri" id="alSave">Zapisz</button>
+        <button class="btn" id="alCheck">🔎 Sprawdź teraz</button>
+        <button class="btn sm" id="alTest">Test powiadomienia</button>
+      </div>
+      <div class="note" id="alStatus" style="margin:10px 0 0"></div>
+    </div>
+    <h2 id="alResH">Znalezione loty</h2>
+    <p class="note">Ceny na żywo z Ryanaira (Wizz Air nie udostępnia swoich cen). Najtańszy termin dla każdego kierunku.</p>
+    <div id="alRes"></div>
+  </div>
+</section>
+
 <!-- ZAPISANE -->
 <section id="s-saved">
   <h2>⭐ Moje wyszukiwania</h2>
@@ -168,6 +206,7 @@ a.plain{color:var(--acc)}
   <button class="on" data-s="s-deals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 3 3 3 5"/></svg>Okazje</button>
   <button data-s="s-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Szukaj</button>
   <button data-s="s-dest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/><circle cx="12" cy="12" r="10"/></svg>Kierunki</button>
+  <button data-s="s-alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>Alerty</button>
   <button data-s="s-saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Moje</button>
 </nav>
 
@@ -511,6 +550,56 @@ function setOrigin(o){
 }
 $("#origin").querySelectorAll(".chip").forEach(c=>c.onclick=()=>setOrigin(c.dataset.v));
 setOrigin(ORIG);
+
+// ---------- ALERTY (tylko w apce na Androida) ----------
+const APP = (typeof window.Android!=="undefined" && window.Android.getSettings) ? window.Android : null;
+let AL = {origins:["POZ","WRO"],maxPrice:250,minDays:2,maxDays:7,monthsAhead:3,everyHours:6,enabled:false};
+function alInit(){
+  if(!APP) return;
+  $("#alNoApp").style.display="none"; $("#alApp").style.display="";
+  try{AL={...AL,...JSON.parse(APP.getSettings())}}catch(e){}
+  let o=""; for(let i=1;i<=21;i++) o+=`<option value="${i}">${i}</option>`;
+  $("#alMin").innerHTML=o; $("#alMaxD").innerHTML=o;
+  $("#alOrig").querySelectorAll(".chip").forEach(c=>{
+    c.classList.toggle("on",AL.origins.includes(c.dataset.v));
+    c.onclick=()=>{c.classList.toggle("on");};
+  });
+  $("#alMax").value=AL.maxPrice; $("#alMaxV").textContent=AL.maxPrice+" zł";
+  $("#alMax").oninput=e=>$("#alMaxV").textContent=e.target.value+" zł";
+  $("#alMin").value=AL.minDays; $("#alMaxD").value=AL.maxDays;
+  $("#alMonths").value=AL.monthsAhead; $("#alEvery").value=AL.everyHours; $("#alOn").checked=AL.enabled;
+  $("#alSave").onclick=()=>{alSave();status("✓ Zapisano"+(AL.enabled?` — sprawdzam co ${AL.everyHours} h i powiadomię o lotach do ${AL.maxPrice} zł.`:" (powiadomienia wyłączone)."))};
+  $("#alCheck").onclick=()=>{alSave();status("Szukam lotów…");$("#alCheck").disabled=true;APP.checkNow()};
+  $("#alTest").onclick=()=>APP.testNotification();
+  alShowLast();
+}
+function alSave(){
+  const origins=[...$("#alOrig").querySelectorAll(".chip.on")].map(c=>c.dataset.v);
+  let mn=+$("#alMin").value, mx=+$("#alMaxD").value; if(mx<mn){mx=mn;$("#alMaxD").value=mx}
+  AL={origins:origins.length?origins:["POZ"],maxPrice:+$("#alMax").value,minDays:mn,maxDays:mx,monthsAhead:+$("#alMonths").value,everyHours:+$("#alEvery").value,enabled:$("#alOn").checked};
+  APP.saveSettings(JSON.stringify(AL));
+}
+function status(t){$("#alStatus").textContent=t}
+function alShowLast(){
+  let list=[]; try{list=JSON.parse(APP.getLastDeals()||"[]")}catch(e){}
+  const t=+APP.getLastTime();
+  $("#alResH").textContent = t? "Znalezione loty · "+new Date(t).toLocaleString("pl-PL",{day:"numeric",month:"numeric",hour:"2-digit",minute:"2-digit"}) : "Znalezione loty";
+  $("#alRes").innerHTML = list.length ? list.map(d=>{
+    const n=nights(d.out,d.in);
+    return `<div class="card"><div class="deal"><div class="info"><div class="city">${esc(d.from)} → ${esc(d.toCity)}</div>
+    <div class="meta">${pl(d.out)} → ${pl(d.in)} · ${n} ${n===1?"noc":"nocy"}${d.country?" · "+esc(d.country):""}</div></div>
+    <div class="price">${d.price} zł<small>w 2 strony</small></div></div>
+    <div class="row" style="margin-top:10px"><a class="btn pri sm" href="${esc(d.url)}" target="_blank" rel="noopener">Kup w Ryanair ↗</a></div></div>`}).join("")
+    : `<div class="empty">Jeszcze nic. Kliknij „Sprawdź teraz”.</div>`;
+}
+window.onCheckDone=r=>{
+  $("#alCheck").disabled=false;
+  if(r&&r.error){status("⚠ Nie udało się pobrać cen: "+r.error+". Sprawdź internet i spróbuj ponownie.");return}
+  status(`✓ Sprawdzone. Nowych okazji: ${r.fresh}.`); alShowLast();
+};
+alInit();
+function hashRoute(){ if(location.hash==="#alerts") show("s-alerts"); }
+hashRoute(); window.addEventListener("hashchange",hashRoute);
 </script>
 </body>
 </html>
