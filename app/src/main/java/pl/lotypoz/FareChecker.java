@@ -18,7 +18,7 @@ public class FareChecker {
 
     public static class Deal {
         public String from, to, toCity, country, out, in;
-        public double price;
+        public double price, outPrice, inPrice;
 
         public String key() { return from + "-" + to + "-" + out + "-" + in; }
 
@@ -34,6 +34,7 @@ public class FareChecker {
             try {
                 o.put("from", from); o.put("to", to); o.put("toCity", toCity); o.put("country", country);
                 o.put("out", out); o.put("in", in); o.put("price", Math.round(price)); o.put("url", bookUrl());
+                if (outPrice > 0 && inPrice > 0) { o.put("outPrice", Math.round(outPrice)); o.put("inPrice", Math.round(inPrice)); }
             } catch (Exception ignored) {}
             return o;
         }
@@ -47,7 +48,11 @@ public class FareChecker {
         List<Deal> all = new ArrayList<>();
         Exception last = null;
         for (String o : s.origins) {
-            try { all.addAll(searchOrigin(o, s)); } catch (Exception e) { last = e; }
+            // Warszawa = Chopin (WAW) + Modlin (WMI)
+            String[] airports = "WAW".equals(o) ? new String[]{"WAW", "WMI"} : new String[]{o};
+            for (String a : airports) {
+                try { all.addAll(searchOrigin(a, s)); } catch (Exception e) { last = e; }
+            }
         }
         if (all.isEmpty() && last != null) throw last;
         Collections.sort(all, (a, b) -> Double.compare(a.price, b.price));
@@ -91,14 +96,14 @@ public class FareChecker {
             d.country = arr != null ? arr.optString("countryName", "") : "";
             d.out = ob.optString("departureDate", "").length() >= 10 ? ob.optString("departureDate").substring(0, 10) : "";
             d.in = ib.optString("departureDate", "").length() >= 10 ? ib.optString("departureDate").substring(0, 10) : "";
+            double op = ob.optJSONObject("price") != null ? ob.optJSONObject("price").optDouble("value", 0) : 0;
+            double ip = ib.optJSONObject("price") != null ? ib.optJSONObject("price").optDouble("value", 0) : 0;
+            d.outPrice = op;
+            d.inPrice = ip;
             double p = -1;
             JSONObject sum = f.optJSONObject("summary");
             if (sum != null && sum.optJSONObject("price") != null) p = sum.optJSONObject("price").optDouble("value", -1);
-            if (p < 0) {
-                double a = ob.optJSONObject("price") != null ? ob.optJSONObject("price").optDouble("value", 0) : 0;
-                double b = ib.optJSONObject("price") != null ? ib.optJSONObject("price").optDouble("value", 0) : 0;
-                p = a + b;
-            }
+            if (p < 0) p = op + ip;
             d.price = p;
             if (p > 0 && p <= s.maxPrice && !d.out.isEmpty()) res.add(d);
         }
