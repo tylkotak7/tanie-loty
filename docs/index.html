@@ -2,15 +2,23 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tanie loty z Polski</title>
+<meta name="theme-color" content="#0d1420">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tanie loty">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0d1420;--card:#152033;--card2:#1b2940;--line:#253552;--tx:#e8eef8;--mut:#8ea0bd;--acc:#ffb547;--acc2:#3dd6a3;--hot:#ff6b5a}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--tx);font:15px/1.45 Inter,system-ui,sans-serif;padding-bottom:84px;min-height:100vh}
 h1,h2,h3{font-family:"Space Grotesk",sans-serif}
-header{padding:20px 16px 14px;background:linear-gradient(160deg,#1c2c48 0%,#0d1420 70%)}
+header{padding:calc(20px + env(safe-area-inset-top)) 16px 14px;background:linear-gradient(160deg,#1c2c48 0%,#0d1420 70%)}
 header h1{font-size:24px;letter-spacing:-.5px}
 header h1 span{color:var(--acc)}
 header p{color:var(--mut);font-size:13px;margin-top:4px}
@@ -75,6 +83,31 @@ a.plain{color:var(--acc)}
 
 <!-- OKAZJE -->
 <section id="s-deals" class="on">
+  <div class="card" id="thai" style="margin-top:16px;border-color:#3dd6a355;background:linear-gradient(160deg,#16303a,#152033)">
+    <h3 style="font-size:18px">🌴 Tajlandia</h3>
+    <div class="note" style="margin:6px 0 10px">Ceny orientacyjne w obie strony (listopad 2026). Ryanair i Wizz Air tam nie latają, więc szukaj w wyszukiwarkach poniżej.</div>
+    <div style="font-size:14px;line-height:1.6">
+      ✈ <b>Warszawa → Bangkok bez przesiadki</b> (LOT, od 7.10.2026): od ok. <b style="color:var(--acc)">2 690 zł</b><br>
+      ✈ <b>Praga → Bangkok</b> z przesiadką: od <b style="color:var(--acc)">2 031 zł</b> (15.01–3.02.2027)<br>
+      ✈ Zwykle 1 800–4 500 zł, w promocjach 1 400–1 700 zł<br>
+      📅 Najtaniej w maju–wrześniu (pora deszczowa). W listopadzie–lutym nawet o 30–50% drożej.<br>
+      🛂 Do 60 dni turystycznie bez wizy. Przed lotem sprawdź wymagania wjazdu (TDAC).
+    </div>
+    <div class="two" style="margin-top:6px">
+      <div><label>Miesiąc wylotu</label><select id="thMonth"></select></div>
+      <div><label>Na ile</label><select id="thLen"><option value="7">tydzień</option><option value="10">10 dni</option><option value="14" selected>2 tygodnie</option><option value="21">3 tygodnie</option></select></div>
+    </div>
+    <label>Dokąd</label>
+    <div class="chips" id="thTo">
+      <button class="chip on" data-v="BKK">Bangkok</button>
+      <button class="chip" data-v="HKT">Phuket</button>
+      <button class="chip" data-v="KBV">Krabi</button>
+      <button class="chip" data-v="CNX">Chiang Mai</button>
+    </div>
+    <div id="thLinks"></div>
+    <div class="note" style="margin:10px 0 0">💡 W Google Flights kliknij <b>„Śledź ceny”</b>. Google wyśle Ci maila, gdy cena do Tajlandii spadnie.</div>
+  </div>
+
   <h2 id="dealsH">🔥 Okazje</h2>
   <p class="note">Ceny za bilet tam i z powrotem za osobę, czyli tani jest też powrót. Znalezione w serwisach z okazjami (stan 11–12.11.2026, Gdańsk 30.10). Na majówkę i wakacje ceny są wyższe niż poza sezonem. Tanie bilety znikają szybko — kliknij „Sprawdź”, żeby zobaczyć aktualną cenę.</p>
   <label>Maks. cena</label>
@@ -136,6 +169,7 @@ a.plain{color:var(--acc)}
     <button class="chip" data-v="uk">🇬🇧 Wyspy</button>
     <button class="chip" data-v="north">❄ Północ</button>
     <button class="chip" data-v="new">✨ Nowe</button>
+    <button class="chip" data-v="exotic">🌏 Egzotyka</button>
   </div>
   <p class="note">„Dobra cena” = cena w obie strony, przy której warto brać bez zastanowienia (orientacyjnie). Siatka połączeń zmienia się sezonowo.</p>
   <div id="dList"></div>
@@ -310,7 +344,12 @@ const CAT = [
  ["HEL","Helsinki","Helsinki [HEL]","Finlandia",["north","city"],300],
  ["GOA","Genua","Genoa [GOA]","Włochy",["city","warm"],250],
  ["SPU","Split","Split [SPU]","Chorwacja",["warm"],350],
+ ["BKK","Bangkok","Bangkok [BKK]","Tajlandia",["exotic","warm","city"],2500],
+ ["HKT","Phuket","Phuket [HKT]","Tajlandia",["exotic","warm"],2700],
+ ["KBV","Krabi","Krabi [KBV]","Tajlandia",["exotic","warm"],2900],
+ ["CNX","Chiang Mai","Chiang Mai [CNX]","Tajlandia",["exotic"],2900],
 ];
+const THAI_CODES=["BKK","HKT","KBV","CNX"];
 const DMAP = Object.fromEntries(CAT.map(d=>[d[0],d]));
 
 const ORIGINS = {
@@ -343,6 +382,11 @@ const ROUTES = {
   BGY:[""],VCE:[""],PMO:[""],CTA:[""],MLA:[""],PFO:[""],ALC:[""],AGP:[""],BCN:[""],TIA:[""],
   VNO:[""],PRG:[""],HAM:[""],TLL:[""],BUD:[""],KUT:[""],FRA:["Lufthansa · przesiadki na świat"]},
 };
+
+// Tajlandia: z Warszawy LOT bez przesiadki do Bangkoku, reszta z przesiadką
+["POZ","WRO","WAW","GDN"].forEach(o=>THAI_CODES.forEach(c=>{
+  ROUTES[o][c]=[o==="WAW"&&c==="BKK"?"LOT bez przesiadki (od 7.10.2026)":"z przesiadką"];
+}));
 
 // Okazje: ceny w obie strony. Źródło: tanie-loty.com.pl „Odkrywaj” (POZ/WRO 11.11, WAW 12.11, GDN 30.10.2026) + wcześniejsze okazje z 9.11.
 const T="tanie-loty.com.pl";
@@ -675,6 +719,40 @@ function renderSaved(){
   $("#savedList").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{store.set("poz_saved",store.get("poz_saved",[]).filter(x=>String(x.id)!==b.dataset.del));renderSaved()});
 }
 
+// ---------- TAJLANDIA ----------
+let thTo="BKK";
+(function(){
+  const now=new Date(); let o="";
+  for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()+i,1);const v=d.getFullYear()+"-"+pad(d.getMonth()+1);o+=`<option value="${v}">${MONTHS[d.getMonth()]} ${d.getFullYear()}${[4,5,6,7,8].includes(d.getMonth())?" 💸":""}</option>`}
+  $("#thMonth").innerHTML=o;
+  const def=new Date(now.getFullYear(),now.getMonth()+2,1); $("#thMonth").value=def.getFullYear()+"-"+pad(def.getMonth()+1);
+  $("#thMonth").onchange=renderThai; $("#thLen").onchange=renderThai;
+  chipGroup($("#thTo"),v=>{thTo=v;renderThai()});
+})();
+function renderThai(){
+  const m=$("#thMonth").value, len=+$("#thLen").value;
+  const [y,mm]=m.split("-").map(Number); const monthEN=MONTHS_EN[mm-1]+" "+y;
+  const d1=`${m}-10`, d2=addDays(d1,len);
+  const sel=ORDER.filter(o=>ORIGS.includes(o));
+  const city={BKK:"Bangkok",HKT:"Phuket",KBV:"Krabi",CNX:"Chiang Mai"}[thTo];
+  const rows=sel.map(o=>{
+    const O=ORIGINS[o];
+    const g=`https://www.google.com/travel/flights?q=${encodeURIComponent(`Flights from ${O.en} to ${city} in ${monthEN}`)}&hl=pl&curr=PLN`;
+    const sk=`https://www.skyscanner.pl/transport/loty/${O.sky}/${thTo.toLowerCase()}/?adultsv2=1&rtn=1&oym=${m.slice(2).replace("-","")}&iym=${d2.slice(2,7).replace("-","")}`;
+    const kw=`https://www.kiwi.com/pl/search/results/${O.kiwi}/${thTo.toLowerCase()}/${m}-01_${m}-28/${addDays(m+"-01",len-3)}_${addDays(m+"-28",len+3)}?sortBy=price`;
+    return `<div style="margin-top:10px"><div class="note" style="margin:0 0 6px">✈ Z ${O.gen} → ${city}</div><div class="row">
+      <a class="btn pri sm" href="${esc(g)}" target="_blank" rel="noopener">Google ↗</a>
+      <a class="btn sm" href="${esc(sk)}" target="_blank" rel="noopener">Skyscanner ↗</a>
+      <a class="btn sm" href="${esc(kw)}" target="_blank" rel="noopener">Kiwi ↗</a></div></div>`;
+  }).join("");
+  const all=[...new Set([...sel.map(o=>o==="WAW"?"WAW,WMI":o),"KRK","PRG","BER"])].join(",");
+  const kayak=`https://www.kayak.pl/flights/${all}-${thTo}/${d1}-flexible-3days/${d2}-flexible-3days?sort=price_a`;
+  const ggAll=`https://www.google.com/travel/explore?q=${encodeURIComponent(`Flights from Poland to Thailand in ${monthEN}`)}&hl=pl&curr=PLN`;
+  $("#thLinks").innerHTML=rows+`<div style="margin-top:12px"><div class="note" style="margin:0 0 6px">🔥 Najtaniej: wszystkie lotniska naraz (też Kraków, Praga, Berlin)</div><div class="row">
+    <a class="btn pri sm" href="${esc(kayak)}" target="_blank" rel="noopener">Kayak: wszystkie lotniska ↗</a>
+    <a class="btn sm" href="${esc(ggAll)}" target="_blank" rel="noopener">Google: cała Tajlandia ↗</a></div></div>`;
+}
+
 // ---------- WYBÓR LOTNISK ----------
 function applyOrigins(){
   store.set("orig_list",ORIGS);
@@ -684,7 +762,7 @@ function applyOrigins(){
   $("#dealsH").textContent=sel.length===1?"🔥 Okazje z "+ORIGINS[sel[0]].gen:"🔥 Okazje z "+sel.length+" lotnisk";
   $("#destH").textContent=sel.length===1?"🗺 Kierunki z "+ORIGINS[sel[0]].gen:"🗺 Kierunki z "+sel.length+" lotnisk";
   $("#origin").querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",ORIGS.includes(c.dataset.v)));
-  fillDestSelect(); renderLinks(); renderDest(); renderDealMonths(); renderDeals();
+  fillDestSelect(); renderLinks(); renderDest(); renderDealMonths(); renderDeals(); renderThai();
 }
 $("#origin").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
   const v=c.dataset.v;
