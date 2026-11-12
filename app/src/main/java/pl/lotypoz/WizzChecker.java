@@ -43,7 +43,7 @@ public class WizzChecker {
         List<FareChecker.Deal> res = new ArrayList<>();
         Calendar start = Calendar.getInstance();
         start.add(Calendar.DAY_OF_MONTH, 1);
-        int totalDays = s.monthsAhead * 30;
+        int totalDays = Math.min(s.monthsAhead, 6) * 30; // Wizz: maks. 6 miesięcy, żeby nie wysyłać setek zapytań
 
         for (String origin : s.origins) {
             JSONObject oc = byIata.get(origin);

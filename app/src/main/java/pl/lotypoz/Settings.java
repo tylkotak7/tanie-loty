@@ -43,7 +43,7 @@ public class Settings {
             s.maxPrice = clamp(o.optInt("maxPrice", 250), 50, 3000);
             s.minDays = clamp(o.optInt("minDays", 2), 1, 30);
             s.maxDays = clamp(o.optInt("maxDays", 7), s.minDays, 30);
-            s.monthsAhead = clamp(o.optInt("monthsAhead", 3), 1, 6);
+            s.monthsAhead = clamp(o.optInt("monthsAhead", 3), 1, 12);
             s.everyHours = clamp(o.optInt("everyHours", 6), 1, 24);
             s.enabled = o.optBoolean("enabled", false);
             s.ryanair = o.optBoolean("ryanair", true);

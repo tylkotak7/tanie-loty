@@ -76,9 +76,15 @@ a.plain{color:var(--acc)}
 <!-- OKAZJE -->
 <section id="s-deals" class="on">
   <h2 id="dealsH">🔥 Okazje</h2>
-  <p class="note">Ceny za bilet tam i z powrotem za osobę, czyli tani jest też powrót. Znalezione w serwisach z okazjami (stan 11–12.11.2026, Gdańsk 30.10). Tanie bilety znikają szybko — kliknij „Sprawdź”, żeby zobaczyć aktualną cenę.</p>
+  <p class="note">Ceny za bilet tam i z powrotem za osobę, czyli tani jest też powrót. Znalezione w serwisach z okazjami (stan 11–12.11.2026, Gdańsk 30.10). Na majówkę i wakacje ceny są wyższe niż poza sezonem. Tanie bilety znikają szybko — kliknij „Sprawdź”, żeby zobaczyć aktualną cenę.</p>
   <label>Maks. cena</label>
-  <div class="range"><input id="dealMax" type="range" min="100" max="400" step="10" value="400"><b id="dealMaxV">400 zł</b></div>
+  <div class="range"><input id="dealMax" type="range" min="100" max="600" step="10" value="600"><b id="dealMaxV">600 zł</b></div>
+  <label>Kiedy</label>
+  <div class="chips" id="dealWhen">
+    <button class="chip on" data-v="all">Wszystkie terminy</button>
+    <button class="chip" data-v="near">Najbliższe 3 mies.</button>
+    <button class="chip" data-v="far">Daleko (za 3+ mies.)</button>
+  </div>
   <div class="toggle"><input type="checkbox" id="dealWeek" checked><span><b>Maks. tydzień</b> (do 7 nocy)</span></div>
   <div class="chips" id="dealMonth" style="margin-top:12px"></div>
   <div id="dealList" style="margin-top:12px"></div>
@@ -163,7 +169,7 @@ a.plain{color:var(--acc)}
         <div><label>do (dni)</label><select id="alMaxD"></select></div>
       </div>
       <div class="two">
-        <div><label>Szukaj w terminach</label><select id="alMonths"><option value="1">najbliższy miesiąc</option><option value="2">2 miesiące</option><option value="3">3 miesiące</option><option value="6">6 miesięcy</option></select></div>
+        <div><label>Szukaj w terminach</label><select id="alMonths"><option value="1">najbliższy miesiąc</option><option value="2">2 miesiące</option><option value="3">3 miesiące</option><option value="6">6 miesięcy</option><option value="9">9 miesięcy</option><option value="12">cały rok</option></select></div>
         <div><label>Sprawdzaj co</label><select id="alEvery"><option value="3">3 godziny</option><option value="6">6 godzin</option><option value="12">12 godzin</option><option value="24">raz dziennie</option></select></div>
       </div>
       <div class="toggle"><input type="checkbox" id="alOn"><span><b>Powiadomienia włączone</b></span></div>
@@ -296,6 +302,14 @@ const CAT = [
  ["GOT","Göteborg","Gothenburg [GOT]","Szwecja",["north","city"],200],
  ["NYO","Sztokholm Skavsta","Stockholm [NYO]","Szwecja",["north"],200],
  ["TKU","Turku","Turku [TKU]","Finlandia",["north","city"],220],
+ ["TGD","Podgorica","Podgorica [TGD]","Czarnogóra",["warm"],300],
+ ["DTM","Dortmund","Dortmund [DTM]","Niemcy",["city"],220],
+ ["BGO","Bergen","Bergen [BGO]","Norwegia",["north"],250],
+ ["SVG","Stavanger","Stavanger [SVG]","Norwegia",["north"],250],
+ ["TRD","Trondheim","Trondheim [TRD]","Norwegia",["north"],280],
+ ["HEL","Helsinki","Helsinki [HEL]","Finlandia",["north","city"],300],
+ ["GOA","Genua","Genoa [GOA]","Włochy",["city","warm"],250],
+ ["SPU","Split","Split [SPU]","Chorwacja",["warm"],350],
 ];
 const DMAP = Object.fromEntries(CAT.map(d=>[d[0],d]));
 
@@ -311,21 +325,21 @@ const ROUTES = {
  POZ:{STN:["Ryanair"],LTN:["Wizz Air"],DUB:[""],SNN:["Ryanair · nowość zima 26/27",1],EDI:[""],LBA:[""],BHX:[""],BRS:[""],
   BCN:["Ryanair · nowość zima 26/27",1],VLC:["Ryanair"],ALC:[""],AGP:[""],TFS:[""],LPA:[""],OPO:["Ryanair · nowość zima 26/27",1],
   LIS:[""],FAO:["Ryanair · od 30.03.2027",1],MLA:[""],PFO:[""],BGY:["Ryanair"],CIA:[""],BRI:[""],TIA:["Ryanair · nowość",1],
-  BVA:["Ryanair"],BSL:["Wizz Air · od 21.09.2026",1],EIN:[""],KUT:["Wizz Air"],TRF:["Ryanair"],ARN:[""],CPH:[""],ZAD:["sezonowo"],
+  BVA:["Ryanair"],BSL:["Wizz Air · od 21.09.2026",1],EIN:[""],KUT:["Wizz Air"],TRF:["Ryanair"],ARN:[""],CPH:[""],ZAD:["sezonowo"],TGD:[""],
   DBV:["sezonowo latem"],PUY:["sezonowo latem"],FRA:["Lufthansa · przesiadki na świat"],AMS:["KLM · przesiadki na świat"]},
  WRO:{STN:[""],LTN:[""],DUB:[""],LPL:[""],MAN:[""],LBA:[""],BRS:[""],NCL:[""],BOH:[""],GLA:[""],EDI:[""],SNN:[""],
   OSL:[""],ARN:[""],CRL:[""],BVA:[""],EIN:[""],BGY:[""],BLQ:[""],VCE:[""],CIA:[""],
   TRN:["Ryanair od 19.12.2026, Wizz Air od 16.01.2027",1],NAP:[""],BRI:[""],PMO:[""],SUF:[""],CTA:["Wizz Air"],
   MLA:[""],PFO:[""],LCA:[""],ALC:[""],AGP:[""],BCN:[""],MAD:["Ryanair · wznowione",1],SVQ:["Ryanair"],
   BIO:["Wizz Air · od 2.12.2026",1],LIS:[""],OPO:[""],RAK:["Ryanair · od 25.10.2026",1],HRG:["Wizz Air · od 25.10.2026",1],
-  TIA:[""],SOF:[""],BSL:[""],MRS:[""],BUD:[""],KEF:["Wizz Air · sezonowo"],FRA:["Lufthansa · przesiadki na świat"]},
+  TIA:[""],SOF:[""],BSL:[""],MRS:[""],BUD:[""],DTM:[""],TGD:[""],BGO:[""],ZAD:["sezonowo"],KEF:["Wizz Air · sezonowo"],FRA:["Lufthansa · przesiadki na świat"]},
  WAW:{STN:["Chopin lub Modlin"],LTN:[""],MAN:[""],LPL:[""],BHX:[""],LBA:[""],BRS:[""],DUB:[""],EDI:[""],
   BVA:[""],CRL:[""],EIN:[""],BGY:[""],VCE:[""],TRN:[""],BLQ:[""],CIA:[""],NAP:[""],BRI:[""],CTA:[""],PMO:[""],PSA:[""],
   TIA:[""],SOF:[""],BUD:[""],BTS:[""],ZAG:[""],CPH:[""],ARN:[""],NYO:[""],OSL:[""],TRF:[""],
-  PFO:[""],LCA:[""],MLA:[""],ALC:[""],AGP:[""],BCN:[""],MAD:[""],LIS:[""],OPO:[""],TFS:[""],LPA:[""],KUT:[""],RAK:[""],HRG:[""],
+  PFO:[""],LCA:[""],MLA:[""],ALC:[""],AGP:[""],BCN:[""],MAD:[""],LIS:[""],OPO:[""],TFS:[""],LPA:[""],KUT:[""],RAK:[""],HRG:[""],HEL:[""],GOA:[""],
   FRA:["Lufthansa · przesiadki na świat"],AMS:["KLM · przesiadki na świat"]},
  GDN:{STN:[""],LTN:[""],LPL:[""],BRS:[""],LBA:[""],NCL:[""],EDI:[""],DUB:[""],
-  BLL:[""],AAR:[""],CPH:[""],GOT:[""],ARN:[""],TKU:[""],OSL:[""],TRF:[""],KEF:["sezonowo"],
+  BLL:[""],AAR:[""],BGO:[""],SVG:[""],TRD:[""],SPU:["sezonowo"],CPH:[""],GOT:[""],ARN:[""],TKU:[""],OSL:[""],TRF:[""],KEF:["sezonowo"],
   BGY:[""],VCE:[""],PMO:[""],CTA:[""],MLA:[""],PFO:[""],ALC:[""],AGP:[""],BCN:[""],TIA:[""],
   VNO:[""],PRG:[""],HAM:[""],TLL:[""],BUD:[""],KUT:[""],FRA:["Lufthansa · przesiadki na świat"]},
 };
@@ -405,6 +419,34 @@ const DEALS = [
  {from:"GDN",en:"Paphos",city:"Pafos",p:167,d1:"2026-11-30",d2:"2026-12-18",src:T+" 30.10",tag:"Ciepło"},
  {from:"GDN",en:"Malta",city:"Malta",p:184,d1:"2026-11-30",d2:"2026-12-21",src:T+" 30.10",tag:"Ciepło"},
  {from:"GDN",en:"Alicante",city:"Alicante",p:188,d1:"2027-01-18",d2:"2027-01-31",src:T+" 30.10",tag:"Ciepło"},
+ // DALEKIE TERMINY: majówka 2027 (ceny z 12.11) i czerwiec 2027
+ {from:"POZ",en:"London",city:"Londyn Luton",p:321,d1:"2027-04-29",d2:"2027-05-05",src:T+" 12.11",tag:"Majówka"},
+ {from:"POZ",en:"Bergamo",city:"Mediolan Bergamo",p:369,d1:"2027-05-01",d2:"2027-05-05",src:T+" 12.11",tag:"Majówka"},
+ {from:"POZ",en:"Zadar",city:"Zadar",p:399,d1:"2027-04-29",d2:"2027-05-05",src:T+" 12.11",tag:"Majówka"},
+ {from:"POZ",en:"Dublin",city:"Dublin",p:416,d1:"2027-04-29",d2:"2027-05-05",src:T+" 12.11",tag:"Majówka"},
+ {from:"POZ",en:"Charleroi",city:"Bruksela Charleroi",p:419,d1:"2027-04-29",d2:"2027-05-06",src:T+" 12.11",tag:"Majówka"},
+ {from:"POZ",en:"Podgorica",city:"Podgorica (Czarnogóra)",p:252,d1:"2027-06-13",d2:"2027-06-17",src:T+" 11.2026",tag:"Czerwiec",hot:1},
+ {from:"POZ",en:"Tirana",city:"Tirana",p:365,d1:"2027-06-21",d2:"2027-06-25",src:T+" 11.2026",tag:"Czerwiec"},
+ {from:"WRO",en:"London",city:"Londyn Stansted",p:333,d1:"2027-05-01",d2:"2027-05-05",src:T+" 12.11",tag:"Majówka"},
+ {from:"WRO",en:"Dortmund",city:"Dortmund",p:351,d1:"2027-05-01",d2:"2027-05-04",src:T+" 12.11",tag:"Majówka"},
+ {from:"WRO",en:"Zadar",city:"Zadar",p:464,d1:"2027-04-30",d2:"2027-05-05",src:T+" 12.11",tag:"Majówka"},
+ {from:"WRO",en:"Liverpool",city:"Liverpool",p:476,d1:"2027-05-01",d2:"2027-05-04",src:T+" 12.11",tag:"Majówka"},
+ {from:"WRO",en:"Paris Beauvais",city:"Paryż Beauvais",p:490,d1:"2027-04-29",d2:"2027-05-06",src:T+" 12.11",tag:"Majówka"},
+ {from:"GDN",en:"Oslo",city:"Oslo",p:199,d1:"2027-05-01",d2:"2027-05-05",src:T+" 12.11",tag:"Majówka",hot:1},
+ {from:"GDN",en:"Bergen",city:"Bergen (fiordy)",p:220,d1:"2027-04-30",d2:"2027-05-04",src:T+" 12.11",tag:"Majówka",hot:1},
+ {from:"GDN",en:"Stavanger",city:"Stavanger",p:220,d1:"2027-04-29",d2:"2027-05-04",src:T+" 12.11",tag:"Majówka"},
+ {from:"GDN",en:"Copenhagen",city:"Kopenhaga",p:355,d1:"2027-05-01",d2:"2027-05-04",src:T+" 12.11",tag:"Majówka"},
+ {from:"GDN",en:"Trondheim",city:"Trondheim",p:290,d1:"2027-05-01",d2:"2027-05-09",src:T+" 12.11",tag:"Majówka"},
+ {from:"GDN",en:"Split",city:"Split",p:365,d1:"2027-06-21",d2:"2027-06-25",src:T+" 11.2026",tag:"Czerwiec"},
+ {from:"WAW",en:"London",city:"Londyn Stansted (z Modlina)",p:369,d1:"2027-05-01",d2:"2027-05-04",src:T+" 12.11",tag:"Majówka"},
+ {from:"WAW",en:"Rome",city:"Rzym",p:462,d1:"2027-05-01",d2:"2027-05-05",src:T+" 12.11",tag:"Majówka"},
+ {from:"WAW",en:"Naples",city:"Neapol",p:471,d1:"2027-04-29",d2:"2027-05-06",src:T+" 12.11",tag:"Majówka"},
+ {from:"WAW",en:"Helsinki",city:"Helsinki (z Modlina)",p:487,d1:"2027-04-30",d2:"2027-05-04",src:T+" 12.11",tag:"Majówka"},
+ {from:"WAW",en:"Oslo Torp",city:"Oslo Torp",p:275,d1:"2027-04-30",d2:"2027-05-10",src:T+" 12.11",tag:"Majówka"},
+ {from:"WAW",en:"Venice Treviso",city:"Wenecja Treviso (z Modlina)",p:398,d1:"2027-04-30",d2:"2027-05-08",src:T+" 12.11",tag:"Majówka"},
+ {from:"WAW",en:"Paphos",city:"Pafos (Cypr)",p:283,d1:"2027-06-10",d2:"2027-06-17",src:T+" 11.2026",tag:"Czerwiec",hot:1},
+ {from:"WAW",en:"Seville",city:"Sewilla",p:375,d1:"2027-06-09",d2:"2027-06-16",src:T+" 11.2026",tag:"Czerwiec"},
+ {from:"WAW",en:"Genoa",city:"Genua",p:201,d1:"2027-06-08",d2:"2027-06-24",src:T+" 11.2026",tag:"Czerwiec"},
 ];
 
 const HOLS = [
@@ -514,10 +556,12 @@ function show(id){
 function chipGroup(el,cb){el.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{el.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");cb(c.dataset.v)})}
 
 // ---------- OKAZJE ----------
-let dealMonth="all";
+let dealMonth="all", dealWhen="all";
+const FAR = addDays(TODAY,90);
 function dealsFor(){
   const week=$("#dealWeek").checked;
-  return DEALS.filter(d=>ORIGS.includes(d.from) && d.d1>=TODAY && (!week || nights(d.d1,d.d2)<=7));
+  return DEALS.filter(d=>ORIGS.includes(d.from) && d.d1>=TODAY && (!week || nights(d.d1,d.d2)<=7)
+    && (dealWhen==="all" || (dealWhen==="near" ? d.d1<FAR : d.d1>=FAR)));
 }
 function renderDealMonths(){
   const ms=[...new Set(dealsFor().map(d=>d.d1.slice(0,7)))].sort();
@@ -549,6 +593,7 @@ function renderDeals(){
 }
 $("#dealMax").oninput=renderDeals;
 $("#dealWeek").onchange=()=>{renderDealMonths();renderDeals()};
+chipGroup($("#dealWhen"),v=>{dealWhen=v;renderDealMonths();renderDeals()});
 
 // ---------- SZUKAJ ----------
 const Q={to:"",mode:"month",month:"",d1:"",d2:"",len:"2-4",budget:400,direct:true};
