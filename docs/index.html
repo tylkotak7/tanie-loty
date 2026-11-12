@@ -151,6 +151,11 @@ a.plain{color:var(--acc)}
         <button class="chip" data-v="WAW">Warszawa</button>
         <button class="chip" data-v="GDN">Gdańsk</button>
       </div>
+      <label>Linie lotnicze</label>
+      <div class="chips" id="alAir">
+        <button class="chip" data-v="ryanair">Ryanair</button>
+        <button class="chip" data-v="wizz">Wizz Air</button>
+      </div>
       <label>Powiadom, gdy lot w obie strony kosztuje maks.</label>
       <div class="range"><input id="alMax" type="range" min="100" max="800" step="10" value="250"><b id="alMaxV">250 zł</b></div>
       <div class="two">
@@ -170,7 +175,7 @@ a.plain{color:var(--acc)}
       <div class="note" id="alStatus" style="margin:10px 0 0"></div>
     </div>
     <h2 id="alResH">Znalezione loty</h2>
-    <p class="note">Ceny na żywo z Ryanaira (Wizz Air nie udostępnia swoich cen). Najtańszy termin dla każdego kierunku.</p>
+    <p class="note">Ceny na żywo z Ryanaira i Wizz Air: najtańszy termin dla każdego kierunku. Ceny Wizz Air za powrót z zagranicy są przeliczane z waluty po przybliżonym kursie (oznaczone ~).</p>
     <div id="alRes"></div>
   </div>
 </section>
@@ -646,7 +651,7 @@ applyOrigins();
 
 // ---------- ALERTY (tylko w apce na Androida) ----------
 const APP = (typeof window.Android!=="undefined" && window.Android.getSettings) ? window.Android : null;
-let AL = {origins:["POZ","WRO"],maxPrice:250,minDays:2,maxDays:7,monthsAhead:3,everyHours:6,enabled:false};
+let AL = {origins:["POZ","WRO"],maxPrice:250,minDays:2,maxDays:7,monthsAhead:3,everyHours:6,enabled:false,ryanair:true,wizz:true};
 const AIRPORT_LABEL={WMI:"WAW (Modlin)"};
 function alInit(){
   if(!APP) return;
@@ -658,19 +663,25 @@ function alInit(){
     c.classList.toggle("on",AL.origins.includes(c.dataset.v));
     c.onclick=()=>{c.classList.toggle("on");};
   });
+  $("#alAir").querySelectorAll(".chip").forEach(c=>{
+    c.classList.toggle("on",AL[c.dataset.v]!==false);
+    c.onclick=()=>{c.classList.toggle("on");};
+  });
   $("#alMax").value=AL.maxPrice; $("#alMaxV").textContent=AL.maxPrice+" zł";
   $("#alMax").oninput=e=>$("#alMaxV").textContent=e.target.value+" zł";
   $("#alMin").value=AL.minDays; $("#alMaxD").value=AL.maxDays;
   $("#alMonths").value=AL.monthsAhead; $("#alEvery").value=AL.everyHours; $("#alOn").checked=AL.enabled;
   $("#alSave").onclick=()=>{alSave();status("✓ Zapisano"+(AL.enabled?` — sprawdzam co ${AL.everyHours} h i powiadomię o lotach do ${AL.maxPrice} zł.`:" (powiadomienia wyłączone)."))};
-  $("#alCheck").onclick=()=>{alSave();status("Szukam lotów…");$("#alCheck").disabled=true;APP.checkNow()};
+  $("#alCheck").onclick=()=>{alSave();status(AL.wizz?"Szukam lotów… (z Wizz Air może to potrwać 1–2 minuty)":"Szukam lotów…");$("#alCheck").disabled=true;APP.checkNow()};
   $("#alTest").onclick=()=>APP.testNotification();
   alShowLast();
 }
 function alSave(){
   const origins=[...$("#alOrig").querySelectorAll(".chip.on")].map(c=>c.dataset.v);
   let mn=+$("#alMin").value, mx=+$("#alMaxD").value; if(mx<mn){mx=mn;$("#alMaxD").value=mx}
-  AL={origins:origins.length?origins:["POZ"],maxPrice:+$("#alMax").value,minDays:mn,maxDays:mx,monthsAhead:+$("#alMonths").value,everyHours:+$("#alEvery").value,enabled:$("#alOn").checked};
+  const air=[...$("#alAir").querySelectorAll(".chip.on")].map(c=>c.dataset.v);
+  AL={origins:origins.length?origins:["POZ"],maxPrice:+$("#alMax").value,minDays:mn,maxDays:mx,monthsAhead:+$("#alMonths").value,everyHours:+$("#alEvery").value,enabled:$("#alOn").checked,
+      ryanair:air.includes("ryanair")||!air.length,wizz:air.includes("wizz")};
   APP.saveSettings(JSON.stringify(AL));
 }
 function status(t){$("#alStatus").textContent=t}
@@ -680,17 +691,19 @@ function alShowLast(){
   $("#alResH").textContent = t? "Znalezione loty · "+new Date(t).toLocaleString("pl-PL",{day:"numeric",month:"numeric",hour:"2-digit",minute:"2-digit"}) : "Znalezione loty";
   $("#alRes").innerHTML = list.length ? list.map(d=>{
     const n=nights(d.out,d.in);
-    const split=(d.outPrice&&d.inPrice)?`<div class="meta">tam ${d.outPrice} zł · powrót ${d.inPrice} zł</div>`:"";
+    const wz=d.airline==="Wizz Air";
+    const split=(d.outPrice&&d.inPrice)?`<div class="meta">tam ${d.outPrice} zł · powrót ${wz?"~":""}${d.inPrice} zł</div>`:"";
     return `<div class="card"><div class="deal"><div class="info"><div class="city">${esc(AIRPORT_LABEL[d.from]||d.from)} → ${esc(d.toCity)}</div>
-    <div class="meta">${pl(d.out)} → ${pl(d.in)} · ${n} ${n===1?"noc":"nocy"}${d.country?" · "+esc(d.country):""}</div>${split}</div>
-    <div class="price">${d.price} zł<small>tam i z powrotem</small></div></div>
-    <div class="row" style="margin-top:10px"><a class="btn pri sm" href="${esc(d.url)}" target="_blank" rel="noopener">Kup w Ryanair ↗</a></div></div>`}).join("")
+    <div class="meta">${pl(d.out)} → ${pl(d.in)} · ${n} ${n===1?"noc":"nocy"}${d.country?" · "+esc(d.country):""}</div>${split}<div><span class="tag">${esc(d.airline||"Ryanair")}</span></div></div>
+    <div class="price">${wz?"~":""}${d.price} zł<small>tam i z powrotem</small></div></div>
+    <div class="row" style="margin-top:10px"><a class="btn pri sm" href="${esc(d.url)}" target="_blank" rel="noopener">Kup w ${esc(d.airline||"Ryanair")} ↗</a></div></div>`}).join("")
     : `<div class="empty">Jeszcze nic. Kliknij „Sprawdź teraz”.</div>`;
 }
 window.onCheckDone=r=>{
   $("#alCheck").disabled=false;
   if(r&&r.error){status("⚠ Nie udało się pobrać cen: "+r.error+". Sprawdź internet i spróbuj ponownie.");return}
-  status(`✓ Sprawdzone. Nowych okazji: ${r.fresh}.`); alShowLast();
+  let err=""; try{err=APP.getLastErrors?APP.getLastErrors():""}catch(e){}
+  status(`✓ Sprawdzone. Nowych okazji: ${r.fresh}.`+(err?` ⚠ ${err}`:"")); alShowLast();
 };
 alInit();
 function hashRoute(){ if(location.hash==="#alerts") show("s-alerts"); }

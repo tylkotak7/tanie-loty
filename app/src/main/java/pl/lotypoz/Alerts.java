@@ -13,7 +13,8 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Alerts {
@@ -36,8 +37,22 @@ public class Alerts {
     /** Sprawdza loty, zapisuje wyniki i powiadamia o nowych lub tańszych okazjach. Zwraca liczbę nowych. */
     public static int runCheck(Context ctx) throws Exception {
         Settings s = Settings.load(ctx);
-        List<FareChecker.Deal> deals = FareChecker.search(s);
+        List<FareChecker.Deal> deals = new ArrayList<>();
+        StringBuilder errors = new StringBuilder();
+        int ok = 0;
+        Exception lastErr = null;
+        if (s.ryanair) {
+            try { deals.addAll(FareChecker.search(s)); ok++; }
+            catch (Exception e) { lastErr = e; errors.append("Ryanair: ").append(e.getMessage()).append(". "); }
+        }
+        if (s.wizz) {
+            try { deals.addAll(WizzChecker.search(s)); ok++; }
+            catch (Exception e) { lastErr = e; errors.append("Wizz Air: ").append(e.getMessage()).append(". "); }
+        }
         SharedPreferences p = Settings.prefs(ctx);
+        p.edit().putString("lastErrors", errors.toString().trim()).apply();
+        if (ok == 0 && lastErr != null) throw lastErr;
+        Collections.sort(deals, (a, b) -> Double.compare(a.price, b.price));
 
         JSONArray last = new JSONArray();
         for (FareChecker.Deal d : deals) last.put(d.toJson());
@@ -53,7 +68,7 @@ public class Alerts {
             if (prev < 0 || d.price < prev - 1) {
                 fresh++;
                 if (best == null) best = d;
-                if (fresh <= 5) lines.append(d.from).append(" → ").append(d.toCity).append(": ")
+                if (fresh <= 5) lines.append(d.from).append(" → ").append(d.toCity).append(" (").append(d.airline).append("): ")
                         .append(Math.round(d.price)).append(" zł (").append(shortDate(d.out)).append("–").append(shortDate(d.in)).append(")\n");
             }
             seen.put(d.key(), d.price);

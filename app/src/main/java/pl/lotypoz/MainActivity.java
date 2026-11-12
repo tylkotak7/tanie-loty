@@ -91,6 +91,11 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public String getLastErrors() {
+            return Settings.prefs(MainActivity.this).getString("lastErrors", "");
+        }
+
+        @JavascriptInterface
         public double getLastTime() {
             return Settings.prefs(MainActivity.this).getLong("lastTime", 0);
         }

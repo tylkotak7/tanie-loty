@@ -17,12 +17,14 @@ import java.util.Locale;
 public class FareChecker {
 
     public static class Deal {
-        public String from, to, toCity, country, out, in;
+        public String from, to, toCity, country, out, in, airline = "Ryanair";
         public double price, outPrice, inPrice;
 
-        public String key() { return from + "-" + to + "-" + out + "-" + in; }
+        public String key() { return airline + "-" + from + "-" + to + "-" + out + "-" + in; }
 
         public String bookUrl() {
+            if ("Wizz Air".equals(airline))
+                return "https://wizzair.com/pl-pl/booking/select-flight/" + from + "/" + to + "/" + out + "/" + in + "/1/0/0/null";
             return "https://www.ryanair.com/pl/pl/trip/flights/select?adults=1&teens=0&children=0&infants=0"
                     + "&dateOut=" + out + "&dateIn=" + in
                     + "&isConnectedFlight=false&isReturn=true&discount=0&promoCode="
@@ -32,7 +34,7 @@ public class FareChecker {
         public JSONObject toJson() {
             JSONObject o = new JSONObject();
             try {
-                o.put("from", from); o.put("to", to); o.put("toCity", toCity); o.put("country", country);
+                o.put("airline", airline); o.put("from", from); o.put("to", to); o.put("toCity", toCity); o.put("country", country);
                 o.put("out", out); o.put("in", in); o.put("price", Math.round(price)); o.put("url", bookUrl());
                 if (outPrice > 0 && inPrice > 0) { o.put("outPrice", Math.round(outPrice)); o.put("inPrice", Math.round(inPrice)); }
             } catch (Exception ignored) {}

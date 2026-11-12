@@ -15,6 +15,8 @@ public class Settings {
     public int monthsAhead = 3;
     public int everyHours = 6;
     public boolean enabled = false;
+    public boolean ryanair = true;
+    public boolean wizz = true;
 
     static SharedPreferences prefs(Context c) {
         return c.getSharedPreferences("tanie_loty", Context.MODE_PRIVATE);
@@ -44,6 +46,9 @@ public class Settings {
             s.monthsAhead = clamp(o.optInt("monthsAhead", 3), 1, 6);
             s.everyHours = clamp(o.optInt("everyHours", 6), 1, 24);
             s.enabled = o.optBoolean("enabled", false);
+            s.ryanair = o.optBoolean("ryanair", true);
+            s.wizz = o.optBoolean("wizz", true);
+            if (!s.ryanair && !s.wizz) s.ryanair = true;
             return s;
         } catch (Exception e) {
             return null;
@@ -62,6 +67,8 @@ public class Settings {
             o.put("monthsAhead", monthsAhead);
             o.put("everyHours", everyHours);
             o.put("enabled", enabled);
+            o.put("ryanair", ryanair);
+            o.put("wizz", wizz);
         } catch (Exception ignored) {}
         return o;
     }
