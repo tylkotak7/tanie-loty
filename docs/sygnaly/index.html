@@ -63,6 +63,11 @@ footer{color:var(--mut);font-size:11px;margin-top:14px}
 </header>
 <div id="err"></div>
 <div id="cards"></div>
+<div class="panel">
+  <div style="font-weight:700;margin-bottom:6px">Strategia</div>
+  <div id="stratBtns" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+  <div id="stratDesc" class="mut" style="margin-top:6px"></div>
+</div>
 
 <div class="panel">
   <div class="top">
@@ -74,9 +79,8 @@ footer{color:var(--mut);font-size:11px;margin-top:14px}
   <canvas id="chart"></canvas>
   <canvas id="ind"></canvas>
   <div class="legend">
-    <span><i style="background:var(--ema)"></i>EMA</span>
-    <span><i style="background:var(--acc)"></i>Skośność</span>
-    <span><i style="background:var(--up)"></i>/<i style="background:var(--dn)"></i>Momentum</span>
+    <span><i style="background:var(--ema)"></i>/<i style="background:#38bdf8"></i>/<i style="background:#64748b"></i>linie strategii</span>
+    <span><i style="background:var(--acc)"></i>wskaźnik na dole</span>
     <span>▲▼ wejścia papierowe</span>
   </div>
   <div class="zoom">
@@ -99,8 +103,14 @@ footer{color:var(--mut);font-size:11px;margin-top:14px}
 </div>
 
 <div class="panel">
+  <div style="font-weight:700">Porównanie strategii na tym instrumencie</div>
+  <div class="mut">Stab. ✓ = obie połowy historii na plusie. Stuknij wiersz, żeby wybrać.</div>
+  <table id="compare"></table>
+</div>
+
+<div class="panel">
   <details>
-    <summary>⚙️ Ustawienia strategii</summary>
+    <summary>⚙️ Ustawienia: <span id="setTitle"></span></summary>
     <div class="set" id="settings"></div>
     <div style="margin-top:8px;display:flex;gap:6px">
       <button id="save">Zapisz i przelicz</button><button id="reset">Domyślne</button>
@@ -115,46 +125,85 @@ Wynik testu to symulacja na historii, nie gwarancja. To narzędzie pomocnicze, n
 
 <script>
 /* ===== LOGIKA (czysta, bez DOM) ===== */
-const DEF={momBars:45,skewBars:40,momMin:0.05,skewMin:0.2,useTrend:1,ema:50,sl:1.5,tp:3,maxBars:16,fee:0.05};
-const LABELS={
-  momBars:'Momentum: ile świec wstecz (4 = 1h, 45 ≈ 11h)',
-  skewBars:'Skośność: ile świec do liczenia',
-  momMin:'Min. momentum % (próg)',
-  skewMin:'Min. skośność (0–1)',
-  useTrend:'Filtr trendu EMA (1 = tak, 0 = nie)',
-  ema:'Długość EMA',
-  sl:'Stop loss × ATR',
-  tp:'Take profit × ATR',
-  maxBars:'Maks. świec w pozycji',
-  fee:'Prowizja % za stronę'
+const STRATS={
+  mom:{name:'Momentum + skośność',desc:'Ze screena: siła ruchu + przewaga wzrostów/spadków, z filtrem trendu. Rynek w ruchu.',
+    def:{momBars:45,skewBars:40,momMin:0.05,skewMin:0.2,useTrend:1,ema:50,sl:1.5,tp:3,maxBars:16,fee:0.05}},
+  ema:{name:'Trend: EMA + RSI',desc:'Szybka EMA nad wolną i RSI powyżej 50 = kupno (odwrotnie sprzedaż). Klasyka na trendy.',
+    def:{fast:20,slow:50,rsiLen:14,sl:1.5,tp:3,maxBars:24,fee:0.05}},
+  brk:{name:'Wybicie z kanału',desc:'Zamknięcie powyżej najwyższej ceny z N świec = kupno, poniżej najniższej = sprzedaż. Dobre na złoto i ropę przy newsach.',
+    def:{n:20,useTrend:1,ema:100,sl:1.5,tp:3,maxBars:32,fee:0.05}},
+  mr:{name:'Odbicie od Bollingera',desc:'Cena poza wstęgą i RSI skrajne = gra na powrót do środka. Rynek w konsolidacji (bokiem).',
+    def:{n:20,k:2,rsiLen:14,rsiLo:30,rsiHi:70,sl:1.5,tp:1.5,maxBars:12,fee:0.05}}
 };
+const LABELS={
+  momBars:'Momentum: ile świec wstecz (4 = 1h)',skewBars:'Skośność: ile świec',momMin:'Min. momentum %',skewMin:'Min. skośność (0–1)',
+  useTrend:'Filtr trendu EMA (1 = tak, 0 = nie)',ema:'Długość EMA trendu',fast:'Szybka EMA',slow:'Wolna EMA',rsiLen:'Długość RSI',
+  n:'Ile świec (kanał / wstęga)',k:'Szerokość wstęgi (odch. std.)',rsiLo:'RSI wyprzedanie (kupno poniżej)',rsiHi:'RSI wykupienie (sprzedaż powyżej)',
+  sl:'Stop loss × ATR',tp:'Take profit × ATR',maxBars:'Maks. świec w pozycji',fee:'Prowizja % za stronę'
+};
+const INTS=['momBars','skewBars','ema','fast','slow','rsiLen','n','maxBars','useTrend'];
 function ema(a,n){const k=2/(n+1),o=[];let e=a[0];for(let i=0;i<a.length;i++){e=i?a[i]*k+e*(1-k):a[i];o.push(e)}return o}
 function atr(c,n){const o=[];let a=null;for(let i=0;i<c.length;i++){const b=c[i],pc=i?c[i-1].c:b.c;const tr=Math.max(b.h-b.l,Math.abs(b.h-pc),Math.abs(b.l-pc));a=a==null?tr:(a*(n-1)+tr)/n;o.push(a)}return o}
-function analyze(c,P){
-  const cl=c.map(x=>x.c),e=ema(cl,P.ema),at=atr(c,14),mom=[],skew=[],sig=[];
-  for(let i=0;i<c.length;i++){
-    mom[i]=i>=P.momBars?(cl[i]-cl[i-P.momBars])/cl[i-P.momBars]*100:null;
-    if(i>=P.skewBars){let up=0,dn=0;for(let j=i-P.skewBars+1;j<=i;j++){const r=(cl[j]-cl[j-1])/cl[j-1];if(r>0)up+=r*r;else dn+=r*r}skew[i]=up+dn>0?(up-dn)/(up+dn):0}else skew[i]=null;
-    if(mom[i]==null||skew[i]==null||i<P.ema){sig[i]=0;continue}
-    const L=mom[i]>P.momMin&&skew[i]>P.skewMin&&(!P.useTrend||cl[i]>e[i]);
-    const S=mom[i]<-P.momMin&&skew[i]<-P.skewMin&&(!P.useTrend||cl[i]<e[i]);
-    sig[i]=L?1:S?-1:0;
+function rsi(cl,n){const o=[null];let ag=0,al=0;for(let i=1;i<cl.length;i++){const d=cl[i]-cl[i-1],g=Math.max(d,0),l=Math.max(-d,0);
+  if(i<=n){ag+=g/n;al+=l/n;o.push(i<n?null:(al===0?100:100-100/(1+ag/al)))}else{ag=(ag*(n-1)+g)/n;al=(al*(n-1)+l)/n;o.push(al===0?100:100-100/(1+ag/al))}}return o}
+const sgn=v=>v>=0?'+':'';
+function analyze(c,k,P){
+  const cl=c.map(x=>x.c),N=c.length,at=atr(c,14),sig=new Array(N).fill(0),lean=new Array(N).fill(1);
+  const A={at,sig,lean,lines:[],panel:null,why:()=>[]};
+  if(k==='mom'){
+    const e=ema(cl,P.ema),mom=[],skew=[];
+    for(let i=0;i<N;i++){
+      mom[i]=i>=P.momBars?(cl[i]-cl[i-P.momBars])/cl[i-P.momBars]*100:null;
+      if(i>=P.skewBars){let up=0,dn=0;for(let j=i-P.skewBars+1;j<=i;j++){const r=(cl[j]-cl[j-1])/cl[j-1];if(r>0)up+=r*r;else dn+=r*r}skew[i]=up+dn>0?(up-dn)/(up+dn):0}else skew[i]=null;
+      if(mom[i]==null||skew[i]==null||i<P.ema)continue;
+      lean[i]=mom[i]>=0?1:-1;
+      if(mom[i]>P.momMin&&skew[i]>P.skewMin&&(!P.useTrend||cl[i]>e[i]))sig[i]=1;
+      else if(mom[i]<-P.momMin&&skew[i]<-P.skewMin&&(!P.useTrend||cl[i]<e[i]))sig[i]=-1;
+    }
+    A.lines=[{a:e,col:'#facc15',l:'EMA'+P.ema}];
+    A.panel={bars:mom,line:skew,min:-1,max:1,levels:[P.skewMin,-P.skewMin],label:'mom/skoś.'};
+    A.why=(i,w)=>[[w>0?mom[i]>P.momMin:mom[i]<-P.momMin,`Momentum ${P.momBars} świec: ${sgn(mom[i])}${mom[i].toFixed(3)}% (próg ±${P.momMin})`],
+      [w>0?skew[i]>P.skewMin:skew[i]<-P.skewMin,`Skośność: ${sgn(skew[i])}${skew[i].toFixed(2)} (próg ±${P.skewMin})`]]
+      .concat(P.useTrend?[[w>0?cl[i]>e[i]:cl[i]<e[i],`Cena ${cl[i]>e[i]?'nad':'pod'} EMA${P.ema}`]]:[]);
+  }else if(k==='ema'){
+    const f=ema(cl,P.fast),sl=ema(cl,P.slow),r=rsi(cl,P.rsiLen);
+    for(let i=0;i<N;i++){if(i<P.slow||r[i]==null)continue;lean[i]=f[i]>=sl[i]?1:-1;
+      if(f[i]>sl[i]&&r[i]>50)sig[i]=1;else if(f[i]<sl[i]&&r[i]<50)sig[i]=-1}
+    A.lines=[{a:f,col:'#38bdf8',l:'EMA'+P.fast},{a:sl,col:'#facc15',l:'EMA'+P.slow}];
+    A.panel={line:r,min:0,max:100,levels:[50],label:'RSI'};
+    A.why=(i,w)=>[[w>0?f[i]>sl[i]:f[i]<sl[i],`EMA${P.fast} ${f[i]>sl[i]?'nad':'pod'} EMA${P.slow}`],
+      [w>0?r[i]>50:r[i]<50,`RSI: ${r[i].toFixed(1)} (${w>0?'potrzeba > 50':'potrzeba < 50'})`]];
+  }else if(k==='brk'){
+    const e=ema(cl,P.ema),hi=[],lo=[];
+    for(let i=0;i<N;i++){if(i<P.n){hi[i]=lo[i]=null;continue}let H=-Infinity,L=Infinity;for(let j=i-P.n;j<i;j++){H=Math.max(H,c[j].h);L=Math.min(L,c[j].l)}hi[i]=H;lo[i]=L;
+      lean[i]=(cl[i]-L)>=(H-cl[i])?1:-1;if(i<P.ema)continue;
+      if(cl[i]>H&&(!P.useTrend||cl[i]>e[i]))sig[i]=1;else if(cl[i]<L&&(!P.useTrend||cl[i]<e[i]))sig[i]=-1}
+    A.lines=[{a:hi,col:'#64748b',l:'kanał'},{a:lo,col:'#64748b'},{a:e,col:'#facc15',l:'EMA'+P.ema}];
+    A.panel={line:rsi(cl,14),min:0,max:100,levels:[30,70],label:'RSI'};
+    A.why=(i,w)=>[[w>0?cl[i]>hi[i]:cl[i]<lo[i],w>0?`Zamknięcie nad szczytem ${P.n} świec (${hi[i].toFixed(2)})`:`Zamknięcie pod dołkiem ${P.n} świec (${lo[i].toFixed(2)})`]]
+      .concat(P.useTrend?[[w>0?cl[i]>e[i]:cl[i]<e[i],`Cena ${cl[i]>e[i]?'nad':'pod'} EMA${P.ema}`]]:[]);
+  }else if(k==='mr'){
+    const r=rsi(cl,P.rsiLen),mid=[],up=[],lo=[];
+    for(let i=0;i<N;i++){if(i<P.n-1){mid[i]=up[i]=lo[i]=null;continue}let s=0,q=0;for(let j=i-P.n+1;j<=i;j++){s+=cl[j];q+=cl[j]*cl[j]}const m=s/P.n,sd=Math.sqrt(Math.max(q/P.n-m*m,0));
+      mid[i]=m;up[i]=m+P.k*sd;lo[i]=m-P.k*sd;lean[i]=cl[i]<=m?1:-1;if(r[i]==null)continue;
+      if(cl[i]<lo[i]&&r[i]<P.rsiLo)sig[i]=1;else if(cl[i]>up[i]&&r[i]>P.rsiHi)sig[i]=-1}
+    A.lines=[{a:up,col:'#64748b',l:'wstęga'},{a:lo,col:'#64748b'},{a:mid,col:'#facc15',l:'środek'}];
+    A.panel={line:r,min:0,max:100,levels:[P.rsiLo,P.rsiHi],label:'RSI'};
+    A.why=(i,w)=>[[w>0?cl[i]<lo[i]:cl[i]>up[i],w>0?`Cena pod dolną wstęgą (${lo[i].toFixed(2)})`:`Cena nad górną wstęgą (${up[i].toFixed(2)})`],
+      [w>0?r[i]<P.rsiLo:r[i]>P.rsiHi,`RSI: ${r[i].toFixed(1)} (${w>0?'potrzeba < '+P.rsiLo:'potrzeba > '+P.rsiHi})`]];
   }
-  return {e,at,mom,skew,sig};
+  return A;
 }
+function startIdx(P){let m=60;for(const k of INTS)if(P[k]!=null&&k!=='useTrend')m=Math.max(m,P[k]+1);return m}
 function backtest(c,A,P,last){
-  const tr=[];let pos=null;const start=Math.max(P.ema,P.skewBars,P.momBars)+1;
-  for(let i=start;i<=last;i++){
+  const tr=[];let pos=null;
+  for(let i=startIdx(P);i<=last;i++){
     if(pos){
       const b=c[i];let ex=null,why='';
       if(pos.dir>0){if(b.l<=pos.sl){ex=pos.sl;why='SL'}else if(b.h>=pos.tp){ex=pos.tp;why='TP'}}
       else{if(b.h>=pos.sl){ex=pos.sl;why='SL'}else if(b.l<=pos.tp){ex=pos.tp;why='TP'}}
       if(ex==null&&i-pos.i>=P.maxBars){ex=b.c;why='Czas'}
-      if(ex!=null){
-        const feeR=pos.entry*P.fee*2/100/pos.risk;
-        tr.push({...pos,exitI:i,exitT:b.t,exit:ex,why,R:(ex-pos.entry)*pos.dir/pos.risk-feeR});
-        pos=null;continue;
-      }
+      if(ex!=null){const feeR=pos.entry*P.fee*2/100/pos.risk;tr.push({...pos,exitI:i,exitT:b.t,exit:ex,why,R:(ex-pos.entry)*pos.dir/pos.risk-feeR});pos=null;continue}
     }
     if(!pos&&A.sig[i]!==0&&A.sig[i]!==A.sig[i-1]&&A.at[i]>0){
       const risk=A.at[i]*P.sl,d=A.sig[i],en=c[i].c;
@@ -168,6 +217,7 @@ function stats(tr){
   const gp=tr.filter(t=>t.R>0).reduce((s,t)=>s+t.R,0),gl=-tr.filter(t=>t.R<0).reduce((s,t)=>s+t.R,0);
   return {n,w,wr:n?w/n*100:0,sum,avg:n?sum/n:0,pf:gl>0?gp/gl:(gp>0?99:0)};
 }
+function halves(c,tr){const mid=c[0].t+(c[c.length-1].t-c[0].t)/2;return [stats(tr.filter(t=>t.t<mid)),stats(tr.filter(t=>t.t>=mid))]}
 /* ===== KONIEC LOGIKI ===== */
 
 const API='https://fapi.binance.com/fapi/v1/klines';
@@ -177,7 +227,11 @@ const INST=[
   {id:'CLUSDT',name:'Ropa WTI',dec:2}
 ];
 const M15=15*60*1000;
-let P={...DEF};try{const s=JSON.parse(localStorage.getItem('sig15P')||'null');if(s)P={...DEF,...s}}catch(e){}
+let strat='mom',PS={};for(const k in STRATS)PS[k]={...STRATS[k].def};
+try{const v=JSON.parse(localStorage.getItem('sig15v2')||'null');if(v){strat=STRATS[v.strat]?v.strat:'mom';for(const k in STRATS)PS[k]={...STRATS[k].def,...(v.PS&&v.PS[k]||{})}}
+  else{const o=JSON.parse(localStorage.getItem('sig15P')||'null');if(o)PS.mom={...PS.mom,...o}}}catch(e){}
+let P=PS[strat];
+function saveState(){try{localStorage.setItem('sig15v2',JSON.stringify({strat,PS}))}catch(e){}}
 let cur='BTCUSDT';try{cur=localStorage.getItem('sig15cur')||cur}catch(e){}
 const S={};INST.forEach(x=>S[x.id]={c:[],A:null,bt:null,lastSigT:null,err:null});
 const view={n:70,off:0};
@@ -196,7 +250,7 @@ async function fetchK(sym,limit){
 function lastClosed(c){const now=Date.now();let i=c.length-1;while(i>=0&&c[i].t+M15>now)i--;return i}
 function recompute(id,notify){
   const s=S[id];if(!s.c.length)return;
-  s.A=analyze(s.c,P);const lc=lastClosed(s.c);s.lc=lc;
+  s.A=analyze(s.c,strat,P);const lc=lastClosed(s.c);s.lc=lc;
   s.bt=backtest(s.c,s.A,P,lc);
   const o=s.bt.open;
   if(o){
@@ -265,14 +319,10 @@ function renderDetail(){
   const v=$('verdict');
   v.textContent=sg>0?'KUPNO (LONG) ▲':sg<0?'SPRZEDAŻ (SHORT) ▼':'BRAK SYGNAŁU';
   v.className='verdict '+(sg>0?'L':sg<0?'S':'N');
-  const m=A.mom[i],k=A.skew[i],above=c[i].c>A.e[i];
   const ok=b=>b?'<b class="pos">✓</b>':'<b class="neg">✗</b>';
-  const dirUp=sg>=0?(m>0):false;
-  const want=sg!==0?sg:(m>=0?1:-1);
-  $('checks').innerHTML=
-    `<div class="chk">${ok(want>0?m>P.momMin:m<-P.momMin)}Momentum ${P.momBars*15} min: <b style="width:auto">${m>=0?'+':''}${m.toFixed(3)}%</b> <span class="mut">(próg ±${P.momMin})</span></div>`+
-    `<div class="chk">${ok(want>0?k>P.skewMin:k<-P.skewMin)}Skośność: <b style="width:auto">${k>=0?'+':''}${k.toFixed(2)}</b> <span class="mut">(${k>0?'silniejsze ruchy w górę':'silniejsze ruchy w dół'})</span></div>`+
-    (P.useTrend?`<div class="chk">${ok(want>0?above:!above)}Cena ${above?'nad':'pod'} EMA${P.ema} (${fmt(A.e[i],x.dec)})</div>`:'')+
+  const want=sg!==0?sg:A.lean[i];
+  $('checks').innerHTML=`<div class="chk mut">Sprawdzam pod ${want>0?'KUPNO':'SPRZEDAŻ'}:</div>`+
+    A.why(i,want).map(([b,t])=>`<div class="chk">${ok(b)}${t}</div>`).join('')+
     `<div class="chk mut">ATR(14): ${fmt(A.at[i],x.dec)} · świeca ${tm(c[i].t)}</div>`;
   const o=s.bt.open;
   $('openPos').innerHTML=o?`<div style="margin-top:6px;padding:8px;border-radius:8px;background:#0f131b">
@@ -285,15 +335,23 @@ function renderDetail(){
     ['Transakcje',st.n],['Trafność',st.wr.toFixed(0)+'%'],
     ['Suma',(st.sum>=0?'+':'')+st.sum.toFixed(1)+' R'],['Profit factor',st.pf.toFixed(2)]
   ].map(([k,v])=>`<div><div class="v">${v}</div><div class="k">${k}</div></div>`).join('');
-  const midT=c[0].t+(c[c.length-1].t-c[0].t)/2;
-  const h1=stats(s.bt.trades.filter(t=>t.t<midT)),h2=stats(s.bt.trades.filter(t=>t.t>=midT));
+  const [h1,h2]=halves(c,s.bt.trades);
   const hs=h=>`${h.n} tr. · ${h.wr.toFixed(0)}% · <b class="${h.sum>=0?'pos':'neg'}">${h.sum>=0?'+':''}${h.sum.toFixed(1)} R</b>`;
   $('halves').innerHTML=`Starsza połowa: ${hs(h1)}<br>Nowsza połowa: ${hs(h2)}<br>${(h1.sum>0)===(h2.sum>0)&&h1.n&&h2.n?'✓ Obie połowy w tę samą stronę: wynik wygląda na stabilny.':'⚠️ Połowy się różnią: wynik może być przypadkiem (dopasowany do historii).'}`;
   const tr=s.bt.trades.slice(-12).reverse();
   $('trades').innerHTML='<tr><th>Wejście</th><th>Kier.</th><th>Cena</th><th>Wyjście</th><th>Wynik</th></tr>'+
     tr.map(t=>`<tr><td>${tm(t.t)}</td><td class="${t.dir>0?'pos':'neg'}">${t.dir>0?'▲':'▼'}</td><td>${fmt(t.entry,x.dec)}</td><td>${t.why}</td><td class="${t.R>0?'pos':'neg'}">${t.R>=0?'+':''}${t.R.toFixed(2)} R</td></tr>`).join('')+
     (tr.length?'':'<tr><td colspan="5" class="mut">Brak transakcji w historii — poluzuj progi w ustawieniach.</td></tr>');
+  renderCompare();
   drawChart();
+}
+function renderCompare(){
+  const s=S[cur],c=s.c;if(!c.length)return;const lc=lastClosed(c);
+  $('compare').innerHTML='<tr><th>Strategia</th><th>Tr.</th><th>Traf.</th><th>Suma</th><th>Stab.</th></tr>'+Object.keys(STRATS).map(k=>{
+    const A=analyze(c,k,PS[k]),tr=backtest(c,A,PS[k],lc).trades,st=stats(tr),[a,b]=halves(c,tr);
+    const stab=a.n&&b.n&&(a.sum>0)&&(b.sum>0)?'✓':(a.sum<=0&&b.sum<=0?'✗':'⚠️');
+    return `<tr data-k="${k}" style="cursor:pointer;${k===strat?'background:#1d2233':''}"><td>${STRATS[k].name}</td><td>${st.n}</td><td>${st.wr.toFixed(0)}%</td><td class="${st.sum>=0?'pos':'neg'}">${st.sum>=0?'+':''}${st.sum.toFixed(1)}R</td><td>${stab}</td></tr>`}).join('');
+  document.querySelectorAll('#compare tr[data-k]').forEach(r=>r.onclick=()=>setStrat(r.dataset.k));
 }
 
 /* ===== WYKRES ===== */
@@ -308,7 +366,7 @@ function drawChart(){
   const end=c.length-1-view.off,st=end-n+1;
   const padR=58,cw=(w-padR)/n;
   let hi=-Infinity,lo=Infinity;
-  for(let i=st;i<=end;i++){hi=Math.max(hi,c[i].h,A.e[i]);lo=Math.min(lo,c[i].l,A.e[i])}
+  for(let i=st;i<=end;i++){hi=Math.max(hi,c[i].h);lo=Math.min(lo,c[i].l);for(const L of A.lines){const v=L.a[i];if(v!=null){hi=Math.max(hi,v);lo=Math.min(lo,v)}}}
   const o=s.bt.open;if(o&&o.i>=st){hi=Math.max(hi,o.sl,o.tp);lo=Math.min(lo,o.sl,o.tp)}
   const pad=(hi-lo)*0.08||1;hi+=pad;lo-=pad;
   const Y=v=>(hi-v)/(hi-lo)*(h-16)+4,X=i=>(i-st)*cw+cw/2;
@@ -325,8 +383,8 @@ function drawChart(){
     g.globalAlpha=i>s.lc?0.45:1;g.fillRect(X(i)-cw*0.35,y1,cw*0.7,Math.max(1,y2-y1));g.globalAlpha=1;
   }
   // EMA
-  g.strokeStyle='#facc15';g.lineWidth=1.5;g.beginPath();
-  for(let i=st;i<=end;i++){i===st?g.moveTo(X(i),Y(A.e[i])):g.lineTo(X(i),Y(A.e[i]))}g.stroke();
+  for(const L of A.lines){g.strokeStyle=L.col;g.lineWidth=1.5;g.beginPath();let f0=true;
+    for(let i=st;i<=end;i++){const v=L.a[i];if(v==null)continue;f0?g.moveTo(X(i),Y(v)):g.lineTo(X(i),Y(v));f0=false}g.stroke()}
   // wejścia
   const all=[...s.bt.trades];if(o)all.push(o);
   for(const t of all){
@@ -342,14 +400,15 @@ function drawChart(){
   // linia ceny
   if(view.off===0){const lp=c[c.length-1].c;g.fillStyle='#a78bfa';g.fillRect(w-padR,Y(lp)-7,padR,14);g.fillStyle='#111';g.fillText(fmt(lp,x.dec),w-padR+4,Y(lp)+3)}
   // panel wskaźników
-  const ig=I.g,ih=I.h,mid=ih/2;let mx=0;
-  for(let i=st;i<=end;i++)if(A.mom[i]!=null)mx=Math.max(mx,Math.abs(A.mom[i]));mx=mx||1;
-  ig.strokeStyle='#232a38';ig.beginPath();ig.moveTo(0,mid);ig.lineTo(I.w-padR,mid);ig.stroke();
-  for(let i=st;i<=end;i++){const m=A.mom[i];if(m==null)continue;ig.fillStyle=m>=0?'rgba(34,197,94,.6)':'rgba(239,68,68,.6)';const hh=m/mx*(mid-4);ig.fillRect(X(i)-cw*0.3,mid-Math.max(hh,0),cw*0.6,Math.abs(hh))}
+  const ig=I.g,ih=I.h,pn=A.panel;if(!pn)return;
+  const YP=v=>4+(pn.max-v)/(pn.max-pn.min)*(ih-8);
+  if(pn.bars){let mx=0;for(let i=st;i<=end;i++)if(pn.bars[i]!=null)mx=Math.max(mx,Math.abs(pn.bars[i]));mx=mx||1;const mid=ih/2;
+    for(let i=st;i<=end;i++){const m=pn.bars[i];if(m==null)continue;ig.fillStyle=m>=0?'rgba(34,197,94,.6)':'rgba(239,68,68,.6)';const hh=m/mx*(mid-4);ig.fillRect(X(i)-cw*0.3,mid-Math.max(hh,0),cw*0.6,Math.abs(hh))}}
+  ig.setLineDash([3,3]);ig.strokeStyle='rgba(167,139,250,.4)';ig.lineWidth=1;
+  pn.levels.forEach(t=>{ig.beginPath();ig.moveTo(0,YP(t));ig.lineTo(I.w-padR,YP(t));ig.stroke()});ig.setLineDash([]);
   ig.strokeStyle='#a78bfa';ig.lineWidth=1.5;ig.beginPath();let f=true;
-  for(let i=st;i<=end;i++){const k=A.skew[i];if(k==null)continue;const y=mid-k*(mid-4);f?ig.moveTo(X(i),y):ig.lineTo(X(i),y);f=false}ig.stroke();
-  ig.setLineDash([3,3]);ig.strokeStyle='rgba(167,139,250,.4)';[P.skewMin,-P.skewMin].forEach(t=>{ig.beginPath();ig.moveTo(0,mid-t*(mid-4));ig.lineTo(I.w-padR,mid-t*(mid-4));ig.stroke()});ig.setLineDash([]);
-  ig.fillStyle='#8a93a6';ig.font='10px system-ui';ig.fillText('mom/skoś.',I.w-padR+4,12);
+  for(let i=st;i<=end;i++){const k=pn.line[i];if(k==null)continue;f?ig.moveTo(X(i),YP(k)):ig.lineTo(X(i),YP(k));f=false}ig.stroke();
+  ig.fillStyle='#8a93a6';ig.font='10px system-ui';ig.fillText(pn.label,I.w-padR+4,12);
 }
 // przeciąganie wykresu
 (function(){let sx=null,so=0;const cv=$('chart');
@@ -363,13 +422,18 @@ $('zEnd').onclick=()=>{view.off=0;drawChart()};
 $('snd').onclick=()=>{sound=!sound;$('snd').textContent=sound?'🔔 Dźwięk':'🔕 Dźwięk';$('snd').className=sound?'on':'';
   if(sound&&!actx){try{actx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
   if(sound&&actx){actx.resume&&actx.resume();alertSig(cur,1)}};
-// ustawienia
-function renderSettings(){$('settings').innerHTML=Object.keys(DEF).map(k=>`<label for="p_${k}">${LABELS[k]}</label><input id="p_${k}" type="number" step="any" value="${P[k]}">`).join('')}
-$('save').onclick=()=>{Object.keys(DEF).forEach(k=>{const v=parseFloat($('p_'+k).value);if(!isNaN(v))P[k]=v});
-  ['momBars','skewBars','ema','maxBars'].forEach(k=>P[k]=Math.max(1,Math.round(P[k])));
-  try{localStorage.setItem('sig15P',JSON.stringify(P))}catch(e){}
-  INST.forEach(x=>{S[x.id].lastSigT=null;recompute(x.id,false)});render()};
-$('reset').onclick=()=>{P={...DEF};renderSettings();$('save').onclick()};
+// strategie i ustawienia
+function renderStrat(){
+  $('stratBtns').innerHTML=Object.keys(STRATS).map(k=>`<button data-k="${k}" class="${k===strat?'on':''}">${STRATS[k].name}</button>`).join('');
+  document.querySelectorAll('#stratBtns button').forEach(b=>b.onclick=()=>setStrat(b.dataset.k));
+  $('stratDesc').textContent=STRATS[strat].desc;
+}
+function setStrat(k){strat=k;P=PS[k];saveState();renderStrat();renderSettings();INST.forEach(x=>{S[x.id].lastSigT=null;recompute(x.id,false)});render()}
+function renderSettings(){$('setTitle').textContent=STRATS[strat].name;$('settings').innerHTML=Object.keys(STRATS[strat].def).map(k=>`<label for="p_${k}">${LABELS[k]}</label><input id="p_${k}" type="number" step="any" value="${P[k]}">`).join('')}
+$('save').onclick=()=>{Object.keys(STRATS[strat].def).forEach(k=>{const v=parseFloat($('p_'+k).value);if(!isNaN(v))P[k]=INTS.includes(k)?Math.max(k==='useTrend'?0:1,Math.round(v)):v});
+  saveState();INST.forEach(x=>{S[x.id].lastSigT=null;recompute(x.id,false)});render()};
+$('reset').onclick=()=>{PS[strat]={...STRATS[strat].def};P=PS[strat];renderSettings();$('save').onclick()};
+renderStrat();
 renderSettings();
 window.addEventListener('resize',drawChart);
 initAll();
