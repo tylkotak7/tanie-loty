@@ -92,8 +92,9 @@ footer{color:var(--mut);font-size:11px;margin-top:14px}
 </div>
 
 <div class="panel">
-  <div style="font-weight:700;margin-bottom:6px">Test na historii (ok. 10 dni, papierowo, z prowizją)</div>
+  <div style="font-weight:700;margin-bottom:6px">Test na historii (ok. 15 dni, papierowo, z prowizją)</div>
   <div class="grid4" id="stats"></div>
+  <div id="halves" class="mut" style="margin-top:8px"></div>
   <table id="trades"></table>
 </div>
 
@@ -114,9 +115,9 @@ Wynik testu to symulacja na historii, nie gwarancja. To narzędzie pomocnicze, n
 
 <script>
 /* ===== LOGIKA (czysta, bez DOM) ===== */
-const DEF={momBars:4,skewBars:20,momMin:0.05,skewMin:0.2,useTrend:1,ema:50,sl:1.5,tp:2,maxBars:16,fee:0.05};
+const DEF={momBars:45,skewBars:40,momMin:0.05,skewMin:0.2,useTrend:1,ema:50,sl:1.5,tp:3,maxBars:16,fee:0.05};
 const LABELS={
-  momBars:'Momentum: ile świec wstecz (4 = 1h)',
+  momBars:'Momentum: ile świec wstecz (4 = 1h, 45 ≈ 11h)',
   skewBars:'Skośność: ile świec do liczenia',
   momMin:'Min. momentum % (próg)',
   skewMin:'Min. skośność (0–1)',
@@ -211,7 +212,7 @@ function alertSig(id,dir){
 }
 async function initAll(){
   await Promise.all(INST.map(async x=>{
-    try{S[x.id].c=await fetchK(x.id,1000);S[x.id].err=null;recompute(x.id,false)}
+    try{S[x.id].c=await fetchK(x.id,1500);S[x.id].err=null;recompute(x.id,false)}
     catch(e){S[x.id].err=e.message}
   }));
   render();
@@ -220,11 +221,11 @@ async function poll(){
   await Promise.all(INST.map(async x=>{
     const s=S[x.id];
     try{
-      if(!s.c.length){s.c=await fetchK(x.id,1000)}
+      if(!s.c.length){s.c=await fetchK(x.id,1500)}
       else{
         const nw=await fetchK(x.id,3);
         for(const k of nw){const j=s.c.findIndex(q=>q.t===k.t);if(j>=0)s.c[j]=k;else if(k.t>s.c[s.c.length-1].t)s.c.push(k)}
-        if(s.c.length>1000)s.c.splice(0,s.c.length-1000);
+        if(s.c.length>1500)s.c.splice(0,s.c.length-1500);
       }
       s.err=null;recompute(x.id,true);
     }catch(e){s.err=e.message}
@@ -284,6 +285,10 @@ function renderDetail(){
     ['Transakcje',st.n],['Trafność',st.wr.toFixed(0)+'%'],
     ['Suma',(st.sum>=0?'+':'')+st.sum.toFixed(1)+' R'],['Profit factor',st.pf.toFixed(2)]
   ].map(([k,v])=>`<div><div class="v">${v}</div><div class="k">${k}</div></div>`).join('');
+  const midT=c[0].t+(c[c.length-1].t-c[0].t)/2;
+  const h1=stats(s.bt.trades.filter(t=>t.t<midT)),h2=stats(s.bt.trades.filter(t=>t.t>=midT));
+  const hs=h=>`${h.n} tr. · ${h.wr.toFixed(0)}% · <b class="${h.sum>=0?'pos':'neg'}">${h.sum>=0?'+':''}${h.sum.toFixed(1)} R</b>`;
+  $('halves').innerHTML=`Starsza połowa: ${hs(h1)}<br>Nowsza połowa: ${hs(h2)}<br>${(h1.sum>0)===(h2.sum>0)&&h1.n&&h2.n?'✓ Obie połowy w tę samą stronę: wynik wygląda na stabilny.':'⚠️ Połowy się różnią: wynik może być przypadkiem (dopasowany do historii).'}`;
   const tr=s.bt.trades.slice(-12).reverse();
   $('trades').innerHTML='<tr><th>Wejście</th><th>Kier.</th><th>Cena</th><th>Wyjście</th><th>Wynik</th></tr>'+
     tr.map(t=>`<tr><td>${tm(t.t)}</td><td class="${t.dir>0?'pos':'neg'}">${t.dir>0?'▲':'▼'}</td><td>${fmt(t.entry,x.dec)}</td><td>${t.why}</td><td class="${t.R>0?'pos':'neg'}">${t.R>=0?'+':''}${t.R.toFixed(2)} R</td></tr>`).join('')+
