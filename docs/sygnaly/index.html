@@ -111,11 +111,13 @@ footer{color:var(--mut);font-size:11px;margin-top:14px}
 
 <div class="panel">
   <details>
-    <summary>⚙️ Ustawienia: <span id="setTitle"></span></summary>
+    <summary>⚙️ Ustawienia: <span id="setTitle"></span> <span class="mut">(<span id="setFor"></span>)</span></summary>
     <div class="set" id="settings"></div>
     <div style="margin-top:8px;display:flex;gap:6px">
       <button id="save">Zapisz i przelicz</button><button id="reset">Domyślne</button>
     </div>
+    <button id="opt" style="margin-top:8px;width:100%">🔍 Dobierz najlepsze ustawienia</button>
+    <div id="optOut" style="font-size:13px"></div>
   </details>
 </div>
 
@@ -139,7 +141,7 @@ const STRATS={
     def:{n:20,k:2,rsiLen:14,rsiLo:30,rsiHi:70,sl:1.5,tp:1.5,maxBars:12,fee:0.05}}
 };
 const LABELS={
-  momBars:'Momentum: ile świec wstecz (4 = 1h)',skewBars:'Skośność: ile świec',momMin:'Min. momentum %',skewMin:'Min. skośność (0–1)',
+  momBars:'Momentum: ile świec wstecz',skewBars:'Skośność: ile świec',momMin:'Min. momentum %',skewMin:'Min. skośność (0–1)',
   useTrend:'Filtr trendu EMA (1 = tak, 0 = nie)',ema:'Długość EMA trendu',fast:'Szybka EMA',slow:'Wolna EMA',rsiLen:'Długość RSI',
   n:'Ile świec (kanał / wstęga)',k:'Szerokość wstęgi (odch. std.)',rsiLo:'RSI wyprzedanie (kupno poniżej)',rsiHi:'RSI wykupienie (sprzedaż powyżej)',
   minVotes:'Ile głosów z 5 potrzeba',adxMin:'Min. siła trendu ADX (0 = wyłącz)',
@@ -230,9 +232,9 @@ function analyze(c,k,P){
   return A;
 }
 function startIdx(P){let m=60;for(const k of INTS)if(P[k]!=null&&k!=='useTrend')m=Math.max(m,P[k]+1);return m}
-function backtest(c,A,P,last){
+function backtest(c,A,P,last,from){
   const tr=[];let pos=null;
-  for(let i=startIdx(P);i<=last;i++){
+  for(let i=Math.max(startIdx(P),from||0);i<=last;i++){
     if(pos){
       const b=c[i];let ex=null,why='';
       if(pos.dir>0){if(b.l<=pos.sl){ex=pos.sl;why='SL'}else if(b.h>=pos.tp){ex=pos.tp;why='TP'}}
@@ -261,14 +263,24 @@ const INST=[
   {id:'XAUUSDT',name:'Złoto',dec:2},
   {id:'CLUSDT',name:'Ropa WTI',dec:2}
 ];
-const IVS={'15m':15*60*1000,'1h':60*60*1000};
+const IVS={'15m':15*60*1000,'1h':60*60*1000,'4h':4*60*60*1000};
 let iv='15m';try{const v=localStorage.getItem('sig15iv');if(IVS[v])iv=v}catch(e){}
 let M15=IVS[iv];
-let strat='mom',PS={};for(const k in STRATS)PS[k]={...STRATS[k].def};
-try{const v=JSON.parse(localStorage.getItem('sig15v2')||'null');if(v){strat=STRATS[v.strat]?v.strat:'mom';for(const k in STRATS)PS[k]={...STRATS[k].def,...(v.PS&&v.PS[k]||{})}}
-  else{const o=JSON.parse(localStorage.getItem('sig15P')||'null');if(o)PS.mom={...PS.mom,...o}}}catch(e){}
-let P=PS[strat];
-function saveState(){try{localStorage.setItem('sig15v2',JSON.stringify({strat,PS}))}catch(e){}}
+// domyślne ustawienia dopasowane do interwału (okno mierzone w czasie, nie w świecach)
+const IVDEF={
+  '1h':{mom:{momBars:12,skewBars:24,maxBars:24},kombo:{momBars:8,skewBars:24,maxBars:24},ema:{maxBars:24},brk:{maxBars:36},mr:{maxBars:12}},
+  '4h':{mom:{momBars:6,skewBars:20,maxBars:12},kombo:{momBars:6,skewBars:20,maxBars:12},ema:{maxBars:12},brk:{maxBars:18},mr:{maxBars:6}}
+};
+function defFor(k){return {...STRATS[k].def,...((IVDEF[iv]||{})[k]||{})}}
+let strat='mom',PSK={};
+try{const v3=JSON.parse(localStorage.getItem('sig15v3')||'null');
+  if(v3){strat=STRATS[v3.strat]?v3.strat:'mom';PSK=v3.PSK||{}}
+  else{const v=JSON.parse(localStorage.getItem('sig15v2')||'null');
+    if(v){strat=STRATS[v.strat]?v.strat:'mom';INST.forEach(x=>PSK['15m|'+x.id]=JSON.parse(JSON.stringify(v.PS||{})))}}}catch(e){}
+function getP(id,k){k=k||strat;return {...defFor(k),...((PSK[iv+'|'+id]||{})[k]||{})}}
+function setP(id,k,o){(PSK[iv+'|'+id]=PSK[iv+'|'+id]||{})[k]=o;saveState()}
+function delP(id,k){const m=PSK[iv+'|'+id];if(m)delete m[k];saveState()}
+function saveState(){try{localStorage.setItem('sig15v3',JSON.stringify({strat,PSK}))}catch(e){}}
 let cur='BTCUSDT';try{cur=localStorage.getItem('sig15cur')||cur}catch(e){}
 const S={};INST.forEach(x=>S[x.id]={c:[],A:null,bt:null,lastSigT:null,err:null});
 const view={n:70,off:0};
@@ -293,7 +305,7 @@ async function fetchK(sym,limit,endTime){
 function lastClosed(c){const now=Date.now();let i=c.length-1;while(i>=0&&c[i].t+M15>now)i--;return i}
 function recompute(id,notify){
   const s=S[id];if(!s.c.length)return;
-  s.A=analyze(s.c,strat,P);const lc=lastClosed(s.c);s.lc=lc;
+  const P=getP(id);s.A=analyze(s.c,strat,P);const lc=lastClosed(s.c);s.lc=lc;
   s.bt=backtest(s.c,s.A,P,lc);
   const o=s.bt.open;
   if(o){
@@ -344,7 +356,7 @@ function render(){
     return `<div class="card ${x.id===cur?'sel':''}" data-id="${x.id}">
       <div class="n">${x.name}</div><div class="p">${last?fmt(last.c,x.dec):'…'}</div>${pill}
       <div class="w">${st?`trafność ${st.wr.toFixed(0)}% (${st.n})`:''}</div></div>`}).join('');
-  document.querySelectorAll('.card').forEach(el=>el.onclick=()=>{cur=el.dataset.id;view.off=0;try{localStorage.setItem('sig15cur',cur)}catch(e){}render()});
+  document.querySelectorAll('.card').forEach(el=>el.onclick=()=>{cur=el.dataset.id;view.off=0;renderSettings();try{localStorage.setItem('sig15cur',cur)}catch(e){}render()});
   renderDetail();
   renderCompare();
 }
@@ -357,7 +369,8 @@ function renderDetail(){
   $('dPrice').textContent=fmt(last.c,x.dec);
   $('dChg').textContent=(ch>=0?'+':'')+ch.toFixed(2)+'% 24h';$('dChg').className='chg '+(ch>=0?'up':'dn');
   const left=Math.max(0,last.t+M15-Date.now());
-  $('dCount').textContent=`świeca zamknie się za ${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,'0')}`;
+  const lh=Math.floor(left/3600000),lm=Math.floor(left/60000)%60,ls=Math.floor(left/1000)%60;
+  $('dCount').textContent=`świeca zamknie się za ${lh?lh+' h ':''}${lh?lm+' min':lm+':'+String(ls).padStart(2,'0')}`;
   // werdykt
   const i=s.lc,A=s.A,sg=A.sig[i];
   const v=$('verdict');
@@ -392,7 +405,7 @@ function renderDetail(){
 function renderCompare(){
   const s=S[cur],c=s.c;if(!c.length)return;const lc=lastClosed(c);
   $('compare').innerHTML='<tr><th>Strategia</th><th>Tr.</th><th>Traf.</th><th>Suma</th><th>Stab.</th></tr>'+Object.keys(STRATS).map(k=>{
-    const A=analyze(c,k,PS[k]),tr=backtest(c,A,PS[k],lc).trades,st=stats(tr),[a,b]=halves(c,tr);
+    const Pk=getP(cur,k),A=analyze(c,k,Pk),tr=backtest(c,A,Pk,lc).trades,st=stats(tr),[a,b]=halves(c,tr);
     const stab=a.n&&b.n&&(a.sum>0)&&(b.sum>0)?'✓':(a.sum<=0&&b.sum<=0?'✗':'⚠️');
     return `<tr data-k="${k}" style="cursor:pointer;${k===strat?'background:#1d2233':''}"><td>${STRATS[k].name}</td><td>${st.n}</td><td>${st.wr.toFixed(0)}%</td><td class="${st.sum>=0?'pos':'neg'}">${st.sum>=0?'+':''}${st.sum.toFixed(1)}R</td><td>${stab}</td></tr>`}).join('');
   document.querySelectorAll('#compare tr[data-k]').forEach(r=>r.onclick=()=>setStrat(r.dataset.k));
@@ -418,7 +431,9 @@ function drawChart(){
   g.font='10px system-ui';g.fillStyle='#8a93a6';g.strokeStyle='#1c2230';g.lineWidth=1;
   for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4,y=Y(v);g.beginPath();g.moveTo(0,y);g.lineTo(w-padR,y);g.stroke();g.fillText(fmt(v,x.dec),w-padR+4,y+3)}
   // godziny
-  for(let i=st;i<=end;i++){const d=new Date(c[i].t);if(d.getMinutes()===0&&d.getHours()%(iv==='1h'?12:4)===0){g.fillText(String(d.getHours()).padStart(2,'0')+':00',X(i)-12,h-2)}}
+  for(let i=st;i<=end;i++){const d=new Date(c[i].t);
+    if(iv==='4h'){if(i>st&&new Date(c[i-1].t).getDate()!==d.getDate()&&d.getDate()%2===0)g.fillText(String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0'),X(i)-12,h-2)}
+    else if(d.getMinutes()===0&&d.getHours()%(iv==='1h'?12:4)===0){g.fillText(String(d.getHours()).padStart(2,'0')+':00',X(i)-12,h-2)}}
   // świece
   for(let i=st;i<=end;i++){
     const b=c[i],up=b.c>=b.o;g.strokeStyle=g.fillStyle=up?'#22c55e':'#ef4444';
@@ -472,15 +487,58 @@ function renderStrat(){
   document.querySelectorAll('#stratBtns button').forEach(b=>b.onclick=()=>setStrat(b.dataset.k));
   $('stratDesc').textContent=STRATS[strat].desc;
 }
-function setStrat(k){strat=k;P=PS[k];saveState();renderStrat();renderSettings();INST.forEach(x=>{S[x.id].lastSigT=null;recompute(x.id,false)});render()}
-function renderSettings(){$('setTitle').textContent=STRATS[strat].name;$('settings').innerHTML=Object.keys(STRATS[strat].def).map(k=>`<label for="p_${k}">${LABELS[k]}</label><input id="p_${k}" type="number" step="any" value="${P[k]}">`).join('')}
-$('save').onclick=()=>{Object.keys(STRATS[strat].def).forEach(k=>{const v=parseFloat($('p_'+k).value);if(!isNaN(v))P[k]=INTS.includes(k)?Math.max(k==='useTrend'?0:1,Math.round(v)):v});
-  saveState();INST.forEach(x=>{S[x.id].lastSigT=null;recompute(x.id,false)});render()};
-$('reset').onclick=()=>{PS[strat]={...STRATS[strat].def};P=PS[strat];renderSettings();$('save').onclick()};
+function setStrat(k){strat=k;saveState();renderStrat();renderSettings();INST.forEach(x=>{S[x.id].lastSigT=null;recompute(x.id,false)});render()}
+function renderSettings(){const P=getP(cur);$('setTitle').textContent=STRATS[strat].name;$('setFor').textContent=`${instOf(cur).name} · ${iv}`;$('optOut').innerHTML='';
+  $('settings').innerHTML=Object.keys(STRATS[strat].def).map(k=>`<label for="p_${k}">${LABELS[k]}</label><input id="p_${k}" type="number" step="any" value="${P[k]}">`).join('')}
+function applyAll(){INST.forEach(x=>{S[x.id].lastSigT=null;recompute(x.id,false)});render()}
+$('save').onclick=()=>{const P=getP(cur);Object.keys(STRATS[strat].def).forEach(k=>{const v=parseFloat($('p_'+k).value);if(!isNaN(v))P[k]=INTS.includes(k)?Math.max(k==='useTrend'?0:1,Math.round(v)):v});
+  setP(cur,strat,P);applyAll()};
+$('reset').onclick=()=>{delP(cur,strat);renderSettings();applyAll()};
+// ===== optymalizacja =====
+const GRID={
+  mom:{momBars:[4,8,16,24,45],skewBars:[20,40],skewMin:[0.1,0.2,0.3]},
+  ema:{fast:[10,20,30],slow:[50,100,200]},
+  brk:{n:[10,20,40,60],useTrend:[0,1]},
+  kombo:{minVotes:[3,4,5],adxMin:[0,20,25,30],momBars:[8,16,32]},
+  mr:{n:[20,40],k:[2,2.5],rsiLo:[25,30]}
+};
+const SLTP={def:[[1,2],[1.5,2.5],[1.5,3],[2,4]],mr:[[1,1],[1.5,1.5],[2,2]]};
+function combos(g){let out=[{}];for(const k in g){const n=[];for(const o of out)for(const v of g[k])n.push({...o,[k]:v});out=n}return out}
+let optRun=0;
+$('opt').onclick=async()=>{
+  const id=cur,k=strat,c=S[id].c,my=++optRun,g0=gen,out=$('optOut');
+  if(c.length<300){out.textContent='Za mało danych.';return}
+  const lc=lastClosed(c),split=Math.floor(lc*0.7),base=getP(id,k);
+  const list=[];for(const cb of combos(GRID[k]))for(const [sl,tp] of (SLTP[k]||SLTP.def)){const P={...base,...cb,sl,tp};if(k==='mr')P.rsiHi=100-P.rsiLo;if(k==='ema'&&P.fast>=P.slow)continue;list.push(P)}
+  const res=[];
+  for(let j=0;j<list.length;j++){
+    if(my!==optRun||g0!==gen||cur!==id||strat!==k){out.textContent='Przerwano.';return}
+    const P=list[j],A=analyze(c,k,P),st=stats(backtest(c,A,P,split).trades);
+    if(st.n>=12)res.push({P,st});
+    if(j%3===0){out.textContent=`Sprawdzam… ${j+1}/${list.length}`;await new Promise(r=>setTimeout(r,0))}
+  }
+  if(!res.length){out.textContent='Żadna kombinacja nie dała min. 12 transakcji w części treningowej.';return}
+  res.sort((a,b)=>b.st.sum-a.st.sum);const best=res[0];
+  const tst=P=>stats(backtest(c,analyze(c,k,P),P,lc,split+1).trades);
+  const bt=tst(best.P),now=tst(base),nowTr=stats(backtest(c,analyze(c,k,base),base,split).trades);
+  const days=x=>Math.round(x/864e5);
+  const f=st=>`${st.n} tr. · ${st.wr.toFixed(0)}% · <b class="${st.sum>=0?'pos':'neg'}">${st.sum>=0?'+':''}${st.sum.toFixed(1)} R</b>`;
+  const diff=Object.keys(STRATS[k].def).filter(q=>best.P[q]!==base[q]).map(q=>`${LABELS[q]}: ${base[q]} → <b>${best.P[q]}</b>`).join('<br>')||'bez zmian';
+  const good=bt.sum>0&&bt.n>=5;
+  out.innerHTML=`<div style="margin-top:8px;padding:8px;border-radius:8px;background:#0f131b">
+    Sprawdzono ${list.length} kombinacji na starszych ${days(c[split].t-c[0].t)} dniach.<br><br>
+    <b>Najlepsze ustawienia</b><br>Trening (starsze 70%): ${f(best.st)}<br>
+    Sprawdzian (nowsze ${days(c[lc].t-c[split].t)} dni, których nie widział): ${f(bt)}<br>
+    Obecne ustawienia na sprawdzianie: ${f(now)}<br><br>${diff}<br><br>
+    ${best.st.sum<=0?'✗ Nawet najlepsza kombinacja traciła na historii: ta strategia nie pasuje do tego instrumentu na tym interwale.':good?'✓ Wynik utrzymał się na nowych danych.':'⚠️ Na nowych danych nie zarobiło: to raczej dopasowanie do przeszłości niż prawdziwa przewaga.'}
+    <div style="margin-top:8px;display:flex;gap:6px"><button id="optApply">Zastosuj</button><button id="optCancel">Anuluj</button></div></div>`;
+  $('optApply').onclick=()=>{setP(id,k,best.P);renderSettings();applyAll()};
+  $('optCancel').onclick=()=>{out.innerHTML=''};
+};
 renderStrat();
 function renderIv(){$('ivName').textContent=iv;$('ivBtns').innerHTML=Object.keys(IVS).map(k=>`<button data-iv="${k}" class="${k===iv?'on':''}">${k}</button>`).join('');
   document.querySelectorAll('#ivBtns button').forEach(b=>b.onclick=()=>{if(b.dataset.iv===iv)return;iv=b.dataset.iv;M15=IVS[iv];try{localStorage.setItem('sig15iv',iv)}catch(e){}
-    gen++;INST.forEach(x=>{S[x.id]={c:[],A:null,bt:null,lastSigT:null,err:null}});view.off=0;renderIv();render();initAll()})}
+    gen++;INST.forEach(x=>{S[x.id]={c:[],A:null,bt:null,lastSigT:null,err:null}});view.off=0;renderIv();renderSettings();render();initAll()})}
 renderIv();
 renderSettings();
 window.addEventListener('resize',drawChart);
