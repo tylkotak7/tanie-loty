@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" content="#04060b">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Kokpit sygnałów — BTC · Złoto · Ropa</title>
+<style>
+:root{--bg:#04060b;--pn:#070b14;--ln:rgba(56,189,248,.22);--tx:#d7e3f4;--mu:#5f7189;--cy:#22d3ee;--am:#fbbf24;--vi:#a78bfa;--gr:#34d399;--rd:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:12px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:8px 8px 30px;max-width:1200px;margin:auto}
+.hd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.hd .t{font-weight:800;letter-spacing:.12em;color:var(--am);font-size:13px;flex:1;min-width:160px}
+.hd .t small{display:block;color:var(--mu);font-weight:500;letter-spacing:.08em;font-size:9.5px}
+.btn{background:transparent;color:var(--tx);border:1px solid var(--ln);padding:4px 8px;font:inherit;border-radius:3px}
+.btn.on{border-color:var(--cy);color:var(--cy);box-shadow:0 0 8px rgba(34,211,238,.35) inset}
+a.btn{text-decoration:none}
+.tick{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:6px}
+.tk{border:1px solid var(--ln);background:var(--pn);padding:5px 6px;border-radius:3px;cursor:pointer}
+.tk.on{border-color:var(--am);box-shadow:0 0 10px rgba(251,191,36,.25)}
+.tk .n{color:var(--mu);font-size:10px;letter-spacing:.1em}
+.tk .p{font-size:14px;font-weight:800}
+.up{color:var(--gr)}.dn{color:var(--rd)}.mu{color:var(--mu)}.am{color:var(--am)}.cy{color:var(--cy)}.vi{color:var(--vi)}
+.pill{font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:2px;border:1px solid currentColor;margin-left:3px}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.chip{border:1px solid var(--ln);padding:2px 6px;border-radius:2px;font-size:10.5px;cursor:pointer;color:var(--mu)}
+.chip.on{color:var(--am);border-color:var(--am);background:rgba(251,191,36,.08)}
+.main{display:grid;grid-template-columns:1fr;gap:6px}
+@media(min-width:820px){.main{grid-template-columns:1.5fr 1fr}}
+.pn{border:1px solid var(--ln);background:var(--pn);border-radius:3px;padding:6px;position:relative}
+.pn h3{margin:0 0 5px;font-size:9.5px;letter-spacing:.14em;color:var(--mu);font-weight:700;text-transform:uppercase;display:flex;justify-content:space-between}
+.pn h3 b{color:var(--cy);font-weight:700}
+#sphere{width:100%;height:380px;display:block;touch-action:none}
+.side{display:grid;gap:6px;grid-template-columns:1fr}
+@media(min-width:560px) and (max-width:819px){.side{grid-template-columns:1fr 1fr}}
+.vote{display:grid;grid-template-columns:78px 1fr 34px;align-items:center;gap:5px;margin:3px 0;font-size:10.5px}
+.bar{height:8px;background:#0d1422;position:relative;border-radius:1px}
+.bar i{position:absolute;top:0;bottom:0}
+.mx{display:grid;grid-template-columns:62px repeat(3,1fr);gap:3px;font-size:10px}
+.mx div{padding:4px 3px;border-radius:2px;text-align:center}
+.mx .h{color:var(--mu);font-size:9.5px;text-align:left}
+.mx .c{cursor:pointer;border:1px solid transparent}
+.mx .c.on{border-color:var(--am)}
+canvas.sm{width:100%;display:block}
+.log{max-height:190px;overflow:auto;font-size:10.5px}
+.log div{display:flex;gap:6px;padding:2px 0;border-bottom:1px dashed rgba(56,189,248,.1)}
+.log span:first-child{color:var(--mu);min-width:76px}
+.grid3{display:grid;grid-template-columns:1fr;gap:6px;margin-top:6px}
+@media(min-width:820px){.grid3{grid-template-columns:1fr 1fr 1fr}}
+.kv{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:10.5px}
+.kv span:nth-child(odd){color:var(--mu)}
+#flash{position:fixed;left:50%;top:10px;transform:translateX(-50%);background:var(--am);color:#000;font-weight:800;padding:8px 12px;border-radius:3px;display:none;z-index:9;letter-spacing:.06em}
+#err{display:none;border:1px solid var(--rd);color:var(--rd);padding:6px;margin-bottom:6px;border-radius:3px}
+.ft{color:var(--mu);font-size:9.5px;margin-top:8px;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div id="flash"></div>
+<div class="hd">
+  <div class="t">SYGNAŁY // KOKPIT<small id="sub">ŁADOWANIE DANYCH…</small></div>
+  <span id="ivBtns" style="display:flex;gap:3px"></span>
+  <button class="btn" id="snd">🔕</button>
+  <a class="btn" href="./">Widok klasyczny</a>
+</div>
+<div id="err"></div>
+<div class="tick" id="tick"></div>
+<div class="chips" id="chips"></div>
+
+<div class="main">
+  <div class="pn">
+    <h3><span>Sieć sygnałów · instrumenty × strategie × wskaźniki</span><b id="spin">SPIN 0°</b></h3>
+    <canvas id="sphere"></canvas>
+    <div class="mu" style="font-size:9.5px;margin-top:3px">Przeciągnij, aby obrócić. Zielone/czerwone połączenia: otwarta pozycja papierowa LONG/SHORT. Impulsy płyną po aktywnych połączeniach.</div>
+  </div>
+  <div class="side">
+    <div class="pn"><h3><span>Głosy Kombo</span><b id="vInst"></b></h3><div id="votes"></div></div>
+    <div class="pn"><h3><span>Matryca: suma R / pozycja</span><b id="mxIv"></b></h3><div class="mx" id="matrix"></div></div>
+    <div class="pn"><h3><span>Telemetria</span><b id="telT"></b></h3><div class="kv" id="tel"></div></div>
+  </div>
+</div>
+
+<div class="grid3">
+  <div class="pn"><h3><span>Krzywa wyniku (papierowo, R)</span><b id="eqV"></b></h3><canvas class="sm" id="eq" style="height:130px"></canvas></div>
+  <div class="pn"><h3><span>Porównanie strategii</span><b id="cmpI"></b></h3><canvas class="sm" id="cmp" style="height:130px"></canvas></div>
+  <div class="pn"><h3><span>Strumień zdarzeń</span><b id="logS"></b></h3><div class="log" id="log"></div></div>
+</div>
+<div class="pn" style="margin-top:6px"><h3><span>Przepływ cen · ostatnia doba (znormalizowane)</span><b id="flowT"></b></h3><canvas class="sm" id="flow" style="height:70px"></canvas></div>
+
+<div class="ft">DANE: BINANCE FUTURES (BTCUSDT · XAUUSDT · CLUSDT) · ODŚWIEŻANIE 15 S · USTAWIENIA WSPÓLNE Z WIDOKIEM KLASYCZNYM · SYMULACJA NA HISTORII, NIE PORADA INWESTYCYJNA</div>
+
+<script>
+/* ===== LOGIKA (czysta, bez DOM) ===== */
+const STRATS={
+  mom:{name:'Momentum + skośność',desc:'Ze screena: siła ruchu + przewaga wzrostów/spadków, z filtrem trendu. Rynek w ruchu.',
+    def:{momBars:45,skewBars:40,momMin:0.05,skewMin:0.2,useTrend:1,ema:50,sl:1.5,tp:3,maxBars:16,fee:0.05}},
+  ema:{name:'Trend: EMA + RSI',desc:'Szybka EMA nad wolną i RSI powyżej 50 = kupno (odwrotnie sprzedaż). Klasyka na trendy.',
+    def:{fast:20,slow:50,rsiLen:14,sl:1.5,tp:3,maxBars:24,fee:0.05}},
+  brk:{name:'Wybicie z kanału',desc:'Zamknięcie powyżej najwyższej ceny z N świec = kupno, poniżej najniższej = sprzedaż. Dobre na złoto i ropę przy newsach.',
+    def:{n:20,useTrend:1,ema:100,sl:1.5,tp:3,maxBars:32,fee:0.05}},
+  kombo:{name:'Kombo (głosowanie)',desc:'Łączy 5 wskaźników: momentum, skośność, EMA szybka/wolna, RSI i miejsce w kanale. Sygnał, gdy co najmniej N z 5 głosuje w tę samą stronę I rynek ma trend (ADX nad progiem), bo w szarpaninie bokiem proste strategie najczęściej tracą.',
+    def:{minVotes:4,adxMin:20,momBars:16,skewBars:40,fast:20,slow:50,rsiLen:14,n:20,sl:1.5,tp:2.5,maxBars:24,fee:0.05}},
+  mr:{name:'Odbicie od Bollingera',desc:'Cena poza wstęgą i RSI skrajne = gra na powrót do środka. Rynek w konsolidacji (bokiem).',
+    def:{n:20,k:2,rsiLen:14,rsiLo:30,rsiHi:70,sl:1.5,tp:1.5,maxBars:12,fee:0.05}}
+};
+const LABELS={
+  momBars:'Momentum: ile świec wstecz',skewBars:'Skośność: ile świec',momMin:'Min. momentum %',skewMin:'Min. skośność (0–1)',
+  useTrend:'Filtr trendu EMA (1 = tak, 0 = nie)',ema:'Długość EMA trendu',fast:'Szybka EMA',slow:'Wolna EMA',rsiLen:'Długość RSI',
+  n:'Ile świec (kanał / wstęga)',k:'Szerokość wstęgi (odch. std.)',rsiLo:'RSI wyprzedanie (kupno poniżej)',rsiHi:'RSI wykupienie (sprzedaż powyżej)',
+  minVotes:'Ile głosów z 5 potrzeba',adxMin:'Min. siła trendu ADX (0 = wyłącz)',
+  sl:'Stop loss × ATR',tp:'Take profit × ATR',maxBars:'Maks. świec w pozycji',fee:'Prowizja % za stronę'
+};
+const INTS=['momBars','skewBars','ema','fast','slow','rsiLen','n','maxBars','useTrend','minVotes'];
+function ema(a,n){const k=2/(n+1),o=[];let e=a[0];for(let i=0;i<a.length;i++){e=i?a[i]*k+e*(1-k):a[i];o.push(e)}return o}
+function atr(c,n){const o=[];let a=null;for(let i=0;i<c.length;i++){const b=c[i],pc=i?c[i-1].c:b.c;const tr=Math.max(b.h-b.l,Math.abs(b.h-pc),Math.abs(b.l-pc));a=a==null?tr:(a*(n-1)+tr)/n;o.push(a)}return o}
+function rsi(cl,n){const o=[null];let ag=0,al=0;for(let i=1;i<cl.length;i++){const d=cl[i]-cl[i-1],g=Math.max(d,0),l=Math.max(-d,0);
+  if(i<=n){ag+=g/n;al+=l/n;o.push(i<n?null:(al===0?100:100-100/(1+ag/al)))}else{ag=(ag*(n-1)+g)/n;al=(al*(n-1)+l)/n;o.push(al===0?100:100-100/(1+ag/al))}}return o}
+const sgn=v=>v>=0?'+':'';
+function adx(c,n){const N=c.length,out=new Array(N).fill(null);let trS=0,pS=0,mS=0,av=null;const dxs=[];
+  for(let i=1;i<N;i++){const up=c[i].h-c[i-1].h,dn=c[i-1].l-c[i].l,pdm=up>dn&&up>0?up:0,mdm=dn>up&&dn>0?dn:0;
+    const tr=Math.max(c[i].h-c[i].l,Math.abs(c[i].h-c[i-1].c),Math.abs(c[i].l-c[i-1].c));
+    if(i<=n){trS+=tr;pS+=pdm;mS+=mdm;if(i<n)continue}else{trS=trS-trS/n+tr;pS=pS-pS/n+pdm;mS=mS-mS/n+mdm}
+    const pdi=trS?100*pS/trS:0,mdi=trS?100*mS/trS:0,dx=pdi+mdi?100*Math.abs(pdi-mdi)/(pdi+mdi):0;
+    if(av==null){dxs.push(dx);if(dxs.length===n)av=dxs.reduce((a,b)=>a+b)/n}else av=(av*(n-1)+dx)/n;
+    out[i]=av}
+  return out}
+function analyze(c,k,P){
+  const cl=c.map(x=>x.c),N=c.length,at=atr(c,14),sig=new Array(N).fill(0),lean=new Array(N).fill(1);
+  const A={at,sig,lean,lines:[],panel:null,why:()=>[]};
+  if(k==='mom'){
+    const e=ema(cl,P.ema),mom=[],skew=[];
+    for(let i=0;i<N;i++){
+      mom[i]=i>=P.momBars?(cl[i]-cl[i-P.momBars])/cl[i-P.momBars]*100:null;
+      if(i>=P.skewBars){let up=0,dn=0;for(let j=i-P.skewBars+1;j<=i;j++){const r=(cl[j]-cl[j-1])/cl[j-1];if(r>0)up+=r*r;else dn+=r*r}skew[i]=up+dn>0?(up-dn)/(up+dn):0}else skew[i]=null;
+      if(mom[i]==null||skew[i]==null||i<P.ema)continue;
+      lean[i]=mom[i]>=0?1:-1;
+      if(mom[i]>P.momMin&&skew[i]>P.skewMin&&(!P.useTrend||cl[i]>e[i]))sig[i]=1;
+      else if(mom[i]<-P.momMin&&skew[i]<-P.skewMin&&(!P.useTrend||cl[i]<e[i]))sig[i]=-1;
+    }
+    A.lines=[{a:e,col:'#facc15',l:'EMA'+P.ema}];
+    A.panel={bars:mom,line:skew,min:-1,max:1,levels:[P.skewMin,-P.skewMin],label:'mom/skoś.'};
+    A.why=(i,w)=>[[w>0?mom[i]>P.momMin:mom[i]<-P.momMin,`Momentum ${P.momBars} świec: ${sgn(mom[i])}${mom[i].toFixed(3)}% (próg ±${P.momMin})`],
+      [w>0?skew[i]>P.skewMin:skew[i]<-P.skewMin,`Skośność: ${sgn(skew[i])}${skew[i].toFixed(2)} (próg ±${P.skewMin})`]]
+      .concat(P.useTrend?[[w>0?cl[i]>e[i]:cl[i]<e[i],`Cena ${cl[i]>e[i]?'nad':'pod'} EMA${P.ema}`]]:[]);
+  }else if(k==='ema'){
+    const f=ema(cl,P.fast),sl=ema(cl,P.slow),r=rsi(cl,P.rsiLen);
+    for(let i=0;i<N;i++){if(i<P.slow||r[i]==null)continue;lean[i]=f[i]>=sl[i]?1:-1;
+      if(f[i]>sl[i]&&r[i]>50)sig[i]=1;else if(f[i]<sl[i]&&r[i]<50)sig[i]=-1}
+    A.lines=[{a:f,col:'#38bdf8',l:'EMA'+P.fast},{a:sl,col:'#facc15',l:'EMA'+P.slow}];
+    A.panel={line:r,min:0,max:100,levels:[50],label:'RSI'};
+    A.why=(i,w)=>[[w>0?f[i]>sl[i]:f[i]<sl[i],`EMA${P.fast} ${f[i]>sl[i]?'nad':'pod'} EMA${P.slow}`],
+      [w>0?r[i]>50:r[i]<50,`RSI: ${r[i].toFixed(1)} (${w>0?'potrzeba > 50':'potrzeba < 50'})`]];
+  }else if(k==='brk'){
+    const e=ema(cl,P.ema),hi=[],lo=[];
+    for(let i=0;i<N;i++){if(i<P.n){hi[i]=lo[i]=null;continue}let H=-Infinity,L=Infinity;for(let j=i-P.n;j<i;j++){H=Math.max(H,c[j].h);L=Math.min(L,c[j].l)}hi[i]=H;lo[i]=L;
+      lean[i]=(cl[i]-L)>=(H-cl[i])?1:-1;if(i<P.ema)continue;
+      if(cl[i]>H&&(!P.useTrend||cl[i]>e[i]))sig[i]=1;else if(cl[i]<L&&(!P.useTrend||cl[i]<e[i]))sig[i]=-1}
+    A.lines=[{a:hi,col:'#64748b',l:'kanał'},{a:lo,col:'#64748b'},{a:e,col:'#facc15',l:'EMA'+P.ema}];
+    A.panel={line:rsi(cl,14),min:0,max:100,levels:[30,70],label:'RSI'};
+    A.why=(i,w)=>[[w>0?cl[i]>hi[i]:cl[i]<lo[i],w>0?`Zamknięcie nad szczytem ${P.n} świec (${hi[i].toFixed(2)})`:`Zamknięcie pod dołkiem ${P.n} świec (${lo[i].toFixed(2)})`]]
+      .concat(P.useTrend?[[w>0?cl[i]>e[i]:cl[i]<e[i],`Cena ${cl[i]>e[i]?'nad':'pod'} EMA${P.ema}`]]:[]);
+  }else if(k==='kombo'){
+    const f=ema(cl,P.fast),sl=ema(cl,P.slow),r=rsi(cl,P.rsiLen),ax=adx(c,14),votes=new Array(N).fill(0),V=[];
+    const NM=['Momentum','Skośność','EMA','RSI','Kanał'];
+    for(let i=0;i<N;i++){
+      if(i<Math.max(P.slow,P.momBars,P.skewBars,P.n)+1||r[i]==null||ax[i]==null){V[i]=null;continue}
+      const mom=(cl[i]-cl[i-P.momBars])/cl[i-P.momBars]*100;
+      let up=0,dn=0;for(let j=i-P.skewBars+1;j<=i;j++){const q=(cl[j]-cl[j-1])/cl[j-1];if(q>0)up+=q*q;else dn+=q*q}
+      const sk=up+dn>0?(up-dn)/(up+dn):0;
+      let H=-Infinity,L=Infinity;for(let j=i-P.n;j<i;j++){H=Math.max(H,c[j].h);L=Math.min(L,c[j].l)}
+      const pos=H>L?(cl[i]-L)/(H-L):0.5;
+      const v=[mom>0.05?1:mom<-0.05?-1:0, sk>0.1?1:sk<-0.1?-1:0, f[i]>sl[i]?1:-1, r[i]>50?1:r[i]<50?-1:0, pos>0.75?1:pos<0.25?-1:0];
+      V[i]={v,mom,sk,pos,r:r[i],ax:ax[i]};
+      const sum=v.reduce((a,b)=>a+b,0);votes[i]=sum;lean[i]=sum>=0?1:-1;
+      const trendOk=!P.adxMin||ax[i]>=P.adxMin;
+      if(trendOk&&sum>=P.minVotes)sig[i]=1;else if(trendOk&&sum<=-P.minVotes)sig[i]=-1;
+    }
+    A.lines=[{a:f,col:'#38bdf8',l:'EMA'+P.fast},{a:sl,col:'#facc15',l:'EMA'+P.slow}];
+    A.panel={bars:votes,line:ax,min:0,max:60,levels:[P.adxMin],label:'głosy/ADX'};
+    A.why=(i,w)=>{const d=V[i];if(!d)return [];const txt=[`${sgn(d.mom)}${d.mom.toFixed(2)}% (${P.momBars} św.)`,`${sgn(d.sk)}${d.sk.toFixed(2)}`,
+      f[i]>sl[i]?`EMA${P.fast} nad EMA${P.slow}`:`EMA${P.fast} pod EMA${P.slow}`,d.r.toFixed(1),`${Math.round(d.pos*100)}% wysokości kanału ${P.n} św.`];
+      const cnt=d.v.filter(x=>x===w).length;
+      return d.v.map((x,j)=>[x===w,`${NM[j]}: ${txt[j]}`]).concat([[cnt>=P.minVotes,`Głosy: ${cnt}/5 (potrzeba ${P.minVotes})`],
+        [!P.adxMin||d.ax>=P.adxMin,`Siła trendu ADX: ${d.ax.toFixed(1)} (próg ${P.adxMin})`]])};
+  }else if(k==='mr'){
+    const r=rsi(cl,P.rsiLen),mid=[],up=[],lo=[];
+    for(let i=0;i<N;i++){if(i<P.n-1){mid[i]=up[i]=lo[i]=null;continue}let s=0,q=0;for(let j=i-P.n+1;j<=i;j++){s+=cl[j];q+=cl[j]*cl[j]}const m=s/P.n,sd=Math.sqrt(Math.max(q/P.n-m*m,0));
+      mid[i]=m;up[i]=m+P.k*sd;lo[i]=m-P.k*sd;lean[i]=cl[i]<=m?1:-1;if(r[i]==null)continue;
+      if(cl[i]<lo[i]&&r[i]<P.rsiLo)sig[i]=1;else if(cl[i]>up[i]&&r[i]>P.rsiHi)sig[i]=-1}
+    A.lines=[{a:up,col:'#64748b',l:'wstęga'},{a:lo,col:'#64748b'},{a:mid,col:'#facc15',l:'środek'}];
+    A.panel={line:r,min:0,max:100,levels:[P.rsiLo,P.rsiHi],label:'RSI'};
+    A.why=(i,w)=>[[w>0?cl[i]<lo[i]:cl[i]>up[i],w>0?`Cena pod dolną wstęgą (${lo[i].toFixed(2)})`:`Cena nad górną wstęgą (${up[i].toFixed(2)})`],
+      [w>0?r[i]<P.rsiLo:r[i]>P.rsiHi,`RSI: ${r[i].toFixed(1)} (${w>0?'potrzeba < '+P.rsiLo:'potrzeba > '+P.rsiHi})`]];
+  }
+  return A;
+}
+function startIdx(P){let m=60;for(const k of INTS)if(P[k]!=null&&k!=='useTrend')m=Math.max(m,P[k]+1);return m}
+function backtest(c,A,P,last,from){
+  const tr=[];let pos=null;
+  for(let i=Math.max(startIdx(P),from||0);i<=last;i++){
+    if(pos){
+      const b=c[i];let ex=null,why='';
+      if(pos.dir>0){if(b.l<=pos.sl){ex=pos.sl;why='SL'}else if(b.h>=pos.tp){ex=pos.tp;why='TP'}}
+      else{if(b.h>=pos.sl){ex=pos.sl;why='SL'}else if(b.l<=pos.tp){ex=pos.tp;why='TP'}}
+      if(ex==null&&i-pos.i>=P.maxBars){ex=b.c;why='Czas'}
+      if(ex!=null){const feeR=pos.entry*P.fee*2/100/pos.risk;tr.push({...pos,exitI:i,exitT:b.t,exit:ex,why,R:(ex-pos.entry)*pos.dir/pos.risk-feeR});pos=null;continue}
+    }
+    if(!pos&&A.sig[i]!==0&&A.sig[i]!==A.sig[i-1]&&A.at[i]>0){
+      const risk=A.at[i]*P.sl,d=A.sig[i],en=c[i].c;
+      pos={i,t:c[i].t,dir:d,entry:en,risk,sl:en-d*risk,tp:en+d*A.at[i]*P.tp};
+    }
+  }
+  return {trades:tr,open:pos};
+}
+function stats(tr){
+  const n=tr.length,w=tr.filter(t=>t.R>0).length,sum=tr.reduce((s,t)=>s+t.R,0);
+  const gp=tr.filter(t=>t.R>0).reduce((s,t)=>s+t.R,0),gl=-tr.filter(t=>t.R<0).reduce((s,t)=>s+t.R,0);
+  return {n,w,wr:n?w/n*100:0,sum,avg:n?sum/n:0,pf:gl>0?gp/gl:(gp>0?99:0)};
+}
+function halves(c,tr){const mid=c[0].t+(c[c.length-1].t-c[0].t)/2;return [stats(tr.filter(t=>t.t<mid)),stats(tr.filter(t=>t.t>=mid))]}
+/* ===== KONIEC LOGIKI ===== */
+const API='https://fapi.binance.com/fapi/v1/klines';
+const INST=[{id:'BTCUSDT',name:'BTC',dec:1,col:'#fbbf24'},{id:'XAUUSDT',name:'ZŁOTO',dec:2,col:'#facc15'},{id:'CLUSDT',name:'ROPA',dec:2,col:'#22d3ee'}];
+INST[1].col='#e5c07b';
+const IVS={'15m':15*60*1000,'1h':60*60*1000,'4h':4*60*60*1000};
+let iv='15m';try{const v=localStorage.getItem('sig15iv');if(IVS[v])iv=v}catch(e){}
+let MS=IVS[iv];const MAXC=6000;
+const IVDEF={
+  '1h':{mom:{momBars:12,skewBars:24,maxBars:24},kombo:{momBars:8,skewBars:24,maxBars:24},ema:{maxBars:24},brk:{maxBars:36},mr:{maxBars:12}},
+  '4h':{mom:{momBars:6,skewBars:20,maxBars:12},kombo:{momBars:6,skewBars:20,maxBars:12},ema:{maxBars:12},brk:{maxBars:18},mr:{maxBars:6}}
+};
+function defFor(k){return {...STRATS[k].def,...((IVDEF[iv]||{})[k]||{})}}
+let strat='kombo',PSK={};
+try{const v3=JSON.parse(localStorage.getItem('sig15v3')||'null');if(v3){strat=STRATS[v3.strat]?v3.strat:strat;PSK=v3.PSK||{}}}catch(e){}
+function getP(id,k){return {...defFor(k),...((PSK[iv+'|'+id]||{})[k]||{})}}
+const SK=Object.keys(STRATS);
+const SHORTN={mom:'MOM+SKOŚ',ema:'EMA+RSI',brk:'WYBICIE',kombo:'KOMBO',mr:'BOLLINGER'};
+let cur='BTCUSDT';try{cur=localStorage.getItem('sig15cur')||cur}catch(e){}
+const D={};INST.forEach(x=>D[x.id]={c:[],lc:-1,lcT:0,res:{},err:null});
+let gen=0,sound=false,actx=null;
+const $=id=>document.getElementById(id);
+const fmt=(v,d)=>v==null?'—':Number(v).toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const tm=t=>{const d=new Date(t);return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+' '+d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})};
+const inst=id=>INST.find(x=>x.id===id);
+const sR=v=>(v>=0?'+':'')+v.toFixed(1);
+
+async function fetchK(sym,limit,endTime){
+  const r=await fetch(`${API}?symbol=${sym}&interval=${iv}&limit=${limit}`+(endTime?`&endTime=${endTime}`:''));
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return (await r.json()).map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
+}
+async function fetchHist(sym){let all=await fetchK(sym,1500);
+  while(all.length<MAXC&&all.length){const m=await fetchK(sym,1500,all[0].t-1);if(!m.length)break;all=m.concat(all)}return all.slice(-MAXC)}
+function lastClosed(c){const now=Date.now();let i=c.length-1;while(i>=0&&c[i].t+MS>now)i--;return i}
+
+function computeAll(id,notify){
+  const d=D[id];if(!d.c.length)return;d.lc=lastClosed(d.c);d.lcT=d.c[d.lc].t;
+  for(const k of SK){
+    const P=getP(id,k),A=analyze(d.c,k,P),bt=backtest(d.c,A,P,d.lc),prev=d.res[k];
+    d.res[k]={A,bt,st:stats(bt.trades),hv:halves(d.c,bt.trades),sig:A.sig[d.lc]};
+    const o=bt.open;
+    if(notify&&k===strat&&o&&o.i===d.lc&&(!prev||!prev.bt.open||prev.bt.open.t!==o.t))alertSig(id,o.dir);
+  }
+}
+function alertSig(id,dir){
+  const f=$('flash');f.textContent=`${inst(id).name} · ${SHORTN[strat]} · ${dir>0?'KUPNO ▲':'SPRZEDAŻ ▼'}`;f.style.display='block';setTimeout(()=>f.style.display='none',8000);
+  try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
+  for(const n of NODES)if(n.id===id)n.flash=performance.now();
+  if(sound&&actx){try{[0,.22].forEach(t=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=dir>0?880:440;g.gain.value=.12;o.connect(g);g.connect(actx.destination);o.start(actx.currentTime+t);o.stop(actx.currentTime+t+.16)})}catch(e){}}
+}
+async function initAll(){
+  const g=gen;$('sub').textContent='ŁADOWANIE DANYCH…';
+  await Promise.all(INST.map(async x=>{try{const c=await fetchHist(x.id);if(g!==gen)return;D[x.id].c=c;D[x.id].err=null;computeAll(x.id,false)}catch(e){if(g===gen)D[x.id].err=e.message}}));
+  if(g===gen)renderAll();
+}
+async function poll(){
+  const g=gen;
+  await Promise.all(INST.map(async x=>{const d=D[x.id];if(!d.c.length)return;
+    try{const nw=await fetchK(x.id,3);if(g!==gen||d!==D[x.id])return;
+      for(const k of nw){const j=d.c.findIndex(q=>q.t===k.t);if(j>=0)d.c[j]=k;else if(k.t>d.c[d.c.length-1].t)d.c.push(k)}
+      if(d.c.length>MAXC)d.c.splice(0,d.c.length-MAXC);
+      d.err=null;const lc=lastClosed(d.c);if(d.c[lc]&&d.c[lc].t!==d.lcT)computeAll(x.id,true);
+    }catch(e){d.err=e.message}}));
+  if(g===gen){if(INST.some(x=>!D[x.id].c.length))initAll();renderAll()}
+}
+
+/* ===== PANELE ===== */
+function renderAll(){
+  const errs=INST.filter(x=>D[x.id].err);
+  $('err').style.display=errs.length?'block':'none';
+  if(errs.length)$('err').textContent='BŁĄD POBIERANIA: '+errs.map(x=>x.name).join(', ')+' ('+D[errs[0].id].err+'). Otwórz stronę w Chrome, nie w podglądzie aplikacji.';
+  const ok=INST.filter(x=>D[x.id].c.length);
+  if(ok.length){const c=D[ok[0].id].c;$('sub').textContent=`INTERWAŁ ${iv} · ${c.length} ŚWIEC · ${Math.round((c[c.length-1].t-c[0].t)/864e5)} DNI HISTORII · STRATEGIA ${SHORTN[strat]}`}
+  $('ivBtns').innerHTML=Object.keys(IVS).map(k=>`<button class="btn ${k===iv?'on':''}" data-iv="${k}">${k}</button>`).join('');
+  document.querySelectorAll('[data-iv]').forEach(b=>b.onclick=()=>{if(b.dataset.iv===iv)return;iv=b.dataset.iv;MS=IVS[iv];try{localStorage.setItem('sig15iv',iv)}catch(e){}
+    gen++;INST.forEach(x=>D[x.id]={c:[],lc:-1,lcT:0,res:{},err:null});renderAll();initAll()});
+  // ticker
+  $('tick').innerHTML=INST.map(x=>{const d=D[x.id],c=d.c,l=c[c.length-1];if(!l)return `<div class="tk ${x.id===cur?'on':''}" data-id="${x.id}"><div class="n">${x.name}</div><div class="p mu">…</div></div>`;
+    const ref=c[Math.max(0,c.length-1-Math.round(864e5/MS))],ch=(l.c-ref.c)/ref.c*100,o=d.res[strat]&&d.res[strat].bt.open;
+    return `<div class="tk ${x.id===cur?'on':''}" data-id="${x.id}"><div class="n">${x.name}${o?`<span class="pill ${o.dir>0?'up':'dn'}">${o.dir>0?'LONG':'SHORT'}</span>`:''}</div>
+      <div class="p">${fmt(l.c,x.dec)}</div><div class="${ch>=0?'up':'dn'}">${ch>=0?'+':''}${ch.toFixed(2)}% 24h</div></div>`}).join('');
+  document.querySelectorAll('.tk').forEach(e=>e.onclick=()=>{cur=e.dataset.id;try{localStorage.setItem('sig15cur',cur)}catch(er){}renderAll()});
+  // strategie
+  $('chips').innerHTML=SK.map(k=>`<span class="chip ${k===strat?'on':''}" data-k="${k}">${SHORTN[k]}</span>`).join('');
+  document.querySelectorAll('.chip').forEach(e=>e.onclick=()=>{strat=e.dataset.k;try{const v=JSON.parse(localStorage.getItem('sig15v3')||'{}');v.strat=strat;v.PSK=v.PSK||PSK;localStorage.setItem('sig15v3',JSON.stringify(v))}catch(er){}renderAll()});
+  renderVotes();renderMatrix();renderTel();renderEq();renderCmp();renderLog();renderFlow();
+}
+function renderVotes(){
+  const d=D[cur],r=d.res.kombo;$('vInst').textContent=inst(cur).name;
+  if(!r||d.lc<0){$('votes').innerHTML='<span class="mu">…</span>';return}
+  const i=d.lc,up=r.A.why(i,1),dn=r.A.why(i,-1);
+  if(!up.length){$('votes').innerHTML='<span class="mu">za mało danych</span>';return}
+  const P=getP(cur,'kombo'),names=['MOMENTUM','SKOŚNOŚĆ','EMA','RSI','KANAŁ'];let sum=0;
+  let h=names.map((n,j)=>{const v=up[j][0]?1:dn[j][0]?-1:0;sum+=v;const col=v>0?'var(--gr)':v<0?'var(--rd)':'var(--mu)';
+    return `<div class="vote"><span>${n}</span><div class="bar"><i style="left:50%;width:1px;background:#28364d"></i><i style="${v>0?'left:50%':v<0?'right:50%':'left:49%'};width:${v?50:2}%;background:${col};box-shadow:0 0 6px ${col}"></i></div><b style="color:${col};text-align:right">${v>0?'▲':v<0?'▼':'·'}</b></div>`}).join('');
+  const ax=r.A.panel.line[i]||0,axOk=!P.adxMin||ax>=P.adxMin;
+  h+=`<div class="vote"><span>ADX TREND</span><div class="bar"><i style="left:0;width:${Math.min(100,ax/60*100)}%;background:${axOk?'var(--cy)':'var(--mu)'};box-shadow:0 0 6px var(--cy)"></i><i style="left:${P.adxMin/60*100}%;width:1px;background:var(--am)"></i></div><b style="text-align:right" class="${axOk?'cy':'mu'}">${ax.toFixed(0)}</b></div>`;
+  const s=r.sig;
+  h+=`<div style="margin-top:5px;font-weight:800;letter-spacing:.08em" class="${s>0?'up':s<0?'dn':'mu'}">SUMA ${sum>0?'+':''}${sum}/5 · PRÓG ${P.minVotes} · ${s>0?'SYGNAŁ KUPNA':s<0?'SYGNAŁ SPRZEDAŻY':'BRAK SYGNAŁU'}</div>`;
+  $('votes').innerHTML=h;
+}
+function renderMatrix(){
+  $('mxIv').textContent=iv;
+  let h='<div class="h"></div>'+INST.map(x=>`<div class="h" style="text-align:center">${x.name}</div>`).join('');
+  for(const k of SK){h+=`<div class="h ${k===strat?'am':''}">${SHORTN[k]}</div>`;
+    for(const x of INST){const r=D[x.id].res[k];if(!r){h+='<div class="c mu">…</div>';continue}
+      const s=r.st.sum,a=Math.min(1,Math.abs(s)/30),o=r.bt.open,stab=r.hv[0].n&&r.hv[1].n&&r.hv[0].sum>0&&r.hv[1].sum>0;
+      h+=`<div class="c ${k===strat&&x.id===cur?'on':''}" data-k="${k}" data-id="${x.id}" style="background:${s>=0?`rgba(52,211,153,${.08+a*.45})`:`rgba(248,113,113,${.08+a*.45})`}">${o?(o.dir>0?'▲ ':'▼ '):''}${sR(s)}${stab?' ✓':''}</div>`}}
+  $('matrix').innerHTML=h;
+  document.querySelectorAll('.mx .c[data-k]').forEach(e=>e.onclick=()=>{cur=e.dataset.id;strat=e.dataset.k;try{localStorage.setItem('sig15cur',cur);const v=JSON.parse(localStorage.getItem('sig15v3')||'{}');v.strat=strat;v.PSK=v.PSK||PSK;localStorage.setItem('sig15v3',JSON.stringify(v))}catch(er){}renderAll()});
+}
+function renderTel(){
+  const d=D[cur],r=d.res[strat],x=inst(cur);$('telT').textContent=x.name+' · '+SHORTN[strat];
+  if(!r){$('tel').innerHTML='';return}
+  const st=r.st,o=r.bt.open,l=d.c[d.c.length-1],left=Math.max(0,l.t+MS-Date.now());
+  let dd=0,pk=0,eq=0;for(const t of r.bt.trades){eq+=t.R;pk=Math.max(pk,eq);dd=Math.max(dd,pk-eq)}
+  const row=(a,b)=>`<span>${a}</span><span>${b}</span>`;
+  $('tel').innerHTML=row('TRANSAKCJE',st.n)+row('TRAFNOŚĆ',st.wr.toFixed(0)+'%')+row('SUMA',`<b class="${st.sum>=0?'up':'dn'}">${sR(st.sum)} R</b>`)+
+    row('PROFIT FACTOR',st.pf.toFixed(2))+row('MAKS. OBSUNIĘCIE',`<span class="dn">-${dd.toFixed(1)} R</span>`)+
+    row('POŁOWY',`${sR(r.hv[0].sum)} / ${sR(r.hv[1].sum)} R`)+row('ATR(14)',fmt(r.A.at[d.lc],x.dec))+
+    row('POZYCJA',o?`<b class="${o.dir>0?'up':'dn'}">${o.dir>0?'LONG':'SHORT'} ${((l.c-o.entry)*o.dir/o.risk).toFixed(2)} R</b>`:'<span class="mu">brak</span>')+
+    (o?row('SL / TP',`${fmt(o.sl,x.dec)} / ${fmt(o.tp,x.dec)}`):'')+
+    row('ŚWIECA ZAMKNIE SIĘ',`${Math.floor(left/3600000)?Math.floor(left/3600000)+'h ':''}${Math.floor(left/60000)%60}m ${Math.floor(left/1000)%60}s`);
+}
+function cv(id){const c=$(id),dpr=Math.min(2,window.devicePixelRatio||1),r=c.getBoundingClientRect();c.width=r.width*dpr;c.height=r.height*dpr;const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,r.width,r.height);return {g,w:r.width,h:r.height}}
+function renderEq(){
+  const {g,w,h}=cv('eq'),r=D[cur].res[strat];if(!r)return;
+  const tr=r.bt.trades;let e=0;const pts=[0];for(const t of tr){e+=t.R;pts.push(e)}
+  $('eqV').textContent=sR(e)+' R';$('eqV').className=e>=0?'up':'dn';
+  const mx=Math.max(...pts,1),mn=Math.min(...pts,-1),Y=v=>6+(mx-v)/(mx-mn)*(h-12),X=i=>i/(pts.length-1||1)*(w-4)+2;
+  g.strokeStyle='#1a2436';g.beginPath();g.moveTo(0,Y(0));g.lineTo(w,Y(0));g.stroke();
+  const col=e>=0?'52,211,153':'248,113,113';const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,`rgba(${col},.35)`);gr.addColorStop(1,`rgba(${col},0)`);
+  g.beginPath();pts.forEach((v,i)=>i?g.lineTo(X(i),Y(v)):g.moveTo(X(i),Y(v)));g.lineTo(X(pts.length-1),Y(0));g.lineTo(X(0),Y(0));g.fillStyle=gr;g.fill();
+  g.beginPath();pts.forEach((v,i)=>i?g.lineTo(X(i),Y(v)):g.moveTo(X(i),Y(v)));g.strokeStyle=`rgb(${col})`;g.lineWidth=1.6;g.shadowColor=`rgb(${col})`;g.shadowBlur=8;g.stroke();g.shadowBlur=0;
+  g.fillStyle='#5f7189';g.font='9px monospace';g.fillText(sR(mx)+'R',2,10);g.fillText(sR(mn)+'R',2,h-3);
+}
+function renderCmp(){
+  const {g,w,h}=cv('cmp'),d=D[cur];$('cmpI').textContent=inst(cur).name+' · '+iv;
+  const vals=SK.map(k=>d.res[k]?d.res[k].st.sum:0),mx=Math.max(5,...vals.map(Math.abs)),bh=(h-6)/SK.length,mid=w*0.62;
+  SK.forEach((k,j)=>{const v=vals[j],y=3+j*bh,len=v/mx*(w-mid-34);const col=v>=0?'#34d399':'#f87171';
+    g.fillStyle=k===strat?'#fbbf24':'#5f7189';g.font='9.5px monospace';g.fillText(SHORTN[k],2,y+bh*0.62);
+    g.fillStyle='#0d1422';g.fillRect(mid-(w-mid-34),y+3,2*(w-mid-34),bh-6);
+    g.fillStyle=col;g.shadowColor=col;g.shadowBlur=k===strat?10:4;g.fillRect(Math.min(mid,mid+len),y+3,Math.abs(len),bh-6);g.shadowBlur=0;
+    g.fillStyle=col;g.fillText(sR(v),w-32,y+bh*0.62)});
+  g.fillStyle='#28364d';g.fillRect(mid,0,1,h);
+}
+function renderLog(){
+  const ev=[];for(const x of INST){const r=D[x.id].res[strat];if(!r)continue;
+    for(const t of r.bt.trades.slice(-10)){ev.push({t:t.t,h:`<span>${tm(t.t)}</span><span class="${t.dir>0?'up':'dn'}">${t.dir>0?'▲':'▼'}</span><span>${x.name}</span><span class="mu">wejście</span>`});
+      ev.push({t:t.exitT,h:`<span>${tm(t.exitT)}</span><span class="${t.R>0?'up':'dn'}">●</span><span>${x.name}</span><span>${t.why} <b class="${t.R>0?'up':'dn'}">${t.R>=0?'+':''}${t.R.toFixed(2)}R</b></span>`})}
+    const o=r.bt.open;if(o)ev.push({t:o.t,h:`<span>${tm(o.t)}</span><span class="${o.dir>0?'up':'dn'}">${o.dir>0?'▲':'▼'}</span><span>${x.name}</span><span class="am">otwarta</span>`})}
+  ev.sort((a,b)=>b.t-a.t);$('logS').textContent=SHORTN[strat];
+  $('log').innerHTML=ev.slice(0,24).map(e=>`<div>${e.h}</div>`).join('')||'<span class="mu">brak zdarzeń</span>';
+}
+function renderFlow(){
+  const {g,w,h}=cv('flow'),n=Math.round(864e5/MS)+1;$('flowT').textContent=n+' świec';
+  INST.forEach((x,j)=>{const c=D[x.id].c.slice(-n);if(c.length<2)return;const mn=Math.min(...c.map(q=>q.c)),mx=Math.max(...c.map(q=>q.c))||1;
+    g.beginPath();c.forEach((q,i)=>{const X=i/(c.length-1)*w,Y=4+(mx-q.c)/((mx-mn)||1)*(h-8);i?g.lineTo(X,Y):g.moveTo(X,Y)});
+    g.strokeStyle=x.col;g.lineWidth=x.id===cur?2:1.2;g.globalAlpha=x.id===cur?1:.55;g.shadowColor=x.col;g.shadowBlur=x.id===cur?8:0;g.stroke();g.shadowBlur=0;g.globalAlpha=1;
+    g.fillStyle=x.col;g.font='9px monospace';g.fillText(x.name,w-44,10+j*11)});
+}
+
+/* ===== KULA 3D ===== */
+const NODES=[],ARCS=[];
+function sph(lat,lon,r=1){const a=lat*Math.PI/180,b=lon*Math.PI/180;return [r*Math.cos(a)*Math.cos(b),r*Math.sin(a),r*Math.cos(a)*Math.sin(b)]}
+INST.forEach((x,j)=>NODES.push({kind:'i',id:x.id,label:x.name,p:sph(0,j*120),col:x.col}));
+SK.forEach((k,j)=>NODES.push({kind:'s',id:k,label:SHORTN[k],p:sph(48,j*72+20),col:'#a78bfa'}));
+['MOMENTUM','SKOŚNOŚĆ','EMA','RSI','KANAŁ'].forEach((n,j)=>NODES.push({kind:'v',id:j,label:n,p:sph(-50,j*72+56),col:'#22d3ee'}));
+(function(){let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  const pal=['200,230,255','34,211,238','167,139,250','251,191,36','255,255,255'];
+  for(let k=0;k<260;k++){const a=sph(rnd()*180-90,rnd()*360),bb=sph(rnd()*180-90,rnd()*360),pts=[],rr=0.92+rnd()*0.16;
+    for(let t=0;t<=1.0001;t+=1/18){let v=[a[0]*(1-t)+bb[0]*t,a[1]*(1-t)+bb[1]*t,a[2]*(1-t)+bb[2]*t];const L=Math.hypot(...v)||1,bulge=rr*(1+0.12*Math.sin(t*Math.PI));pts.push(v.map(q=>q/L*bulge))}
+    ARCS.push({pts,col:pal[Math.floor(rnd()*pal.length)],a:0.05+rnd()*0.14})}
+  for(let k=0;k<420;k++)ARCS.push({dot:sph(rnd()*180-90,rnd()*360,0.98+rnd()*0.35),col:pal[Math.floor(rnd()*pal.length)],a:0.2+rnd()*0.5});
+})();
+function edgePts(a,b,pull){const pts=[];for(let t=0;t<=1.0001;t+=1/24){const v=[a[0]*(1-t)+b[0]*t,a[1]*(1-t)+b[1]*t,a[2]*(1-t)+b[2]*t],L=Math.hypot(...v)||1,r=1-pull*Math.sin(t*Math.PI);pts.push(v.map(q=>q/L*r))}return pts}
+const EDGE_CACHE={};
+function edge(a,b,pull){const k=a.label+'|'+b.label+'|'+pull;return EDGE_CACHE[k]||(EDGE_CACHE[k]=edgePts(a.p,b.p,pull))}
+let yaw=0.4,pitch=0.32,drag=null,lastT=performance.now();
+(function(){const c=$('sphere');
+  c.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,yaw,pitch};c.setPointerCapture(e.pointerId)});
+  c.addEventListener('pointermove',e=>{if(!drag)return;yaw=drag.yaw+(e.clientX-drag.x)*0.01;pitch=Math.max(-1.2,Math.min(1.2,drag.pitch+(e.clientY-drag.y)*0.01))});
+  const up=()=>drag=null;c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
+})();
+let SC=null;
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;if(!drag)yaw+=dt*0.00012;
+  const c=$('sphere'),dpr=Math.min(2,window.devicePixelRatio||1),r=c.getBoundingClientRect();
+  if(!SC||SC.w!==r.width||SC.h!==r.height){c.width=r.width*dpr;c.height=r.height*dpr;SC={w:r.width,h:r.height}}
+  const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);const W=r.width,H=r.height,cx=W/2,cy=H/2,R=Math.min(W,H)*0.36;
+  g.fillStyle='#04060b';g.fillRect(0,0,W,H);
+  const cyw=Math.cos(yaw),syw=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  const P=v=>{let x=v[0]*cyw-v[2]*syw,z=v[0]*syw+v[2]*cyw,y=v[1];const y2=y*cp-z*sp,z2=y*sp+z*cp;const s=3/(3-z2);return [cx+x*R*s,cy-y2*R*s,z2,s]};
+  // poświata
+  const gl=g.createRadialGradient(cx,cy,R*0.1,cx,cy,R*1.25);gl.addColorStop(0,'rgba(34,211,238,.10)');gl.addColorStop(.6,'rgba(167,139,250,.05)');gl.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gl;g.fillRect(0,0,W,H);
+  // pierścień ze skalą
+  g.strokeStyle='rgba(56,189,248,.25)';g.lineWidth=1;g.beginPath();g.arc(cx,cy,R*1.42,0,7);g.stroke();
+  g.fillStyle='rgba(95,113,137,.9)';g.font='8.5px monospace';
+  for(let d=0;d<360;d+=10){const a=d*Math.PI/180-yaw,x1=cx+Math.cos(a)*R*1.42,y1=cy+Math.sin(a)*R*1.42,L=d%90===0?8:3;
+    g.beginPath();g.moveTo(x1,y1);g.lineTo(cx+Math.cos(a)*(R*1.42+L),cy+Math.sin(a)*(R*1.42+L));g.stroke();if(d%90===0)g.fillText(d+'°',cx+Math.cos(a)*(R*1.42+16)-8,cy+Math.sin(a)*(R*1.42+16)+3)}
+  g.globalCompositeOperation='lighter';
+  // tło: łuki i pył
+  for(const a of ARCS){
+    if(a.dot){const q=P(a.dot),al=a.a*(0.35+0.65*(q[2]+1)/2);g.fillStyle=`rgba(${a.col},${al})`;g.fillRect(q[0],q[1],1.3,1.3);continue}
+    g.beginPath();let z=0;a.pts.forEach((v,i)=>{const q=P(v);z+=q[2];i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1])});
+    g.strokeStyle=`rgba(${a.col},${a.a*(0.4+0.6*((z/a.pts.length)+1)/2)})`;g.lineWidth=0.8;g.stroke()}
+  // połączenia z danymi
+  const I=NODES.filter(n=>n.kind==='i'),S=NODES.filter(n=>n.kind==='s'),V=NODES.filter(n=>n.kind==='v');
+  const t=now/1000;
+  const drawEdge=(pts,rgb,w,alpha,pulse,ph)=>{g.beginPath();pts.forEach((v,i)=>{const q=P(v);i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1])});
+    g.strokeStyle=`rgba(${rgb},${alpha})`;g.lineWidth=w;g.shadowColor=`rgb(${rgb})`;g.shadowBlur=pulse?8:0;g.stroke();g.shadowBlur=0;
+    if(pulse){for(let k=0;k<2;k++){const u=((t*0.45+ph+k*0.5)%1),q=P(pts[Math.floor(u*(pts.length-1))]);g.fillStyle=`rgba(${rgb},.95)`;g.beginPath();g.arc(q[0],q[1],2.4*q[3],0,7);g.fill()}}};
+  I.forEach((a,ai)=>S.forEach((b,bi)=>{const r=D[a.id].res[b.id],o=r&&r.bt.open,sel=b.id===strat;
+    const rgb=o?(o.dir>0?'52,211,153':'248,113,113'):'95,113,137';
+    drawEdge(edge(a,b,0.35),rgb,sel?1.6:0.9,o?(sel?0.9:0.45):(sel?0.35:0.12),!!o,ai*0.31+bi*0.17)}));
+  const kr=D[cur].res.kombo,ci=NODES.find(n=>n.id===cur);
+  if(kr&&D[cur].lc>=0){const up=kr.A.why(D[cur].lc,1),dn=kr.A.why(D[cur].lc,-1);
+    V.forEach((v,j)=>{if(!up[j])return;const vv=up[j][0]?1:dn[j][0]?-1:0;drawEdge(edge(v,ci,0.45),vv>0?'52,211,153':vv<0?'248,113,113':'95,113,137',1.1,vv?0.7:0.15,!!vv,j*0.2)})}
+  // rdzeń
+  const core=P([0,0,0]);const cg=g.createRadialGradient(core[0],core[1],0,core[0],core[1],R*0.32);
+  const cs=kr?kr.sig:0;const crgb=cs>0?'52,211,153':cs<0?'248,113,113':'167,139,250';
+  cg.addColorStop(0,`rgba(255,255,255,.9)`);cg.addColorStop(.25,`rgba(${crgb},.5)`);cg.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=cg;g.beginPath();g.arc(core[0],core[1],R*0.32*(1+0.04*Math.sin(t*2)),0,7);g.fill();
+  I.forEach(a=>{const r=D[a.id].res[strat],o=r&&r.bt.open;drawEdge(edge({p:[0,0,0],label:'core'},a,0),o?(o.dir>0?'52,211,153':'248,113,113'):'167,139,250',0.8,o?0.5:0.15,!!o,0.5)});
+  g.globalCompositeOperation='source-over';
+  // węzły i podpisy
+  const proj=NODES.map(n=>({n,q:P(n.p)})).sort((a,b)=>a.q[2]-b.q[2]);
+  for(const {n,q} of proj){const front=(q[2]+1)/2,rad=(n.kind==='i'?6:4)*q[3],hl=(n.kind==='i'&&n.id===cur)||(n.kind==='s'&&n.id===strat);
+    const fl=n.flash&&now-n.flash<3000?1-(now-n.flash)/3000:0;
+    g.fillStyle=n.col;g.globalAlpha=0.35+0.65*front;g.shadowColor=n.col;g.shadowBlur=hl?16:8;g.beginPath();g.arc(q[0],q[1],rad*(hl?1.35:1),0,7);g.fill();g.shadowBlur=0;
+    if(fl){g.strokeStyle='#fbbf24';g.lineWidth=2;g.beginPath();g.arc(q[0],q[1],rad+18*(1-fl),0,7);g.globalAlpha=fl;g.stroke()}
+    g.globalAlpha=0.3+0.7*front;g.fillStyle=hl?'#fbbf24':'#d7e3f4';g.font=(n.kind==='i'?'bold 10px':'9px')+' monospace';
+    let lbl=n.label;if(n.kind==='i'){const d=D[n.id],l=d.c[d.c.length-1];if(l)lbl+=' '+fmt(l.c,inst(n.id).dec)}
+    g.fillText(lbl,q[0]+rad+4,q[1]+3);g.globalAlpha=1}
+  $('spin').textContent='SPIN '+(((yaw*180/Math.PI)%360+360)%360).toFixed(1)+'° · PITCH '+(pitch*180/Math.PI).toFixed(0)+'°';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+$('snd').onclick=()=>{sound=!sound;$('snd').textContent=sound?'🔔':'🔕';$('snd').className='btn'+(sound?' on':'');if(sound&&!actx){try{actx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(sound&&actx){actx.resume&&actx.resume();alertSig(cur,1)}};
+window.addEventListener('resize',renderAll);
+renderAll();initAll();
+setInterval(poll,15000);
+setInterval(renderTel,1000);
+</script>
+</body>
+</html>
