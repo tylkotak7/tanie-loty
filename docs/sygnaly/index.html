@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="theme-color" content="#0b0d12">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Sygnały 15m — BTC · Złoto · Ropa</title>
+<title>Sygnały — BTC · Złoto · Ropa</title>
 <style>
 :root{--bg:#0b0d12;--panel:#141822;--line:#232a38;--txt:#e6e9f0;--mut:#8a93a6;--up:#22c55e;--dn:#ef4444;--acc:#a78bfa;--ema:#facc15}
 *{box-sizing:border-box}
@@ -58,7 +58,8 @@ footer{color:var(--mut);font-size:11px;margin-top:14px}
 <div id="flash"></div>
 <header>
   <span class="dot" id="dot"></span>
-  <h1>Sygnały 15m</h1>
+  <h1>Sygnały</h1>
+  <span id="ivBtns" style="display:flex;gap:4px"></span>
   <button id="snd">🔕 Dźwięk</button>
 </header>
 <div id="err"></div>
@@ -89,7 +90,7 @@ footer{color:var(--mut);font-size:11px;margin-top:14px}
 </div>
 
 <div class="panel">
-  <div class="mut">Ostatnia zamknięta świeca 15m</div>
+  <div class="mut">Ostatnia zamknięta świeca <span id="ivName"></span></div>
   <div class="verdict N" id="verdict">—</div>
   <div id="checks"></div>
   <div id="openPos" class="chk"></div>
@@ -260,7 +261,9 @@ const INST=[
   {id:'XAUUSDT',name:'Złoto',dec:2},
   {id:'CLUSDT',name:'Ropa WTI',dec:2}
 ];
-const M15=15*60*1000;
+const IVS={'15m':15*60*1000,'1h':60*60*1000};
+let iv='15m';try{const v=localStorage.getItem('sig15iv');if(IVS[v])iv=v}catch(e){}
+let M15=IVS[iv];
 let strat='mom',PS={};for(const k in STRATS)PS[k]={...STRATS[k].def};
 try{const v=JSON.parse(localStorage.getItem('sig15v2')||'null');if(v){strat=STRATS[v.strat]?v.strat:'mom';for(const k in STRATS)PS[k]={...STRATS[k].def,...(v.PS&&v.PS[k]||{})}}
   else{const o=JSON.parse(localStorage.getItem('sig15P')||'null');if(o)PS.mom={...PS.mom,...o}}}catch(e){}
@@ -282,7 +285,7 @@ async function fetchHist(sym){
   return all.slice(-MAXC);
 }
 async function fetchK(sym,limit,endTime){
-  const r=await fetch(`${API}?symbol=${sym}&interval=15m&limit=${limit}`+(endTime?`&endTime=${endTime}`:''));
+  const r=await fetch(`${API}?symbol=${sym}&interval=${iv}&limit=${limit}`+(endTime?`&endTime=${endTime}`:''));
   if(!r.ok)throw new Error('HTTP '+r.status);
   const a=await r.json();
   return a.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
@@ -304,29 +307,29 @@ function alertSig(id,dir){
   try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
   if(sound&&actx){try{[0,0.25].forEach(d=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=dir>0?880:440;g.gain.value=0.15;o.connect(g);g.connect(actx.destination);o.start(actx.currentTime+d);o.stop(actx.currentTime+d+0.18)})}catch(e){}}
 }
+let gen=0;
 async function initAll(){
+  const g=gen;
   await Promise.all(INST.map(async x=>{
-    try{S[x.id].c=await fetchHist(x.id);S[x.id].err=null;recompute(x.id,false)}
-    catch(e){S[x.id].err=e.message}
+    try{const c=await fetchHist(x.id);if(g!==gen)return;S[x.id].c=c;S[x.id].err=null;recompute(x.id,false)}
+    catch(e){if(g===gen)S[x.id].err=e.message}
   }));
-  render();
+  if(g===gen)render();
 }
 async function poll(){
+  const g=gen;
   await Promise.all(INST.map(async x=>{
     const s=S[x.id];
     try{
-      if(!s.c.length){s.c=await fetchHist(x.id)}
-      else{
-        const nw=await fetchK(x.id,3);
-        for(const k of nw){const j=s.c.findIndex(q=>q.t===k.t);if(j>=0)s.c[j]=k;else if(k.t>s.c[s.c.length-1].t)s.c.push(k)}
-        if(s.c.length>MAXC)s.c.splice(0,s.c.length-MAXC);
-      }
+      if(!s.c.length)return;
+      const nw=await fetchK(x.id,3);if(g!==gen||s!==S[x.id])return;
+      for(const k of nw){const j=s.c.findIndex(q=>q.t===k.t);if(j>=0)s.c[j]=k;else if(k.t>s.c[s.c.length-1].t)s.c.push(k)}
+      if(s.c.length>MAXC)s.c.splice(0,s.c.length-MAXC);
       s.err=null;recompute(x.id,true);
-    }catch(e){s.err=e.message}
+    }catch(e){if(g===gen)s.err=e.message}
   }));
-  render();
+  if(g===gen){if(INST.some(x=>!S[x.id].c.length))initAll();render()}
 }
-
 function render(){
   const errs=INST.filter(x=>S[x.id].err);
   $('dot').className='dot '+(errs.length===INST.length?'err':errs.length?'':'ok');
@@ -349,7 +352,7 @@ function renderDetail(){
   const x=instOf(cur),s=S[cur],c=s.c;
   $('dName').textContent=x.name;
   if(!c.length||!s.A){$('dPrice').textContent='…';drawChart();return}
-  const last=c[c.length-1],ref=c[Math.max(0,c.length-97)];
+  const last=c[c.length-1],ref=c[Math.max(0,c.length-1-Math.round(864e5/M15))];
   const ch=(last.c-ref.c)/ref.c*100;
   $('dPrice').textContent=fmt(last.c,x.dec);
   $('dChg').textContent=(ch>=0?'+':'')+ch.toFixed(2)+'% 24h';$('dChg').className='chg '+(ch>=0?'up':'dn');
@@ -415,7 +418,7 @@ function drawChart(){
   g.font='10px system-ui';g.fillStyle='#8a93a6';g.strokeStyle='#1c2230';g.lineWidth=1;
   for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4,y=Y(v);g.beginPath();g.moveTo(0,y);g.lineTo(w-padR,y);g.stroke();g.fillText(fmt(v,x.dec),w-padR+4,y+3)}
   // godziny
-  for(let i=st;i<=end;i++){const d=new Date(c[i].t);if(d.getMinutes()===0&&d.getHours()%4===0){g.fillText(String(d.getHours()).padStart(2,'0')+':00',X(i)-12,h-2)}}
+  for(let i=st;i<=end;i++){const d=new Date(c[i].t);if(d.getMinutes()===0&&d.getHours()%(iv==='1h'?12:4)===0){g.fillText(String(d.getHours()).padStart(2,'0')+':00',X(i)-12,h-2)}}
   // świece
   for(let i=st;i<=end;i++){
     const b=c[i],up=b.c>=b.o;g.strokeStyle=g.fillStyle=up?'#22c55e':'#ef4444';
@@ -475,6 +478,10 @@ $('save').onclick=()=>{Object.keys(STRATS[strat].def).forEach(k=>{const v=parseF
   saveState();INST.forEach(x=>{S[x.id].lastSigT=null;recompute(x.id,false)});render()};
 $('reset').onclick=()=>{PS[strat]={...STRATS[strat].def};P=PS[strat];renderSettings();$('save').onclick()};
 renderStrat();
+function renderIv(){$('ivName').textContent=iv;$('ivBtns').innerHTML=Object.keys(IVS).map(k=>`<button data-iv="${k}" class="${k===iv?'on':''}">${k}</button>`).join('');
+  document.querySelectorAll('#ivBtns button').forEach(b=>b.onclick=()=>{if(b.dataset.iv===iv)return;iv=b.dataset.iv;M15=IVS[iv];try{localStorage.setItem('sig15iv',iv)}catch(e){}
+    gen++;INST.forEach(x=>{S[x.id]={c:[],A:null,bt:null,lastSigT:null,err:null}});view.off=0;renderIv();render();initAll()})}
+renderIv();
 renderSettings();
 window.addEventListener('resize',drawChart);
 initAll();
