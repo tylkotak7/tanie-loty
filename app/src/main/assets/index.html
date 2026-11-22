@@ -109,9 +109,16 @@ a.plain{color:var(--acc)}
   </div>
 
   <h2 id="dealsH">🔥 Okazje</h2>
-  <p class="note">Ceny za bilet tam i z powrotem za osobę, czyli tani jest też powrót. Znalezione w serwisach z okazjami (stan 11–12.11.2026, Gdańsk 30.10). Na majówkę i wakacje ceny są wyższe niż poza sezonem. Tanie bilety znikają szybko — kliknij „Sprawdź”, żeby zobaczyć aktualną cenę.</p>
+  <p class="note">Ceny za bilet tam i z powrotem za osobę, czyli tani jest też powrót. Znalezione w serwisach z okazjami (stan 21–22.11.2026). Na majówkę, wakacje i do ciepłych krajów zimą ceny są wyższe. Tanie bilety znikają szybko — kliknij „Sprawdź”, żeby zobaczyć aktualną cenę.</p>
   <label>Maks. cena</label>
-  <div class="range"><input id="dealMax" type="range" min="100" max="600" step="10" value="600"><b id="dealMaxV">600 zł</b></div>
+  <div class="range"><input id="dealMax" type="range" min="100" max="1000" step="10" value="1000"><b id="dealMaxV">1000 zł</b></div>
+  <div class="chips" id="dealPrice" style="margin-top:10px">
+    <button class="chip" data-v="200">do 200 zł</button>
+    <button class="chip" data-v="300">do 300 zł</button>
+    <button class="chip" data-v="500">do 500 zł</button>
+    <button class="chip on" data-v="1000">do 1000 zł</button>
+    <button class="chip" data-v="warm">☀ Tylko ciepłe kraje</button>
+  </div>
   <label>Kiedy</label>
   <div class="chips" id="dealWhen">
     <button class="chip on" data-v="all">Wszystkie terminy</button>
@@ -197,7 +204,7 @@ a.plain{color:var(--acc)}
         <button class="chip" data-v="wizz">Wizz Air</button>
       </div>
       <label>Powiadom, gdy lot w obie strony kosztuje maks.</label>
-      <div class="range"><input id="alMax" type="range" min="100" max="800" step="10" value="250"><b id="alMaxV">250 zł</b></div>
+      <div class="range"><input id="alMax" type="range" min="100" max="1000" step="10" value="250"><b id="alMaxV">250 zł</b></div>
       <div class="two">
         <div><label>Wyjazd od (dni)</label><select id="alMin"></select></div>
         <div><label>do (dni)</label><select id="alMaxD"></select></div>
@@ -250,7 +257,7 @@ a.plain{color:var(--acc)}
   </div>
 </section>
 
-<p class="foot">Apka nie pobiera cen na żywo — kieruje do wyszukiwarek z gotowymi parametrami. Ceny okazji pochodzą z serwisów okazji (11–12.11.2026) i mogły się zmienić.</p>
+<p class="foot">Apka nie pobiera cen na żywo — kieruje do wyszukiwarek z gotowymi parametrami. Ceny okazji pochodzą z serwisów okazji (21–22.11.2026) i mogły się zmienić.</p>
 </main>
 
 <nav>
@@ -344,6 +351,13 @@ const CAT = [
  ["HEL","Helsinki","Helsinki [HEL]","Finlandia",["north","city"],300],
  ["GOA","Genua","Genoa [GOA]","Włochy",["city","warm"],250],
  ["SPU","Split","Split [SPU]","Chorwacja",["warm"],350],
+ ["AGA","Agadir","Agadir [AGA]","Maroko",["warm"],450],
+ ["FUE","Fuerteventura","Fuerteventura [FUE]","Wyspy Kanaryjskie",["warm"],700],
+ ["ACE","Lanzarote","Lanzarote [ACE]","Wyspy Kanaryjskie",["warm"],700],
+ ["FNC","Madera","Madeira [FNC]","Portugalia",["warm"],700],
+ ["SSH","Szarm el-Szejk","Sharm el-Sheikh [SSH]","Egipt",["warm"],700],
+ ["ATH","Ateny","Athens [ATH]","Grecja",["city","warm"],250],
+ ["OTP","Bukareszt","Bucharest [OTP]","Rumunia",["city"],200],
  ["BKK","Bangkok","Bangkok [BKK]","Tajlandia",["exotic","warm","city"],2500],
  ["HKT","Phuket","Phuket [HKT]","Tajlandia",["exotic","warm"],2700],
  ["KBV","Krabi","Krabi [KBV]","Tajlandia",["exotic","warm"],2900],
@@ -383,86 +397,157 @@ const ROUTES = {
   VNO:[""],PRG:[""],HAM:[""],TLL:[""],BUD:[""],KUT:[""],FRA:["Lufthansa · przesiadki na świat"]},
 };
 
+// Ciepłe kierunki zimą (z okazji 11.2026)
+Object.assign(ROUTES.WRO,{AGA:["Ryanair"],LPA:[""]});
+Object.assign(ROUTES.WAW,{AGA:[""],FUE:[""],ACE:[""],ATH:[""]});
+Object.assign(ROUTES.GDN,{SSH:[""],TFS:[""],FNC:[""],OTP:[""]});
+Object.assign(ROUTES.POZ,{RAK:[""]});
+
 // Tajlandia: z Warszawy LOT bez przesiadki do Bangkoku, reszta z przesiadką
 ["POZ","WRO","WAW","GDN"].forEach(o=>THAI_CODES.forEach(c=>{
   ROUTES[o][c]=[o==="WAW"&&c==="BKK"?"LOT bez przesiadki (od 7.10.2026)":"z przesiadką"];
 }));
 
-// Okazje: ceny w obie strony. Źródło: tanie-loty.com.pl „Odkrywaj” (POZ/WRO 11.11, WAW 12.11, GDN 30.10.2026) + wcześniejsze okazje z 9.11.
+// Okazje: ceny w obie strony. Źródło: tanie-loty.com.pl „Odkrywaj” i „Okazje” (stan 21–22.11.2026; część ciepłych kierunków z 20.10).
 const T="tanie-loty.com.pl";
 const DEALS = [
- // POZNAŃ
- {from:"POZ",en:"London",city:"Londyn",p:142,d1:"2026-12-22",d2:"2026-12-30",src:T+" 11.11",tag:"Święta",hot:1},
- {from:"POZ",en:"Paris",city:"Paryż",p:147,d1:"2026-11-23",d2:"2026-11-29",src:T+" 11.11",tag:"City break",hot:1},
- {from:"POZ",en:"Liverpool",city:"Liverpool",p:163,d1:"2026-12-13",d2:"2026-12-14",src:T+" 11.11",tag:"Wyspy"},
- {from:"POZ",en:"Valencia",city:"Walencja",p:175,d1:"2027-01-11",d2:"2027-01-18",src:T+" 11.11",tag:"Ciepło"},
- {from:"POZ",en:"Basel",city:"Bazylea",p:182,d1:"2027-01-11",d2:"2027-01-15",src:T+" 11.11",tag:"Alpy"},
- {from:"POZ",en:"Malta",city:"Malta",p:208,d1:"2027-02-28",d2:"2027-03-06",src:T+" 11.11",tag:"Ciepło"},
- {from:"POZ",en:"Zadar",city:"Zadar",p:210,d1:"2027-03-29",d2:"2027-03-31",src:T+" 11.11",tag:"Chorwacja"},
- {from:"POZ",en:"Porto",city:"Porto",p:267,d1:"2026-12-13",d2:"2026-12-16",src:T+" 9.11",tag:"Nowa trasa"},
- {from:"POZ",en:"Barcelona",city:"Barcelona",p:279,d1:"2027-02-07",d2:"2027-02-12",src:T+" 11.11",tag:"Nowa trasa"},
- {from:"POZ",en:"Oslo",city:"Oslo",p:142,d1:"2027-02-08",d2:"2027-03-01",src:T+" 11.11",tag:"Ferie"},
- {from:"POZ",en:"Tirana",city:"Tirana",p:148,d1:"2026-11-30",d2:"2026-12-14",src:T+" 11.11",tag:"Ciepło"},
- {from:"POZ",en:"Stockholm",city:"Sztokholm",p:148,d1:"2026-12-13",d2:"2026-12-29",src:T+" 11.11",tag:"Święta"},
- {from:"POZ",en:"Shannon",city:"Shannon",p:149,d1:"2026-11-21",d2:"2026-12-01",src:T+" 11.11",tag:"Irlandia"},
- {from:"POZ",en:"Bari",city:"Bari",p:167,d1:"2027-01-10",d2:"2027-01-22",src:T+" 11.11",tag:"Włochy"},
- {from:"POZ",en:"Palermo",city:"Palermo",p:171,d1:"2026-11-28",d2:"2026-12-12",src:T+" 11.11",tag:"Ciepło"},
- {from:"POZ",en:"Paphos",city:"Pafos",p:179,d1:"2026-11-24",d2:"2026-12-12",src:T+" 11.11",tag:"Ciepło"},
- // WROCŁAW
- {from:"WRO",en:"Tirana",city:"Tirana",p:148,d1:"2026-12-10",d2:"2026-12-12",src:T+" 11.11",tag:"Weekend",hot:1},
- {from:"WRO",en:"London",city:"Londyn",p:157,d1:"2026-11-21",d2:"2026-11-23",src:T+" 11.11",tag:"Weekend",hot:1},
- {from:"WRO",en:"Liverpool",city:"Liverpool",p:157,d1:"2026-11-19",d2:"2026-11-20",src:T+" 11.11",tag:"Wyspy"},
- {from:"WRO",en:"Newcastle",city:"Newcastle",p:157,d1:"2026-12-05",d2:"2026-12-07",src:T+" 11.11",tag:"Weekend"},
- {from:"WRO",en:"Bristol",city:"Bristol",p:166,d1:"2026-11-27",d2:"2026-11-29",src:T+" 11.11",tag:"Weekend"},
- {from:"WRO",en:"Bergamo",city:"Mediolan Bergamo",p:172,d1:"2027-02-08",d2:"2027-02-13",src:T+" 11.11",tag:"Ferie"},
- {from:"WRO",en:"Bologna",city:"Bolonia",p:173,d1:"2026-11-16",d2:"2026-11-22",src:T+" 11.11",tag:"Włochy"},
- {from:"WRO",en:"Lamezia Terme",city:"Lamezia Terme",p:175,d1:"2027-01-11",d2:"2027-01-18",src:T+" 11.11",tag:"Kalabria"},
- {from:"WRO",en:"Budapest",city:"Budapeszt",p:189,d1:"2026-12-22",d2:"2026-12-24",src:T+" 11.11",tag:"Jarmarki"},
- {from:"WRO",en:"Bari",city:"Bari",p:189,d1:"2027-02-04",d2:"2027-02-09",src:T+" 11.11",tag:"Włochy"},
- {from:"WRO",en:"Oslo",city:"Oslo",p:145,d1:"2027-02-07",d2:"2027-02-26",src:T+" 9.11",tag:"Ferie"},
- {from:"WRO",en:"Venice",city:"Wenecja",p:160,d1:"2026-12-18",d2:"2027-01-08",src:T+" 9.11",tag:"Święta"},
- {from:"WRO",en:"Alicante",city:"Alicante",p:171,d1:"2026-12-05",d2:"2026-12-23",src:T+" 9.11",tag:"Ciepło"},
- {from:"WRO",en:"Turin",city:"Turyn",p:174,d1:"2026-12-26",d2:"2027-01-16",src:T+" 9.11",tag:"Nowa trasa"},
- {from:"WRO",en:"Paphos",city:"Pafos",p:184,d1:"2027-03-06",d2:"2027-03-18",src:T+" 9.11",tag:"Ciepło"},
- // WARSZAWA (Chopin + Modlin)
- {from:"WAW",en:"Venice",city:"Wenecja",p:147,d1:"2026-12-02",d2:"2026-12-09",src:T+" 12.11",tag:"Włochy",hot:1},
- {from:"WAW",en:"Bratislava",city:"Bratysława",p:147,d1:"2026-11-14",d2:"2026-11-20",src:T+" 12.11",tag:"City break",hot:1},
- {from:"WAW",en:"Bergamo",city:"Mediolan Bergamo",p:148,d1:"2026-12-14",d2:"2026-12-17",src:T+" 12.11",tag:"City break",hot:1},
- {from:"WAW",en:"Tirana",city:"Tirana",p:148,d1:"2026-12-17",d2:"2026-12-22",src:T+" 12.11",tag:"Ciepło",hot:1},
- {from:"WAW",en:"Manchester",city:"Manchester",p:156,d1:"2026-12-09",d2:"2026-12-11",src:T+" 12.11",tag:"Wyspy"},
- {from:"WAW",en:"Turin",city:"Turyn",p:157,d1:"2026-11-21",d2:"2026-11-28",src:T+" 12.11",tag:"Włochy"},
- {from:"WAW",en:"Liverpool",city:"Liverpool",p:172,d1:"2026-12-12",d2:"2026-12-14",src:T+" 12.11",tag:"Weekend"},
- {from:"WAW",en:"Naples",city:"Neapol",p:175,d1:"2027-01-12",d2:"2027-01-13",src:T+" 12.11",tag:"Włochy"},
- {from:"WAW",en:"Bologna",city:"Bolonia",p:176,d1:"2027-01-25",d2:"2027-01-31",src:T+" 12.11",tag:"Włochy"},
- {from:"WAW",en:"Birmingham",city:"Birmingham",p:177,d1:"2026-12-05",d2:"2026-12-07",src:T+" 12.11",tag:"Weekend"},
- {from:"WAW",en:"Bari",city:"Bari",p:184,d1:"2027-01-13",d2:"2027-01-20",src:T+" 12.11",tag:"Włochy"},
- {from:"WAW",en:"Leeds",city:"Leeds",p:185,d1:"2026-12-05",d2:"2026-12-12",src:T+" 12.11",tag:"Wyspy"},
- {from:"WAW",en:"Bristol",city:"Bristol",p:196,d1:"2026-11-28",d2:"2026-11-30",src:T+" 12.11",tag:"Weekend"},
- {from:"WAW",en:"Sofia",city:"Sofia",p:145,d1:"2026-12-11",d2:"2026-12-31",src:T+" 12.11",tag:"Święta"},
- {from:"WAW",en:"Copenhagen",city:"Kopenhaga",p:148,d1:"2026-12-22",d2:"2027-01-10",src:T+" 12.11",tag:"Święta"},
- {from:"WAW",en:"Rome",city:"Rzym",p:154,d1:"2026-12-02",d2:"2026-12-16",src:T+" 12.11",tag:"Włochy"},
- {from:"WAW",en:"Catania",city:"Katania",p:162,d1:"2027-01-12",d2:"2027-01-28",src:T+" 12.11",tag:"Sycylia"},
- {from:"WAW",en:"London",city:"Londyn",p:164,d1:"2026-12-21",d2:"2027-01-11",src:T+" 12.11",tag:"Święta"},
- {from:"WAW",en:"Budapest",city:"Budapeszt",p:171,d1:"2026-12-14",d2:"2026-12-28",src:T+" 12.11",tag:"Święta"},
- {from:"WAW",en:"Paris",city:"Paryż",p:174,d1:"2026-12-17",d2:"2026-12-31",src:T+" 12.11",tag:"Sylwester"},
- {from:"WAW",en:"Paphos",city:"Pafos",p:180,d1:"2026-11-30",d2:"2026-12-19",src:T+" 12.11",tag:"Ciepło"},
- {from:"WAW",en:"Pisa",city:"Piza",p:183,d1:"2027-01-17",d2:"2027-01-29",src:T+" 12.11",tag:"Toskania"},
- // GDAŃSK
- {from:"GDN",en:"Billund",city:"Billund",p:138,d1:"2027-01-14",d2:"2027-01-17",src:T+" 30.10",tag:"Legoland",hot:1},
- {from:"GDN",en:"Vilnius",city:"Wilno",p:143,d1:"2027-01-06",d2:"2027-01-11",src:T+" 30.10",tag:"City break",hot:1},
- {from:"GDN",en:"Milan",city:"Mediolan",p:143,d1:"2027-01-11",d2:"2027-01-18",src:T+" 30.10",tag:"Włochy",hot:1},
- {from:"GDN",en:"Aarhus",city:"Aarhus",p:147,d1:"2026-11-20",d2:"2026-11-22",src:T+" 30.10",tag:"Weekend"},
- {from:"GDN",en:"Oslo",city:"Oslo Torp",p:147,d1:"2026-11-21",d2:"2026-11-23",src:T+" 30.10",tag:"Weekend"},
- {from:"GDN",en:"Prague",city:"Praga",p:157,d1:"2026-11-14",d2:"2026-11-21",src:T+" 30.10",tag:"City break"},
- {from:"GDN",en:"Turku",city:"Turku",p:164,d1:"2027-01-23",d2:"2027-01-30",src:T+" 30.10",tag:"Finlandia"},
- {from:"GDN",en:"Budapest",city:"Budapeszt",p:166,d1:"2026-11-16",d2:"2026-11-18",src:T+" 30.10",tag:"City break"},
- {from:"GDN",en:"Copenhagen",city:"Kopenhaga",p:139,d1:"2027-01-14",d2:"2027-02-01",src:T+" 30.10",tag:"Skandynawia"},
- {from:"GDN",en:"Gothenburg",city:"Göteborg",p:146,d1:"2026-12-11",d2:"2026-12-28",src:T+" 30.10",tag:"Święta"},
- {from:"GDN",en:"London",city:"Londyn",p:151,d1:"2026-12-19",d2:"2026-12-30",src:T+" 30.10",tag:"Święta"},
- {from:"GDN",en:"Tallinn",city:"Tallinn",p:159,d1:"2027-01-08",d2:"2027-01-17",src:T+" 30.10",tag:"City break"},
- {from:"GDN",en:"Paphos",city:"Pafos",p:167,d1:"2026-11-30",d2:"2026-12-18",src:T+" 30.10",tag:"Ciepło"},
- {from:"GDN",en:"Malta",city:"Malta",p:184,d1:"2026-11-30",d2:"2026-12-21",src:T+" 30.10",tag:"Ciepło"},
- {from:"GDN",en:"Alicante",city:"Alicante",p:188,d1:"2027-01-18",d2:"2027-01-31",src:T+" 30.10",tag:"Ciepło"},
+ // POZ — tanie-loty.com.pl 22.11
+ {from:"POZ",en:"Oslo",city:"Oslo",p:141,d1:"2026-12-12",d2:"2026-12-31",src:"tanie-loty.com.pl 22.11",tag:"Okazja",hot:1},
+ {from:"POZ",en:"London",city:"Londyn",p:143,d1:"2026-12-14",d2:"2026-12-31",src:"tanie-loty.com.pl 22.11",tag:"Święta",hot:1},
+ {from:"POZ",en:"Copenhagen",city:"Kopenhaga",p:147,d1:"2026-12-22",d2:"2027-01-10",src:"tanie-loty.com.pl 22.11",tag:"Święta",hot:1},
+ {from:"POZ",en:"Stockholm",city:"Sztokholm",p:147,d1:"2027-01-17",d2:"2027-01-22",src:"tanie-loty.com.pl 22.11",tag:"Skandynawia",hot:1},
+ {from:"POZ",en:"Tirana",city:"Tirana",p:149,d1:"2026-12-05",d2:"2026-12-07",src:"tanie-loty.com.pl 22.11",tag:"Weekend",hot:1},
+ {from:"POZ",en:"Paris",city:"Paryż",p:149,d1:"2026-12-21",d2:"2027-01-01",src:"tanie-loty.com.pl 22.11",tag:"Sylwester",hot:1},
+ {from:"POZ",en:"Bergamo",city:"Mediolan Bergamo",p:150,d1:"2026-12-21",d2:"2027-01-11",src:"tanie-loty.com.pl 22.11",tag:"Święta",hot:1},
+ {from:"POZ",en:"Liverpool",city:"Liverpool",p:156,d1:"2026-12-17",d2:"2027-01-04",src:"tanie-loty.com.pl 22.11",tag:"Święta"},
+ {from:"POZ",en:"Manchester",city:"Manchester",p:158,d1:"2027-01-15",d2:"2027-01-24",src:"tanie-loty.com.pl 22.11",tag:"Wyspy"},
+ {from:"POZ",en:"Bristol",city:"Bristol",p:163,d1:"2026-12-13",d2:"2026-12-31",src:"tanie-loty.com.pl 22.11",tag:"Wyspy"},
+ {from:"POZ",en:"Birmingham",city:"Birmingham",p:165,d1:"2027-01-23",d2:"2027-01-30",src:"tanie-loty.com.pl 22.11",tag:"Wyspy"},
+ {from:"POZ",en:"Valencia",city:"Walencja",p:168,d1:"2027-01-11",d2:"2027-01-18",src:"tanie-loty.com.pl 22.11",tag:"Ciepło"},
+ {from:"POZ",en:"Malta",city:"Malta",p:172,d1:"2027-01-10",d2:"2027-01-16",src:"tanie-loty.com.pl 22.11",tag:"Ciepło"},
+ {from:"POZ",en:"Paphos",city:"Pafos",p:172,d1:"2026-12-05",d2:"2026-12-22",src:"tanie-loty.com.pl 22.11",tag:"Ciepło"},
+ {from:"POZ",en:"Edinburgh",city:"Edynburg",p:174,d1:"2026-12-24",d2:"2027-01-11",src:"tanie-loty.com.pl 22.11",tag:"Sylwester"},
+ {from:"POZ",en:"Bari",city:"Bari",p:175,d1:"2027-01-10",d2:"2027-01-31",src:"tanie-loty.com.pl 22.11",tag:"Włochy"},
+ {from:"POZ",en:"Palermo",city:"Palermo",p:177,d1:"2026-12-07",d2:"2026-12-12",src:"tanie-loty.com.pl 22.11",tag:"Ciepło"},
+ {from:"POZ",en:"Rome",city:"Rzym",p:186,d1:"2026-12-01",d2:"2026-12-11",src:"tanie-loty.com.pl 22.11",tag:"City break"},
+ {from:"POZ",en:"Zadar",city:"Zadar",p:194,d1:"2027-03-30",d2:"2027-03-31",src:"tanie-loty.com.pl 22.11",tag:"Chorwacja"},
+ {from:"POZ",en:"Basel",city:"Bazylea",p:199,d1:"2027-01-11",d2:"2027-01-15",src:"tanie-loty.com.pl 22.11",tag:"Alpy"},
+ {from:"POZ",en:"Alicante",city:"Alicante",p:212,d1:"2026-12-13",d2:"2026-12-23",src:"tanie-loty.com.pl 22.11",tag:"Ciepło"},
+ {from:"POZ",en:"Dublin",city:"Dublin",p:212,d1:"2027-02-25",d2:"2027-03-07",src:"tanie-loty.com.pl 22.11",tag:"Irlandia"},
+ {from:"POZ",en:"Shannon",city:"Shannon",p:212,d1:"2026-12-05",d2:"2026-12-08",src:"tanie-loty.com.pl 22.11",tag:"Irlandia"},
+ {from:"POZ",en:"Malaga",city:"Malaga",p:223,d1:"2026-12-06",d2:"2026-12-22",src:"tanie-loty.com.pl 22.11",tag:"Ciepło"},
+ {from:"POZ",en:"Porto",city:"Porto",p:233,d1:"2026-11-29",d2:"2026-12-09",src:"tanie-loty.com.pl 22.11",tag:"Portugalia"},
+ {from:"POZ",en:"Leeds",city:"Leeds",p:237,d1:"2027-03-29",d2:"2027-04-15",src:"tanie-loty.com.pl 22.11",tag:"Wielkanoc"},
+ {from:"POZ",en:"Venice",city:"Wenecja",p:250,d1:"2027-03-28",d2:"2027-04-09",src:"tanie-loty.com.pl 22.11",tag:"Wielkanoc"},
+ {from:"POZ",en:"Brussels",city:"Bruksela",p:260,d1:"2027-03-29",d2:"2027-04-05",src:"tanie-loty.com.pl 22.11",tag:"Wielkanoc"},
+ {from:"POZ",en:"Dubrovnik",city:"Dubrownik",p:265,d1:"2027-03-30",d2:"2027-04-10",src:"tanie-loty.com.pl 22.11",tag:"Wielkanoc"},
+ // WRO — tanie-loty.com.pl 22.11
+ {from:"WRO",en:"Oslo",city:"Oslo",p:140,d1:"2026-12-12",d2:"2026-12-31",src:"tanie-loty.com.pl 22.11",tag:"Okazja",hot:1},
+ {from:"WRO",en:"Venice",city:"Wenecja",p:147,d1:"2027-01-10",d2:"2027-01-22",src:"tanie-loty.com.pl 22.11",tag:"Włochy",hot:1},
+ {from:"WRO",en:"Brussels",city:"Bruksela",p:147,d1:"2027-01-11",d2:"2027-01-18",src:"tanie-loty.com.pl 22.11",tag:"City break",hot:1},
+ {from:"WRO",en:"Tirana",city:"Tirana",p:148,d1:"2026-12-10",d2:"2026-12-12",src:"tanie-loty.com.pl 22.11",tag:"Weekend",hot:1},
+ {from:"WRO",en:"Bologna",city:"Bolonia",p:149,d1:"2026-12-06",d2:"2026-12-13",src:"tanie-loty.com.pl 22.11",tag:"Włochy",hot:1},
+ {from:"WRO",en:"Bergamo",city:"Mediolan Bergamo",p:150,d1:"2027-01-11",d2:"2027-01-17",src:"tanie-loty.com.pl 22.11",tag:"Włochy",hot:1},
+ {from:"WRO",en:"London",city:"Londyn",p:156,d1:"2026-12-15",d2:"2027-01-01",src:"tanie-loty.com.pl 22.11",tag:"Święta"},
+ {from:"WRO",en:"Dublin",city:"Dublin",p:159,d1:"2026-12-14",d2:"2026-12-31",src:"tanie-loty.com.pl 22.11",tag:"Święta"},
+ {from:"WRO",en:"Lamezia Terme",city:"Lamezia Terme",p:163,d1:"2027-01-11",d2:"2027-01-18",src:"tanie-loty.com.pl 22.11",tag:"Kalabria"},
+ {from:"WRO",en:"Sofia",city:"Sofia",p:163,d1:"2027-02-01",d2:"2027-02-13",src:"tanie-loty.com.pl 22.11",tag:"Ferie"},
+ {from:"WRO",en:"Newcastle",city:"Newcastle",p:163,d1:"2026-12-05",d2:"2026-12-07",src:"tanie-loty.com.pl 22.11",tag:"Weekend"},
+ {from:"WRO",en:"Marseille",city:"Marsylia",p:165,d1:"2026-12-18",d2:"2027-01-01",src:"tanie-loty.com.pl 22.11",tag:"Święta"},
+ {from:"WRO",en:"Liverpool",city:"Liverpool",p:165,d1:"2027-01-11",d2:"2027-01-15",src:"tanie-loty.com.pl 22.11",tag:"Wyspy"},
+ {from:"WRO",en:"Bristol",city:"Bristol",p:165,d1:"2026-12-04",d2:"2026-12-07",src:"tanie-loty.com.pl 22.11",tag:"Weekend"},
+ {from:"WRO",en:"Turin",city:"Turyn",p:167,d1:"2027-01-09",d2:"2027-01-16",src:"tanie-loty.com.pl 22.11",tag:"Nowa trasa"},
+ {from:"WRO",en:"Stockholm",city:"Sztokholm",p:168,d1:"2026-12-21",d2:"2027-01-11",src:"tanie-loty.com.pl 22.11",tag:"Święta"},
+ {from:"WRO",en:"East Midlands",city:"Derby (East Midlands)",p:169,d1:"2026-12-20",d2:"2027-01-10",src:"tanie-loty.com.pl 22.11",tag:"Święta"},
+ {from:"WRO",en:"Glasgow",city:"Glasgow",p:170,d1:"2026-12-18",d2:"2027-01-01",src:"tanie-loty.com.pl 22.11",tag:"Sylwester"},
+ {from:"WRO",en:"Pisa",city:"Piza",p:172,d1:"2027-01-31",d2:"2027-02-01",src:"tanie-loty.com.pl 22.11",tag:"Toskania"},
+ {from:"WRO",en:"Bournemouth",city:"Bournemouth",p:176,d1:"2026-11-30",d2:"2026-12-06",src:"tanie-loty.com.pl 22.11",tag:"Wyspy"},
+ {from:"WRO",en:"Leeds",city:"Leeds",p:176,d1:"2026-12-17",d2:"2026-12-30",src:"tanie-loty.com.pl 22.11",tag:"Święta"},
+ {from:"WRO",en:"Paris",city:"Paryż",p:177,d1:"2026-12-18",d2:"2027-01-04",src:"tanie-loty.com.pl 22.11",tag:"Sylwester"},
+ {from:"WRO",en:"Manchester",city:"Manchester",p:180,d1:"2026-12-20",d2:"2027-01-08",src:"tanie-loty.com.pl 22.11",tag:"Święta"},
+ {from:"WRO",en:"Alicante",city:"Alicante",p:186,d1:"2026-12-05",d2:"2026-12-23",src:"tanie-loty.com.pl 22.11",tag:"Ciepło"},
+ {from:"WRO",en:"Shannon",city:"Shannon",p:190,d1:"2026-12-11",d2:"2026-12-31",src:"tanie-loty.com.pl 22.11",tag:"Irlandia"},
+ {from:"WRO",en:"Palermo",city:"Palermo",p:192,d1:"2027-01-30",d2:"2027-02-03",src:"tanie-loty.com.pl 22.11",tag:"Ciepło"},
+ {from:"WRO",en:"Malta",city:"Malta",p:195,d1:"2027-01-07",d2:"2027-01-17",src:"tanie-loty.com.pl 22.11",tag:"Ciepło"},
+ {from:"WRO",en:"Naples",city:"Neapol",p:195,d1:"2027-01-30",d2:"2027-02-06",src:"tanie-loty.com.pl 22.11",tag:"Włochy"},
+ // WAW — tanie-loty.com.pl 21.11
+ {from:"WAW",en:"Venice",city:"Wenecja",p:147,d1:"2026-12-02",d2:"2026-12-09",src:"tanie-loty.com.pl 21.11",tag:"Włochy",hot:1},
+ {from:"WAW",en:"Sofia",city:"Sofia",p:147,d1:"2026-12-03",d2:"2026-12-05",src:"tanie-loty.com.pl 21.11",tag:"Weekend",hot:1},
+ {from:"WAW",en:"Rome",city:"Rzym",p:147,d1:"2026-12-01",d2:"2026-12-15",src:"tanie-loty.com.pl 21.11",tag:"City break",hot:1},
+ {from:"WAW",en:"Bratislava",city:"Bratysława",p:147,d1:"2026-11-28",d2:"2026-11-29",src:"tanie-loty.com.pl 21.11",tag:"Weekend",hot:1},
+ {from:"WAW",en:"Milan",city:"Mediolan",p:147,d1:"2026-11-29",d2:"2026-12-10",src:"tanie-loty.com.pl 21.11",tag:"Włochy",hot:1},
+ {from:"WAW",en:"Tirana",city:"Tirana",p:148,d1:"2026-12-17",d2:"2026-12-28",src:"tanie-loty.com.pl 21.11",tag:"Święta",hot:1},
+ {from:"WAW",en:"Bergamo",city:"Mediolan Bergamo",p:149,d1:"2026-12-16",d2:"2027-01-06",src:"tanie-loty.com.pl 21.11",tag:"Święta",hot:1},
+ {from:"WAW",en:"Copenhagen",city:"Kopenhaga",p:150,d1:"2026-12-18",d2:"2027-01-07",src:"tanie-loty.com.pl 21.11",tag:"Święta",hot:1},
+ {from:"WAW",en:"Bologna",city:"Bolonia",p:151,d1:"2027-01-25",d2:"2027-01-31",src:"tanie-loty.com.pl 21.11",tag:"Włochy"},
+ {from:"WAW",en:"Stockholm",city:"Sztokholm",p:155,d1:"2027-02-21",d2:"2027-03-14",src:"tanie-loty.com.pl 21.11",tag:"Ferie"},
+ {from:"WAW",en:"Budapest",city:"Budapeszt",p:158,d1:"2027-01-11",d2:"2027-01-15",src:"tanie-loty.com.pl 21.11",tag:"City break"},
+ {from:"WAW",en:"London",city:"Londyn",p:158,d1:"2026-12-16",d2:"2027-01-06",src:"tanie-loty.com.pl 21.11",tag:"Święta"},
+ {from:"WAW",en:"Manchester",city:"Manchester",p:158,d1:"2026-12-18",d2:"2027-01-08",src:"tanie-loty.com.pl 21.11",tag:"Święta"},
+ {from:"WAW",en:"Birmingham",city:"Birmingham",p:158,d1:"2027-01-11",d2:"2027-01-18",src:"tanie-loty.com.pl 21.11",tag:"Wyspy"},
+ {from:"WAW",en:"Turin",city:"Turyn",p:158,d1:"2026-12-05",d2:"2026-12-12",src:"tanie-loty.com.pl 21.11",tag:"Włochy"},
+ {from:"WAW",en:"Naples",city:"Neapol",p:159,d1:"2027-01-12",d2:"2027-01-13",src:"tanie-loty.com.pl 21.11",tag:"Włochy"},
+ {from:"WAW",en:"Paris",city:"Paryż",p:163,d1:"2026-12-18",d2:"2026-12-31",src:"tanie-loty.com.pl 21.11",tag:"Sylwester"},
+ {from:"WAW",en:"Liverpool",city:"Liverpool",p:167,d1:"2027-01-16",d2:"2027-01-18",src:"tanie-loty.com.pl 21.11",tag:"Weekend"},
+ {from:"WAW",en:"Palermo",city:"Palermo",p:171,d1:"2027-01-11",d2:"2027-01-17",src:"tanie-loty.com.pl 21.11",tag:"Ciepło"},
+ {from:"WAW",en:"Athens",city:"Ateny",p:172,d1:"2027-01-18",d2:"2027-02-01",src:"tanie-loty.com.pl 21.11",tag:"Grecja"},
+ {from:"WAW",en:"Pisa",city:"Piza",p:174,d1:"2027-01-11",d2:"2027-01-29",src:"tanie-loty.com.pl 21.11",tag:"Toskania"},
+ {from:"WAW",en:"Bari",city:"Bari",p:174,d1:"2027-01-13",d2:"2027-01-29",src:"tanie-loty.com.pl 21.11",tag:"Włochy"},
+ {from:"WAW",en:"Zagreb",city:"Zagrzeb",p:176,d1:"2027-02-01",d2:"2027-02-15",src:"tanie-loty.com.pl 21.11",tag:"Ferie"},
+ {from:"WAW",en:"Catania",city:"Katania",p:177,d1:"2027-02-23",d2:"2027-03-08",src:"tanie-loty.com.pl 21.11",tag:"Sycylia"},
+ {from:"WAW",en:"Brussels",city:"Bruksela",p:179,d1:"2027-01-25",d2:"2027-02-15",src:"tanie-loty.com.pl 21.11",tag:"City break"},
+ {from:"WAW",en:"Madrid",city:"Madryt",p:189,d1:"2027-01-15",d2:"2027-02-01",src:"tanie-loty.com.pl 21.11",tag:"Hiszpania"},
+ {from:"WAW",en:"Bristol",city:"Bristol",p:195,d1:"2026-12-21",d2:"2027-01-11",src:"tanie-loty.com.pl 21.11",tag:"Święta"},
+ {from:"WAW",en:"Shannon",city:"Shannon",p:198,d1:"2027-01-14",d2:"2027-01-17",src:"tanie-loty.com.pl 21.11",tag:"Irlandia"},
+ {from:"WAW",en:"Malta",city:"Malta",p:203,d1:"2027-02-27",d2:"2027-03-05",src:"tanie-loty.com.pl 21.11",tag:"Ciepło"},
+ // GDN — tanie-loty.com.pl 22.11
+ {from:"GDN",en:"Oslo",city:"Oslo",p:132,d1:"2026-12-23",d2:"2026-12-30",src:"tanie-loty.com.pl 22.11",tag:"Święta",hot:1},
+ {from:"GDN",en:"Billund",city:"Billund",p:138,d1:"2027-01-21",d2:"2027-01-31",src:"tanie-loty.com.pl 22.11",tag:"Legoland",hot:1},
+ {from:"GDN",en:"Gothenburg",city:"Göteborg",p:141,d1:"2026-12-11",d2:"2027-01-01",src:"tanie-loty.com.pl 22.11",tag:"Święta",hot:1},
+ {from:"GDN",en:"London",city:"Londyn",p:143,d1:"2026-12-20",d2:"2026-12-30",src:"tanie-loty.com.pl 22.11",tag:"Święta",hot:1},
+ {from:"GDN",en:"Milan",city:"Mediolan",p:145,d1:"2027-01-17",d2:"2027-01-22",src:"tanie-loty.com.pl 22.11",tag:"Włochy",hot:1},
+ {from:"GDN",en:"Copenhagen",city:"Kopenhaga",p:145,d1:"2026-12-22",d2:"2027-01-07",src:"tanie-loty.com.pl 22.11",tag:"Święta",hot:1},
+ {from:"GDN",en:"Stockholm",city:"Sztokholm",p:145,d1:"2026-12-09",d2:"2026-12-29",src:"tanie-loty.com.pl 22.11",tag:"Święta",hot:1},
+ {from:"GDN",en:"Aarhus",city:"Aarhus",p:147,d1:"2026-12-06",d2:"2026-12-07",src:"tanie-loty.com.pl 22.11",tag:"Weekend",hot:1},
+ {from:"GDN",en:"Tirana",city:"Tirana",p:149,d1:"2026-12-07",d2:"2026-12-11",src:"tanie-loty.com.pl 22.11",tag:"Ciepło",hot:1},
+ {from:"GDN",en:"Hamburg",city:"Hamburg",p:149,d1:"2026-12-21",d2:"2027-01-10",src:"tanie-loty.com.pl 22.11",tag:"Święta",hot:1},
+ {from:"GDN",en:"Bergamo",city:"Mediolan Bergamo",p:149,d1:"2026-11-30",d2:"2026-12-12",src:"tanie-loty.com.pl 22.11",tag:"Włochy",hot:1},
+ {from:"GDN",en:"Venice",city:"Wenecja",p:150,d1:"2027-01-24",d2:"2027-01-31",src:"tanie-loty.com.pl 22.11",tag:"Włochy",hot:1},
+ {from:"GDN",en:"Bucharest",city:"Bukareszt",p:150,d1:"2027-01-15",d2:"2027-01-23",src:"tanie-loty.com.pl 22.11",tag:"City break",hot:1},
+ {from:"GDN",en:"Budapest",city:"Budapeszt",p:158,d1:"2027-01-11",d2:"2027-01-22",src:"tanie-loty.com.pl 22.11",tag:"City break"},
+ {from:"GDN",en:"Paphos",city:"Pafos",p:158,d1:"2027-01-18",d2:"2027-01-29",src:"tanie-loty.com.pl 22.11",tag:"Ciepło"},
+ {from:"GDN",en:"Vilnius",city:"Wilno",p:159,d1:"2027-01-06",d2:"2027-01-25",src:"tanie-loty.com.pl 22.11",tag:"City break"},
+ {from:"GDN",en:"Catania",city:"Katania",p:159,d1:"2027-01-11",d2:"2027-01-30",src:"tanie-loty.com.pl 22.11",tag:"Sycylia"},
+ {from:"GDN",en:"Turin",city:"Turyn",p:162,d1:"2027-01-09",d2:"2027-01-30",src:"tanie-loty.com.pl 22.11",tag:"Włochy"},
+ {from:"GDN",en:"Prague",city:"Praga",p:165,d1:"2027-01-11",d2:"2027-01-23",src:"tanie-loty.com.pl 22.11",tag:"City break"},
+ {from:"GDN",en:"Palermo",city:"Palermo",p:165,d1:"2027-01-11",d2:"2027-01-21",src:"tanie-loty.com.pl 22.11",tag:"Ciepło"},
+ {from:"GDN",en:"Liverpool",city:"Liverpool",p:165,d1:"2026-12-11",d2:"2027-01-01",src:"tanie-loty.com.pl 22.11",tag:"Święta"},
+ {from:"GDN",en:"Newcastle",city:"Newcastle",p:171,d1:"2026-12-04",d2:"2026-12-06",src:"tanie-loty.com.pl 22.11",tag:"Weekend"},
+ {from:"GDN",en:"Manchester",city:"Manchester",p:172,d1:"2027-01-10",d2:"2027-01-24",src:"tanie-loty.com.pl 22.11",tag:"Wyspy"},
+ {from:"GDN",en:"Bristol",city:"Bristol",p:175,d1:"2027-01-16",d2:"2027-01-18",src:"tanie-loty.com.pl 22.11",tag:"Weekend"},
+ {from:"GDN",en:"Podgorica",city:"Podgorica",p:176,d1:"2027-03-28",d2:"2027-03-31",src:"tanie-loty.com.pl 22.11",tag:"Wielkanoc"},
+ {from:"GDN",en:"Tallinn",city:"Tallinn",p:178,d1:"2027-01-18",d2:"2027-01-25",src:"tanie-loty.com.pl 22.11",tag:"City break"},
+ {from:"GDN",en:"Turku",city:"Turku",p:178,d1:"2027-02-23",d2:"2027-03-06",src:"tanie-loty.com.pl 22.11",tag:"Finlandia"},
+ // CIEPŁE KRAJE 300–1000 zł
+ {from:"WRO",en:"Seville",city:"Sewilla",p:300,d1:"2027-01-29",d2:"2027-02-05",src:"tanie-loty.com.pl 21.11",tag:"☀ Ciepło",warm:1},
+ {from:"WRO",en:"Larnaca",city:"Larnaka (Cypr)",p:311,d1:"2027-01-12",d2:"2027-01-16",src:"tanie-loty.com.pl 21.11",tag:"☀ Ciepło",warm:1},
+ {from:"WRO",en:"Lamezia Terme",city:"Lamezia Terme",p:316,d1:"2026-12-05",d2:"2026-12-12",src:"tanie-loty.com.pl 22.11",tag:"Kalabria",warm:1},
+ {from:"WRO",en:"Agadir",city:"Agadir (Maroko)",p:366,d1:"2026-12-14",d2:"2026-12-19",src:"tanie-loty.com.pl 21.11",tag:"☀ Maroko",warm:1},
+ {from:"WRO",en:"Agadir",city:"Agadir (Maroko)",p:421,d1:"2027-01-08",d2:"2027-01-15",src:"tanie-loty.com.pl 22.11",tag:"☀ Maroko",warm:1},
+ {from:"WRO",en:"Agadir",city:"Agadir (Maroko)",p:409,d1:"2027-02-01",d2:"2027-02-07",src:"tanie-loty.com.pl 20.10",tag:"☀ Maroko",warm:1},
+ {from:"WRO",en:"Gran Canaria",city:"Gran Canaria",p:836,d1:"2027-01-06",d2:"2027-01-13",src:"tanie-loty.com.pl 22.11",tag:"☀ Kanary",warm:1},
+ {from:"WRO",en:"Marrakech",city:"Marrakesz",p:863,d1:"2027-02-08",d2:"2027-02-16",src:"tanie-loty.com.pl 20.10",tag:"☀ Maroko",warm:1},
+ {from:"WAW",en:"Agadir",city:"Agadir (Maroko)",p:573,d1:"2027-02-10",d2:"2027-02-19",src:"tanie-loty.com.pl 20.10",tag:"☀ Maroko",warm:1},
+ {from:"WAW",en:"Agadir",city:"Agadir (Maroko)",p:593,d1:"2027-02-16",d2:"2027-02-22",src:"tanie-loty.com.pl 20.10",tag:"☀ Maroko",warm:1},
+ {from:"WAW",en:"Marrakech",city:"Marrakesz",p:805,d1:"2027-02-09",d2:"2027-02-16",src:"tanie-loty.com.pl 20.10",tag:"☀ Maroko",warm:1},
+ {from:"WAW",en:"Tenerife",city:"Teneryfa (z Modlina)",p:818,d1:"2027-01-08",d2:"2027-01-18",src:"tanie-loty.com.pl 22.11",tag:"☀ Kanary",warm:1},
+ {from:"WAW",en:"Lanzarote",city:"Lanzarote",p:845,d1:"2027-01-09",d2:"2027-01-17",src:"tanie-loty.com.pl 22.11",tag:"☀ Kanary",warm:1},
+ {from:"WAW",en:"Fuerteventura",city:"Fuerteventura",p:846,d1:"2027-01-12",d2:"2027-01-21",src:"tanie-loty.com.pl 22.11",tag:"☀ Kanary",warm:1},
+ {from:"GDN",en:"Sharm el-Sheikh",city:"Szarm el-Szejk (Egipt)",p:805,d1:"2027-01-09",d2:"2027-01-13",src:"tanie-loty.com.pl 22.11",tag:"☀ Egipt",warm:1},
+ {from:"GDN",en:"Tenerife",city:"Teneryfa",p:863,d1:"2027-01-07",d2:"2027-01-13",src:"tanie-loty.com.pl 22.11",tag:"☀ Kanary",warm:1},
+ {from:"GDN",en:"Madeira",city:"Madera",p:886,d1:"2027-01-04",d2:"2027-01-11",src:"tanie-loty.com.pl 21.11",tag:"☀ Madera",warm:1},
+ {from:"POZ",en:"Marrakech",city:"Marrakesz",p:819,d1:"2027-02-08",d2:"2027-02-12",src:"tanie-loty.com.pl 20.10",tag:"☀ Maroko",warm:1},
+ {from:"POZ",en:"Marrakech",city:"Marrakesz",p:822,d1:"2027-02-08",d2:"2027-02-16",src:"tanie-loty.com.pl 20.10",tag:"☀ Maroko",warm:1},
  // DALEKIE TERMINY: majówka 2027 (ceny z 12.11) i czerwiec 2027
  {from:"POZ",en:"London",city:"Londyn Luton",p:321,d1:"2027-04-29",d2:"2027-05-05",src:T+" 12.11",tag:"Majówka"},
  {from:"POZ",en:"Bergamo",city:"Mediolan Bergamo",p:369,d1:"2027-05-01",d2:"2027-05-05",src:T+" 12.11",tag:"Majówka"},
@@ -600,12 +685,13 @@ function show(id){
 function chipGroup(el,cb){el.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{el.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");cb(c.dataset.v)})}
 
 // ---------- OKAZJE ----------
-let dealMonth="all", dealWhen="all";
+let dealMonth="all", dealWhen="all", dealWarm=false;
 const FAR = addDays(TODAY,90);
 function dealsFor(){
   const week=$("#dealWeek").checked;
   return DEALS.filter(d=>ORIGS.includes(d.from) && d.d1>=TODAY && (!week || nights(d.d1,d.d2)<=7)
-    && (dealWhen==="all" || (dealWhen==="near" ? d.d1<FAR : d.d1>=FAR)));
+    && (dealWhen==="all" || (dealWhen==="near" ? d.d1<FAR : d.d1>=FAR))
+    && (!dealWarm || d.warm || /Ciepło|Kanary|Maroko|Egipt|Madera/.test(d.tag)));
 }
 function renderDealMonths(){
   const ms=[...new Set(dealsFor().map(d=>d.d1.slice(0,7)))].sort();
@@ -635,7 +721,13 @@ function renderDeals(){
     openUrl(`https://www.skyscanner.pl/transport/loty/${ORIGINS[d.from].sky}/anywhere/${ymd6(d.d1)}/${ymd6(d.d2)}/?adultsv2=1&rtn=1&preferdirects=true`);
   });
 }
-$("#dealMax").oninput=renderDeals;
+$("#dealMax").oninput=()=>{dealWarm=false;$("#dealPrice").querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));renderDeals()};
+$("#dealPrice").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
+  const v=c.dataset.v;
+  if(v==="warm"){ dealWarm=!dealWarm; c.classList.toggle("on",dealWarm); }
+  else { $("#dealPrice").querySelectorAll(".chip:not([data-v=warm])").forEach(x=>x.classList.toggle("on",x===c)); $("#dealMax").value=v; }
+  renderDealMonths(); renderDeals();
+});
 $("#dealWeek").onchange=()=>{renderDealMonths();renderDeals()};
 chipGroup($("#dealWhen"),v=>{dealWhen=v;renderDealMonths();renderDeals()});
 
