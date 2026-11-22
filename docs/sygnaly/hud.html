@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" content="#06080d">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>HUD wejść — BTC · ETH · Złoto · Ropa</title>
+<style>
+:root{--bg:#06080d;--card:rgba(255,255,255,.035);--ln:rgba(255,255,255,.08);--tx:#eef2f8;--mu:#7a8599;--gr:#2ee59d;--rd:#ff5c6c;--am:#ffc845}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:10px 10px 30px;max-width:640px;margin:auto}
+.top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.top h1{font-size:15px;margin:0;flex:1;letter-spacing:.06em;font-weight:800}
+.top h1 span{color:var(--mu);font-weight:500}
+.b{background:transparent;color:var(--mu);border:1px solid var(--ln);border-radius:8px;padding:5px 9px;font:inherit;font-size:12.5px;text-decoration:none}
+.b.on{color:var(--tx);border-color:rgba(255,255,255,.35)}
+.row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:14px;margin-bottom:10px;transition:border-color .3s}
+.card.L{border-color:rgba(46,229,157,.45);box-shadow:0 0 24px rgba(46,229,157,.08)}
+.card.S{border-color:rgba(255,92,108,.45);box-shadow:0 0 24px rgba(255,92,108,.08)}
+.h{display:flex;align-items:baseline;gap:8px}
+.h .n{font-weight:800;font-size:17px}
+.h .p{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums}
+.h .c{font-size:12.5px}
+.st{margin:10px 0 4px;font-size:26px;font-weight:900;letter-spacing:.02em}
+.st.L{color:var(--gr)}.st.S{color:var(--rd)}.st.W{color:var(--mu);font-size:20px;font-weight:700}
+.fresh{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.45}}
+.sub{color:var(--mu);font-size:13px}
+.lv{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;text-align:center}
+.lv div{border-radius:10px;padding:7px 4px;background:rgba(255,255,255,.03)}
+.lv .k{font-size:11px;color:var(--mu);letter-spacing:.08em}
+.lv .v{font-weight:800;font-variant-numeric:tabular-nums;font-size:15px}
+.lv .d{font-size:11.5px}
+.rng{position:relative;height:10px;border-radius:6px;margin:16px 4px 6px;background:linear-gradient(90deg,rgba(255,92,108,.55),rgba(255,92,108,.15) var(--e),rgba(46,229,157,.15) var(--e),rgba(46,229,157,.55))}
+.rng .e{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;left:var(--e)}
+.rng .now{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;transform:translate(-50%,-50%);background:var(--am);box-shadow:0 0 10px var(--am);left:var(--n);transition:left .6s}
+.rl{display:flex;justify-content:space-between;font-size:11px;color:var(--mu)}
+.g{color:var(--gr)}.r{color:var(--rd)}.a{color:var(--am)}
+.trust{margin-top:10px;font-size:12px;color:var(--mu);border-top:1px solid var(--ln);padding-top:8px}
+#err{display:none;color:var(--rd);border:1px solid var(--rd);border-radius:10px;padding:8px;margin-bottom:10px;font-size:13px}
+#flash{position:fixed;left:50%;top:10px;transform:translateX(-50%);background:var(--am);color:#000;font-weight:900;padding:10px 14px;border-radius:12px;display:none;z-index:9}
+.ft{color:var(--mu);font-size:11px;margin-top:6px}
+</style>
+</head>
+<body>
+<div id="flash"></div>
+<div class="top">
+  <h1>HUD <span id="sub"></span></h1>
+  <button class="b" id="snd">🔕</button>
+  <button class="b" id="wake">💡</button>
+  <a class="b" href="./">Klasyczny</a><a class="b" href="kokpit.html">Kokpit</a>
+</div>
+<div class="row" id="ivs"></div>
+<div class="row" id="strats"></div>
+<div id="err"></div>
+<div id="cards"></div>
+<div class="ft">Wejście, SL i TP z wybranej strategii, na zamkniętej świecy. „Test” to wynik tej strategii na historii danego instrumentu: jeśli jest na minusie, nie ufaj sygnałom. Ustawienia zmieniasz w widoku klasycznym (⚙️). To nie porada inwestycyjna.</div>
+<script>
+/* ===== LOGIKA (czysta, bez DOM) ===== */
+const STRATS={
+  mom:{name:'Momentum + skośność',desc:'Ze screena: siła ruchu + przewaga wzrostów/spadków, z filtrem trendu. Rynek w ruchu.',
+    def:{momBars:45,skewBars:40,momMin:0.05,skewMin:0.2,useTrend:1,ema:50,sl:1.5,tp:3,maxBars:16,fee:0.05}},
+  ema:{name:'Trend: EMA + RSI',desc:'Szybka EMA nad wolną i RSI powyżej 50 = kupno (odwrotnie sprzedaż). Klasyka na trendy.',
+    def:{fast:20,slow:50,rsiLen:14,sl:1.5,tp:3,maxBars:24,fee:0.05}},
+  brk:{name:'Wybicie z kanału',desc:'Zamknięcie powyżej najwyższej ceny z N świec = kupno, poniżej najniższej = sprzedaż. Dobre na złoto i ropę przy newsach.',
+    def:{n:20,useTrend:1,ema:100,sl:1.5,tp:3,maxBars:32,fee:0.05}},
+  kombo:{name:'Kombo (głosowanie)',desc:'Łączy 5 wskaźników: momentum, skośność, EMA szybka/wolna, RSI i miejsce w kanale. Sygnał, gdy co najmniej N z 5 głosuje w tę samą stronę I rynek ma trend (ADX nad progiem), bo w szarpaninie bokiem proste strategie najczęściej tracą.',
+    def:{minVotes:4,adxMin:20,momBars:16,skewBars:40,fast:20,slow:50,rsiLen:14,n:20,sl:1.5,tp:2.5,maxBars:24,fee:0.05}},
+  mr:{name:'Odbicie od Bollingera',desc:'Cena poza wstęgą i RSI skrajne = gra na powrót do środka. Rynek w konsolidacji (bokiem).',
+    def:{n:20,k:2,rsiLen:14,rsiLo:30,rsiHi:70,sl:1.5,tp:1.5,maxBars:12,fee:0.05}}
+};
+const LABELS={
+  momBars:'Momentum: ile świec wstecz',skewBars:'Skośność: ile świec',momMin:'Min. momentum %',skewMin:'Min. skośność (0–1)',
+  useTrend:'Filtr trendu EMA (1 = tak, 0 = nie)',ema:'Długość EMA trendu',fast:'Szybka EMA',slow:'Wolna EMA',rsiLen:'Długość RSI',
+  n:'Ile świec (kanał / wstęga)',k:'Szerokość wstęgi (odch. std.)',rsiLo:'RSI wyprzedanie (kupno poniżej)',rsiHi:'RSI wykupienie (sprzedaż powyżej)',
+  minVotes:'Ile głosów z 5 potrzeba',adxMin:'Min. siła trendu ADX (0 = wyłącz)',
+  sl:'Stop loss × ATR',tp:'Take profit × ATR',maxBars:'Maks. świec w pozycji',fee:'Prowizja % za stronę'
+};
+const INTS=['momBars','skewBars','ema','fast','slow','rsiLen','n','maxBars','useTrend','minVotes'];
+function ema(a,n){const k=2/(n+1),o=[];let e=a[0];for(let i=0;i<a.length;i++){e=i?a[i]*k+e*(1-k):a[i];o.push(e)}return o}
+function atr(c,n){const o=[];let a=null;for(let i=0;i<c.length;i++){const b=c[i],pc=i?c[i-1].c:b.c;const tr=Math.max(b.h-b.l,Math.abs(b.h-pc),Math.abs(b.l-pc));a=a==null?tr:(a*(n-1)+tr)/n;o.push(a)}return o}
+function rsi(cl,n){const o=[null];let ag=0,al=0;for(let i=1;i<cl.length;i++){const d=cl[i]-cl[i-1],g=Math.max(d,0),l=Math.max(-d,0);
+  if(i<=n){ag+=g/n;al+=l/n;o.push(i<n?null:(al===0?100:100-100/(1+ag/al)))}else{ag=(ag*(n-1)+g)/n;al=(al*(n-1)+l)/n;o.push(al===0?100:100-100/(1+ag/al))}}return o}
+const sgn=v=>v>=0?'+':'';
+function adx(c,n){const N=c.length,out=new Array(N).fill(null);let trS=0,pS=0,mS=0,av=null;const dxs=[];
+  for(let i=1;i<N;i++){const up=c[i].h-c[i-1].h,dn=c[i-1].l-c[i].l,pdm=up>dn&&up>0?up:0,mdm=dn>up&&dn>0?dn:0;
+    const tr=Math.max(c[i].h-c[i].l,Math.abs(c[i].h-c[i-1].c),Math.abs(c[i].l-c[i-1].c));
+    if(i<=n){trS+=tr;pS+=pdm;mS+=mdm;if(i<n)continue}else{trS=trS-trS/n+tr;pS=pS-pS/n+pdm;mS=mS-mS/n+mdm}
+    const pdi=trS?100*pS/trS:0,mdi=trS?100*mS/trS:0,dx=pdi+mdi?100*Math.abs(pdi-mdi)/(pdi+mdi):0;
+    if(av==null){dxs.push(dx);if(dxs.length===n)av=dxs.reduce((a,b)=>a+b)/n}else av=(av*(n-1)+dx)/n;
+    out[i]=av}
+  return out}
+function analyze(c,k,P){
+  const cl=c.map(x=>x.c),N=c.length,at=atr(c,14),sig=new Array(N).fill(0),lean=new Array(N).fill(1);
+  const A={at,sig,lean,lines:[],panel:null,why:()=>[]};
+  if(k==='mom'){
+    const e=ema(cl,P.ema),mom=[],skew=[];
+    for(let i=0;i<N;i++){
+      mom[i]=i>=P.momBars?(cl[i]-cl[i-P.momBars])/cl[i-P.momBars]*100:null;
+      if(i>=P.skewBars){let up=0,dn=0;for(let j=i-P.skewBars+1;j<=i;j++){const r=(cl[j]-cl[j-1])/cl[j-1];if(r>0)up+=r*r;else dn+=r*r}skew[i]=up+dn>0?(up-dn)/(up+dn):0}else skew[i]=null;
+      if(mom[i]==null||skew[i]==null||i<P.ema)continue;
+      lean[i]=mom[i]>=0?1:-1;
+      if(mom[i]>P.momMin&&skew[i]>P.skewMin&&(!P.useTrend||cl[i]>e[i]))sig[i]=1;
+      else if(mom[i]<-P.momMin&&skew[i]<-P.skewMin&&(!P.useTrend||cl[i]<e[i]))sig[i]=-1;
+    }
+    A.lines=[{a:e,col:'#facc15',l:'EMA'+P.ema}];
+    A.panel={bars:mom,line:skew,min:-1,max:1,levels:[P.skewMin,-P.skewMin],label:'mom/skoś.'};
+    A.why=(i,w)=>[[w>0?mom[i]>P.momMin:mom[i]<-P.momMin,`Momentum ${P.momBars} świec: ${sgn(mom[i])}${mom[i].toFixed(3)}% (próg ±${P.momMin})`],
+      [w>0?skew[i]>P.skewMin:skew[i]<-P.skewMin,`Skośność: ${sgn(skew[i])}${skew[i].toFixed(2)} (próg ±${P.skewMin})`]]
+      .concat(P.useTrend?[[w>0?cl[i]>e[i]:cl[i]<e[i],`Cena ${cl[i]>e[i]?'nad':'pod'} EMA${P.ema}`]]:[]);
+  }else if(k==='ema'){
+    const f=ema(cl,P.fast),sl=ema(cl,P.slow),r=rsi(cl,P.rsiLen);
+    for(let i=0;i<N;i++){if(i<P.slow||r[i]==null)continue;lean[i]=f[i]>=sl[i]?1:-1;
+      if(f[i]>sl[i]&&r[i]>50)sig[i]=1;else if(f[i]<sl[i]&&r[i]<50)sig[i]=-1}
+    A.lines=[{a:f,col:'#38bdf8',l:'EMA'+P.fast},{a:sl,col:'#facc15',l:'EMA'+P.slow}];
+    A.panel={line:r,min:0,max:100,levels:[50],label:'RSI'};
+    A.why=(i,w)=>[[w>0?f[i]>sl[i]:f[i]<sl[i],`EMA${P.fast} ${f[i]>sl[i]?'nad':'pod'} EMA${P.slow}`],
+      [w>0?r[i]>50:r[i]<50,`RSI: ${r[i].toFixed(1)} (${w>0?'potrzeba > 50':'potrzeba < 50'})`]];
+  }else if(k==='brk'){
+    const e=ema(cl,P.ema),hi=[],lo=[];
+    for(let i=0;i<N;i++){if(i<P.n){hi[i]=lo[i]=null;continue}let H=-Infinity,L=Infinity;for(let j=i-P.n;j<i;j++){H=Math.max(H,c[j].h);L=Math.min(L,c[j].l)}hi[i]=H;lo[i]=L;
+      lean[i]=(cl[i]-L)>=(H-cl[i])?1:-1;if(i<P.ema)continue;
+      if(cl[i]>H&&(!P.useTrend||cl[i]>e[i]))sig[i]=1;else if(cl[i]<L&&(!P.useTrend||cl[i]<e[i]))sig[i]=-1}
+    A.lines=[{a:hi,col:'#64748b',l:'kanał'},{a:lo,col:'#64748b'},{a:e,col:'#facc15',l:'EMA'+P.ema}];
+    A.panel={line:rsi(cl,14),min:0,max:100,levels:[30,70],label:'RSI'};
+    A.why=(i,w)=>[[w>0?cl[i]>hi[i]:cl[i]<lo[i],w>0?`Zamknięcie nad szczytem ${P.n} świec (${hi[i].toFixed(2)})`:`Zamknięcie pod dołkiem ${P.n} świec (${lo[i].toFixed(2)})`]]
+      .concat(P.useTrend?[[w>0?cl[i]>e[i]:cl[i]<e[i],`Cena ${cl[i]>e[i]?'nad':'pod'} EMA${P.ema}`]]:[]);
+  }else if(k==='kombo'){
+    const f=ema(cl,P.fast),sl=ema(cl,P.slow),r=rsi(cl,P.rsiLen),ax=adx(c,14),votes=new Array(N).fill(0),V=[];
+    const NM=['Momentum','Skośność','EMA','RSI','Kanał'];
+    for(let i=0;i<N;i++){
+      if(i<Math.max(P.slow,P.momBars,P.skewBars,P.n)+1||r[i]==null||ax[i]==null){V[i]=null;continue}
+      const mom=(cl[i]-cl[i-P.momBars])/cl[i-P.momBars]*100;
+      let up=0,dn=0;for(let j=i-P.skewBars+1;j<=i;j++){const q=(cl[j]-cl[j-1])/cl[j-1];if(q>0)up+=q*q;else dn+=q*q}
+      const sk=up+dn>0?(up-dn)/(up+dn):0;
+      let H=-Infinity,L=Infinity;for(let j=i-P.n;j<i;j++){H=Math.max(H,c[j].h);L=Math.min(L,c[j].l)}
+      const pos=H>L?(cl[i]-L)/(H-L):0.5;
+      const v=[mom>0.05?1:mom<-0.05?-1:0, sk>0.1?1:sk<-0.1?-1:0, f[i]>sl[i]?1:-1, r[i]>50?1:r[i]<50?-1:0, pos>0.75?1:pos<0.25?-1:0];
+      V[i]={v,mom,sk,pos,r:r[i],ax:ax[i]};
+      const sum=v.reduce((a,b)=>a+b,0);votes[i]=sum;lean[i]=sum>=0?1:-1;
+      const trendOk=!P.adxMin||ax[i]>=P.adxMin;
+      if(trendOk&&sum>=P.minVotes)sig[i]=1;else if(trendOk&&sum<=-P.minVotes)sig[i]=-1;
+    }
+    A.lines=[{a:f,col:'#38bdf8',l:'EMA'+P.fast},{a:sl,col:'#facc15',l:'EMA'+P.slow}];
+    A.panel={bars:votes,line:ax,min:0,max:60,levels:[P.adxMin],label:'głosy/ADX'};
+    A.why=(i,w)=>{const d=V[i];if(!d)return [];const txt=[`${sgn(d.mom)}${d.mom.toFixed(2)}% (${P.momBars} św.)`,`${sgn(d.sk)}${d.sk.toFixed(2)}`,
+      f[i]>sl[i]?`EMA${P.fast} nad EMA${P.slow}`:`EMA${P.fast} pod EMA${P.slow}`,d.r.toFixed(1),`${Math.round(d.pos*100)}% wysokości kanału ${P.n} św.`];
+      const cnt=d.v.filter(x=>x===w).length;
+      return d.v.map((x,j)=>[x===w,`${NM[j]}: ${txt[j]}`]).concat([[cnt>=P.minVotes,`Głosy: ${cnt}/5 (potrzeba ${P.minVotes})`],
+        [!P.adxMin||d.ax>=P.adxMin,`Siła trendu ADX: ${d.ax.toFixed(1)} (próg ${P.adxMin})`]])};
+  }else if(k==='mr'){
+    const r=rsi(cl,P.rsiLen),mid=[],up=[],lo=[];
+    for(let i=0;i<N;i++){if(i<P.n-1){mid[i]=up[i]=lo[i]=null;continue}let s=0,q=0;for(let j=i-P.n+1;j<=i;j++){s+=cl[j];q+=cl[j]*cl[j]}const m=s/P.n,sd=Math.sqrt(Math.max(q/P.n-m*m,0));
+      mid[i]=m;up[i]=m+P.k*sd;lo[i]=m-P.k*sd;lean[i]=cl[i]<=m?1:-1;if(r[i]==null)continue;
+      if(cl[i]<lo[i]&&r[i]<P.rsiLo)sig[i]=1;else if(cl[i]>up[i]&&r[i]>P.rsiHi)sig[i]=-1}
+    A.lines=[{a:up,col:'#64748b',l:'wstęga'},{a:lo,col:'#64748b'},{a:mid,col:'#facc15',l:'środek'}];
+    A.panel={line:r,min:0,max:100,levels:[P.rsiLo,P.rsiHi],label:'RSI'};
+    A.why=(i,w)=>[[w>0?cl[i]<lo[i]:cl[i]>up[i],w>0?`Cena pod dolną wstęgą (${lo[i].toFixed(2)})`:`Cena nad górną wstęgą (${up[i].toFixed(2)})`],
+      [w>0?r[i]<P.rsiLo:r[i]>P.rsiHi,`RSI: ${r[i].toFixed(1)} (${w>0?'potrzeba < '+P.rsiLo:'potrzeba > '+P.rsiHi})`]];
+  }
+  return A;
+}
+function startIdx(P){let m=60;for(const k of INTS)if(P[k]!=null&&k!=='useTrend')m=Math.max(m,P[k]+1);return m}
+function backtest(c,A,P,last,from){
+  const tr=[];let pos=null;
+  for(let i=Math.max(startIdx(P),from||0);i<=last;i++){
+    if(pos){
+      const b=c[i];let ex=null,why='';
+      if(pos.dir>0){if(b.l<=pos.sl){ex=pos.sl;why='SL'}else if(b.h>=pos.tp){ex=pos.tp;why='TP'}}
+      else{if(b.h>=pos.sl){ex=pos.sl;why='SL'}else if(b.l<=pos.tp){ex=pos.tp;why='TP'}}
+      if(ex==null&&i-pos.i>=P.maxBars){ex=b.c;why='Czas'}
+      if(ex!=null){const feeR=pos.entry*P.fee*2/100/pos.risk;tr.push({...pos,exitI:i,exitT:b.t,exit:ex,why,R:(ex-pos.entry)*pos.dir/pos.risk-feeR});pos=null;continue}
+    }
+    if(!pos&&A.sig[i]!==0&&A.sig[i]!==A.sig[i-1]&&A.at[i]>0){
+      const risk=A.at[i]*P.sl,d=A.sig[i],en=c[i].c;
+      pos={i,t:c[i].t,dir:d,entry:en,risk,sl:en-d*risk,tp:en+d*A.at[i]*P.tp};
+    }
+  }
+  return {trades:tr,open:pos};
+}
+function stats(tr){
+  const n=tr.length,w=tr.filter(t=>t.R>0).length,sum=tr.reduce((s,t)=>s+t.R,0);
+  const gp=tr.filter(t=>t.R>0).reduce((s,t)=>s+t.R,0),gl=-tr.filter(t=>t.R<0).reduce((s,t)=>s+t.R,0);
+  return {n,w,wr:n?w/n*100:0,sum,avg:n?sum/n:0,pf:gl>0?gp/gl:(gp>0?99:0)};
+}
+function halves(c,tr){const mid=c[0].t+(c[c.length-1].t-c[0].t)/2;return [stats(tr.filter(t=>t.t<mid)),stats(tr.filter(t=>t.t>=mid))]}
+/* ===== KONIEC LOGIKI ===== */
+const API='https://fapi.binance.com/fapi/v1/klines';
+const INST=[{id:'BTCUSDT',name:'BTC',dec:1},{id:'ETHUSDT',name:'ETH',dec:2},{id:'XAUUSDT',name:'Złoto',dec:2},{id:'CLUSDT',name:'Ropa WTI',dec:2}];
+const IVS={'15m':15*60*1000,'1h':60*60*1000,'4h':4*60*60*1000};
+let iv='15m';try{const v=localStorage.getItem('sig15iv');if(IVS[v])iv=v}catch(e){}
+let MS=IVS[iv];const MAXC=6000;
+const IVDEF={
+  '1h':{mom:{momBars:12,skewBars:24,maxBars:24},kombo:{momBars:8,skewBars:24,maxBars:24},ema:{maxBars:24},brk:{maxBars:36},mr:{maxBars:12}},
+  '4h':{mom:{momBars:6,skewBars:20,maxBars:12},kombo:{momBars:6,skewBars:20,maxBars:12},ema:{maxBars:12},brk:{maxBars:18},mr:{maxBars:6}}
+};
+function defFor(k){return {...STRATS[k].def,...((IVDEF[iv]||{})[k]||{})}}
+let strat='kombo',PSK={};
+function loadState(){try{const v3=JSON.parse(localStorage.getItem('sig15v3')||'null');if(v3){strat=STRATS[v3.strat]?v3.strat:strat;PSK=v3.PSK||{}}}catch(e){}}
+loadState();
+function saveStrat(){try{const v=JSON.parse(localStorage.getItem('sig15v3')||'{}');v.strat=strat;v.PSK=v.PSK||PSK;localStorage.setItem('sig15v3',JSON.stringify(v))}catch(e){}}
+function getP(id){return {...defFor(strat),...((PSK[iv+'|'+id]||{})[strat]||{})}}
+const SHORTN={mom:'Momentum',ema:'EMA+RSI',brk:'Wybicie',kombo:'Kombo',mr:'Bollinger'};
+const D={};INST.forEach(x=>D[x.id]={c:[],lc:-1,lcT:0,r:null,err:null});
+let gen=0,sound=false,actx=null,wl=null;
+const $=id=>document.getElementById(id);
+const fmt=(v,d)=>v==null?'—':Number(v).toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=(a,b)=>((a-b)/b*100);
+async function fetchK(sym,limit,endTime){const r=await fetch(`${API}?symbol=${sym}&interval=${iv}&limit=${limit}`+(endTime?`&endTime=${endTime}`:''));
+  if(!r.ok)throw new Error('HTTP '+r.status);return (await r.json()).map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4]}))}
+async function fetchHist(sym){let all=await fetchK(sym,1500);while(all.length<MAXC&&all.length){const m=await fetchK(sym,1500,all[0].t-1);if(!m.length)break;all=m.concat(all)}return all.slice(-MAXC)}
+function lastClosed(c){const now=Date.now();let i=c.length-1;while(i>=0&&c[i].t+MS>now)i--;return i}
+function compute(id,notify){const d=D[id];if(!d.c.length)return;d.lc=lastClosed(d.c);d.lcT=d.c[d.lc].t;
+  const P=getP(id),A=analyze(d.c,strat,P),bt=backtest(d.c,A,P,d.lc),prev=d.r;
+  d.r={A,bt,st:stats(bt.trades),P};
+  const o=bt.open;if(notify&&o&&o.i===d.lc&&(!prev||!prev.bt.open||prev.bt.open.t!==o.t))alertSig(id,o.dir)}
+function alertSig(id,dir){const x=INST.find(q=>q.id===id),f=$('flash');f.textContent=`${x.name}: WEJDŹ ${dir>0?'LONG ▲':'SHORT ▼'}`;f.style.display='block';setTimeout(()=>f.style.display='none',8000);
+  try{navigator.vibrate&&navigator.vibrate([250,120,250])}catch(e){}
+  if(sound&&actx){try{[0,.22].forEach(t=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=dir>0?880:440;g.gain.value=.14;o.connect(g);g.connect(actx.destination);o.start(actx.currentTime+t);o.stop(actx.currentTime+t+.16)})}catch(e){}}}
+async function initAll(){const g=gen;
+  await Promise.all(INST.map(async x=>{try{const c=await fetchHist(x.id);if(g!==gen)return;D[x.id].c=c;D[x.id].err=null;compute(x.id,false)}catch(e){if(g===gen)D[x.id].err=e.message}}));
+  if(g===gen)render()}
+async function poll(){const g=gen;
+  await Promise.all(INST.map(async x=>{const d=D[x.id];if(!d.c.length)return;
+    try{const nw=await fetchK(x.id,3);if(g!==gen||d!==D[x.id])return;
+      for(const k of nw){const j=d.c.findIndex(q=>q.t===k.t);if(j>=0)d.c[j]=k;else if(k.t>d.c[d.c.length-1].t)d.c.push(k)}
+      if(d.c.length>MAXC)d.c.splice(0,d.c.length-MAXC);d.err=null;const lc=lastClosed(d.c);if(d.c[lc]&&d.c[lc].t!==d.lcT)compute(x.id,true)}
+    catch(e){d.err=e.message}}));
+  if(g===gen){if(INST.some(x=>!D[x.id].c.length))initAll();render()}}
+function ago(t){const m=Math.round((Date.now()-t)/60000);return m<60?m+' min temu':m<1440?Math.floor(m/60)+' h '+(m%60)+' min temu':Math.floor(m/1440)+' dni temu'}
+function render(){
+  $('sub').textContent=`· ${iv} · ${SHORTN[strat]}`;
+  $('ivs').innerHTML=Object.keys(IVS).map(k=>`<button class="b ${k===iv?'on':''}" data-iv="${k}">${k}</button>`).join('');
+  $('strats').innerHTML=Object.keys(STRATS).map(k=>`<button class="b ${k===strat?'on':''}" data-k="${k}">${SHORTN[k]}</button>`).join('');
+  document.querySelectorAll('[data-iv]').forEach(b=>b.onclick=()=>{if(b.dataset.iv===iv)return;iv=b.dataset.iv;MS=IVS[iv];try{localStorage.setItem('sig15iv',iv)}catch(e){}
+    gen++;INST.forEach(x=>D[x.id]={c:[],lc:-1,lcT:0,r:null,err:null});render();initAll()});
+  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{strat=b.dataset.k;saveStrat();INST.forEach(x=>compute(x.id,false));render()});
+  const errs=INST.filter(x=>D[x.id].err);$('err').style.display=errs.length?'block':'none';
+  if(errs.length)$('err').textContent='Nie udało się pobrać: '+errs.map(x=>x.name).join(', ')+'. Otwórz stronę w Chrome (nie w podglądzie aplikacji).';
+  $('cards').innerHTML=INST.map(card).join('');
+}
+function card(x){
+  const d=D[x.id],c=d.c,l=c[c.length-1];
+  if(!l||!d.r)return `<div class="card"><div class="h"><span class="n">${x.name}</span><span class="p sub">ładowanie…</span></div></div>`;
+  const ref=c[Math.max(0,c.length-1-Math.round(864e5/MS))],ch=pct(l.c,ref.c),o=d.r.bt.open,st=d.r.st;
+  const head=`<div class="h"><span class="n">${x.name}</span><span class="c ${ch>=0?'g':'r'}">${ch>=0?'+':''}${ch.toFixed(2)}%</span><span class="p">${fmt(l.c,x.dec)}</span></div>`;
+  const trust=`<div class="trust">Test (${Math.round((c[c.length-1].t-c[0].t)/864e5)} dni): ${st.n} transakcji · trafność ${st.wr.toFixed(0)}% · <b class="${st.sum>=0?'g':'r'}">${st.sum>=0?'+':''}${st.sum.toFixed(1)} R</b>${st.sum<0?' · <span class="a">⚠️ na tym rynku strategia traciła</span>':''}</div>`;
+  if(!o){
+    const left=Math.max(0,l.t+MS-Date.now()),m=Math.floor(left/60000);
+    return `<div class="card">${head}<div class="st W">CZEKAJ</div><div class="sub">Brak sygnału. Następne sprawdzenie za ${m>=60?Math.floor(m/60)+' h '+(m%60)+' min':m+' min'} (zamknięcie świecy).</div>${trust}</div>`;
+  }
+  const L=o.dir>0,cls=L?'L':'S',age=d.lc-o.i,fresh=age<=1;
+  const nowR=(l.c-o.entry)*o.dir/o.risk,late=!fresh&&nowR>0.5;
+  const lo=Math.min(o.sl,o.tp),hi=Math.max(o.sl,o.tp),pos=v=>Math.max(0,Math.min(100,(v-lo)/(hi-lo)*100));
+  // pasek: zawsze SL po lewej, TP po prawej
+  const P=v=>L?pos(v):100-pos(v);
+  const title=fresh?`WEJDŹ ${L?'LONG ▲':'SHORT ▼'}`:`${L?'LONG ▲':'SHORT ▼'} TRWA`;
+  const subt=fresh?`Sygnał na świecy zamkniętej ${ago(o.t+MS)}. Wejście po cenie rynkowej, blisko poziomu wejścia.`:
+    late?`Sygnał był ${ago(o.t+MS)}. Cena już odjechała (${nowR>=0?'+':''}${nowR.toFixed(2)} R), nie goń jej. Poczekaj na nowy sygnał.`:
+    `Sygnał był ${ago(o.t+MS)}. Teraz ${nowR>=0?'+':''}${nowR.toFixed(2)} R. Wejście jeszcze możliwe tylko blisko ceny wejścia.`;
+  return `<div class="card ${cls}">${head}
+    <div class="st ${cls} ${fresh?'fresh':''}">${title}</div><div class="sub">${subt}</div>
+    <div class="lv">
+      <div><div class="k">STOP LOSS</div><div class="v r">${fmt(o.sl,x.dec)}</div><div class="d r">${pct(o.sl,o.entry)>=0?'+':''}${pct(o.sl,o.entry).toFixed(2)}%</div></div>
+      <div><div class="k">WEJŚCIE</div><div class="v">${fmt(o.entry,x.dec)}</div><div class="d sub">ryzyko 1 R</div></div>
+      <div><div class="k">TAKE PROFIT</div><div class="v g">${fmt(o.tp,x.dec)}</div><div class="d g">${pct(o.tp,o.entry)>=0?'+':''}${pct(o.tp,o.entry).toFixed(2)}% · ${(d.r.P.tp/d.r.P.sl).toFixed(1)} R</div></div>
+    </div>
+    <div class="rng" style="--e:${P(o.entry)}%;--n:${P(l.c)}%"><div class="e"></div><div class="now"></div></div>
+    <div class="rl"><span>SL</span><span>● cena teraz ${fmt(l.c,x.dec)}</span><span>TP</span></div>
+    <div class="sub" style="margin-top:6px">Wyjście czasowe po ${d.r.P.maxBars} świecach, jeśli nie trafi SL/TP.</div>
+    ${trust}</div>`;
+}
+$('snd').onclick=()=>{sound=!sound;$('snd').textContent=sound?'🔔':'🔕';$('snd').classList.toggle('on',sound);if(sound&&!actx){try{actx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(sound&&actx){actx.resume&&actx.resume();alertSig('BTCUSDT',1)}};
+$('wake').onclick=async()=>{try{if(wl){await wl.release();wl=null}else{wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null;$('wake').classList.remove('on')})}$('wake').classList.toggle('on',!!wl)}catch(e){$('wake').textContent='💡✗'}};
+document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&$('wake').classList.contains('on')&&!wl){try{wl=await navigator.wakeLock.request('screen')}catch(e){}}});
+render();initAll();setInterval(poll,15000);setInterval(render,5000);
+</script>
+</body>
+</html>

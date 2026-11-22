@@ -15,11 +15,11 @@ body{margin:0;background:var(--bg);color:var(--tx);font:12px/1.35 ui-monospace,S
 .btn{background:transparent;color:var(--tx);border:1px solid var(--ln);padding:4px 8px;font:inherit;border-radius:3px}
 .btn.on{border-color:var(--cy);color:var(--cy);box-shadow:0 0 8px rgba(34,211,238,.35) inset}
 a.btn{text-decoration:none}
-.tick{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:6px}
+.tick{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:6px}
 .tk{border:1px solid var(--ln);background:var(--pn);padding:5px 6px;border-radius:3px;cursor:pointer}
 .tk.on{border-color:var(--am);box-shadow:0 0 10px rgba(251,191,36,.25)}
 .tk .n{color:var(--mu);font-size:10px;letter-spacing:.1em}
-.tk .p{font-size:14px;font-weight:800}
+.tk .p{font-size:12.5px;font-weight:800}
 .up{color:var(--gr)}.dn{color:var(--rd)}.mu{color:var(--mu)}.am{color:var(--am)}.cy{color:var(--cy)}.vi{color:var(--vi)}
 .pill{font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:2px;border:1px solid currentColor;margin-left:3px}
 .chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
@@ -36,7 +36,7 @@ a.btn{text-decoration:none}
 .vote{display:grid;grid-template-columns:78px 1fr 34px;align-items:center;gap:5px;margin:3px 0;font-size:10.5px}
 .bar{height:8px;background:#0d1422;position:relative;border-radius:1px}
 .bar i{position:absolute;top:0;bottom:0}
-.mx{display:grid;grid-template-columns:62px repeat(3,1fr);gap:3px;font-size:10px}
+.mx{display:grid;grid-template-columns:62px repeat(4,1fr);gap:3px;font-size:10px}
 .mx div{padding:4px 3px;border-radius:2px;text-align:center}
 .mx .h{color:var(--mu);font-size:9.5px;text-align:left}
 .mx .c{cursor:pointer;border:1px solid transparent}
@@ -60,7 +60,7 @@ canvas.sm{width:100%;display:block}
   <div class="t">SYGNAŁY // KOKPIT<small id="sub">ŁADOWANIE DANYCH…</small></div>
   <span id="ivBtns" style="display:flex;gap:3px"></span>
   <button class="btn" id="snd">🔕</button>
-  <a class="btn" href="./">Widok klasyczny</a>
+  <a class="btn" href="./">Klasyczny</a><a class="btn" href="hud.html">HUD</a>
 </div>
 <div id="err"></div>
 <div class="tick" id="tick"></div>
@@ -86,7 +86,7 @@ canvas.sm{width:100%;display:block}
 </div>
 <div class="pn" style="margin-top:6px"><h3><span>Przepływ cen · ostatnia doba (znormalizowane)</span><b id="flowT"></b></h3><canvas class="sm" id="flow" style="height:70px"></canvas></div>
 
-<div class="ft">DANE: BINANCE FUTURES (BTCUSDT · XAUUSDT · CLUSDT) · ODŚWIEŻANIE 15 S · USTAWIENIA WSPÓLNE Z WIDOKIEM KLASYCZNYM · SYMULACJA NA HISTORII, NIE PORADA INWESTYCYJNA</div>
+<div class="ft">DANE: BINANCE FUTURES (BTCUSDT · XAUUSDT · CLUSDT · ETHUSDT) · ODŚWIEŻANIE 15 S · USTAWIENIA WSPÓLNE Z WIDOKIEM KLASYCZNYM · SYMULACJA NA HISTORII, NIE PORADA INWESTYCYJNA</div>
 
 <script>
 /* ===== LOGIKA (czysta, bez DOM) ===== */
@@ -219,7 +219,7 @@ function stats(tr){
 function halves(c,tr){const mid=c[0].t+(c[c.length-1].t-c[0].t)/2;return [stats(tr.filter(t=>t.t<mid)),stats(tr.filter(t=>t.t>=mid))]}
 /* ===== KONIEC LOGIKI ===== */
 const API='https://fapi.binance.com/fapi/v1/klines';
-const INST=[{id:'BTCUSDT',name:'BTC',dec:1,col:'#fbbf24'},{id:'XAUUSDT',name:'ZŁOTO',dec:2,col:'#facc15'},{id:'CLUSDT',name:'ROPA',dec:2,col:'#22d3ee'}];
+const INST=[{id:'BTCUSDT',name:'BTC',dec:1,col:'#fbbf24'},{id:'XAUUSDT',name:'ZŁOTO',dec:2,col:'#facc15'},{id:'CLUSDT',name:'ROPA',dec:2,col:'#22d3ee'},{id:'ETHUSDT',name:'ETH',dec:2,col:'#a5b4fc'}];
 INST[1].col='#e5c07b';
 const IVS={'15m':15*60*1000,'1h':60*60*1000,'4h':4*60*60*1000};
 let iv='15m';try{const v=localStorage.getItem('sig15iv');if(IVS[v])iv=v}catch(e){}
@@ -382,7 +382,7 @@ function renderFlow(){
 /* ===== KULA 3D ===== */
 const NODES=[],ARCS=[];
 function sph(lat,lon,r=1){const a=lat*Math.PI/180,b=lon*Math.PI/180;return [r*Math.cos(a)*Math.cos(b),r*Math.sin(a),r*Math.cos(a)*Math.sin(b)]}
-INST.forEach((x,j)=>NODES.push({kind:'i',id:x.id,label:x.name,p:sph(0,j*120),col:x.col}));
+INST.forEach((x,j)=>NODES.push({kind:'i',id:x.id,label:x.name,p:sph(0,j*360/INST.length),col:x.col}));
 SK.forEach((k,j)=>NODES.push({kind:'s',id:k,label:SHORTN[k],p:sph(48,j*72+20),col:'#a78bfa'}));
 ['MOMENTUM','SKOŚNOŚĆ','EMA','RSI','KANAŁ'].forEach((n,j)=>NODES.push({kind:'v',id:j,label:n,p:sph(-50,j*72+56),col:'#22d3ee'}));
 (function(){let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
