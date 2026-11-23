@@ -82,7 +82,50 @@ async function news() {
   return items.length ? items.slice(0, 8) : null;
 }
 
-const [f, l, n] = await Promise.allSettled([fuel(), lotto(), news()]);
+// ---------- Kino MDK (Bilety24) ----------
+async function cinema() {
+  const h = await get('https://www.bilety24.pl/kino/organizator/miejski-dom-kultury-623');
+  const seen = new Set(), shows = [];
+  for (const m of h.matchAll(/href="(\/kino\/623-[^"]+)"\s+title="Film: (.+?) - (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) - W/g)) {
+    const t = m[2].replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").trim();
+    const k = t + m[3] + m[4];
+    if (seen.has(k) || m[3] < today) continue;
+    seen.add(k); shows.push({ t, d: m[3], h: m[4], u: 'https://www.bilety24.pl' + m[1].replace(/&amp;/g, '&') });
+  }
+  shows.sort((a, b) => (a.d + a.h).localeCompare(b.d + b.h));
+  return shows.length ? shows : null;
+}
+
+// ---------- Gazetki (blix.pl; kaufland.pl blokuje roboty) ----------
+const SHOPS = [['kaufland', 'Kaufland'], ['lidl', 'Lidl'], ['biedronka', 'Biedronka'], ['netto', 'Netto'], ['dino', 'Dino']];
+async function leaflets() {
+  const out = [];
+  for (const [slug, shop] of SHOPS) {
+    try {
+      const h = await get('https://blix.pl/sklep/' + slug + '/');
+      const seen = new Set();
+      const re = /t-name="([^"]*)"[^>]*?data-date-start="([^"]+)"\s+data-date-end="([^"]+)"[^>]*>\s*<a href="(https:\/\/blix\.pl\/sklep\/([a-z0-9-]+)\/gazetka\/(\d+))\//g;
+      let m, n = 0;
+      while ((m = re.exec(h)) && n < 4) {
+        if (m[5] !== slug || seen.has(m[6])) continue;
+        const from = new Date(m[2]), to = new Date(m[3]);
+        if (isNaN(from) || isNaN(to)) continue;
+        const iso = d => d.toLocaleDateString('sv-SE');
+        if (iso(to) < today) continue;
+        seen.add(m[6]); n++;
+        out.push({ shop, name: m[1].replace(/&amp;/g, '&').trim() || 'Gazetka', from: iso(from), to: iso(to), url: m[4] + '/' });
+      }
+      if (!n) console.log('gazetki: nic dla', slug);
+    } catch (e) { console.log('gazetki:', e.message); }
+  }
+  return out.length ? out : null;
+}
+
+const [f, l, n, c, g] = await Promise.allSettled([fuel(), lotto(), news(), cinema(), leaflets()]);
+if (c.value) data.cinema = c.value;
+if (g.value) data.leaflets = g.value;
+console.log('kino', c.value ? c.value.length : c.reason?.message, '| gazetki', g.value ? g.value.length : 0);
+
 if (f.value) {
   const hist = (old.fuel?.hist || []).filter(h => h.d !== today);
   hist.push({ d: today, pb95: f.value.pb95, on: f.value.on, lpg: f.value.lpg });
