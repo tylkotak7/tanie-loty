@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-23T23:30:06.533Z",
+ "updated": "2026-11-23T23:57:55.888Z",
  "news": [
   {
    "t": "Sprawdź, czy spadnie dzisiaj (23.11) śnieg w Wągrowcu. Prognoza pogody na najbliższe dni",
@@ -131,5 +131,539 @@
     ]
    ]
   ]
- }
+ },
+ "cinema": [
+  {
+   "t": "Struś Pędziwiatr i zemsta Kojota / Dubbing",
+   "d": "2026-11-24",
+   "h": "15:30",
+   "u": "https://www.bilety24.pl/kino/623-strus-pedziwiatr-i-zemsta-kojota-169268?id=1014228"
+  },
+  {
+   "t": "Nasza rewolucja",
+   "d": "2026-11-24",
+   "h": "17:30",
+   "u": "https://www.bilety24.pl/kino/623-nasza-rewolucja-169258?id=1014130"
+  },
+  {
+   "t": "Jestem Rocky",
+   "d": "2026-11-24",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-jestem-rocky-169276?id=1014253"
+  },
+  {
+   "t": "Struś Pędziwiatr i zemsta Kojota / Dubbing",
+   "d": "2026-11-25",
+   "h": "15:30",
+   "u": "https://www.bilety24.pl/kino/623-strus-pedziwiatr-i-zemsta-kojota-169268?id=1014225"
+  },
+  {
+   "t": "Zobaczysz wszystko",
+   "d": "2026-11-25",
+   "h": "16:30",
+   "u": "https://www.bilety24.pl/kino/623-zobaczysz-wszystko-169275?id=1014244"
+  },
+  {
+   "t": "Nasza rewolucja",
+   "d": "2026-11-25",
+   "h": "17:30",
+   "u": "https://www.bilety24.pl/kino/623-nasza-rewolucja-169258?id=1014122"
+  },
+  {
+   "t": "Rozważna i romantyczna",
+   "d": "2026-11-25",
+   "h": "19:30",
+   "u": "https://www.bilety24.pl/kino/623-rozwazna-i-romantyczna-169274?id=1014238"
+  },
+  {
+   "t": "Jestem Rocky",
+   "d": "2026-11-25",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-jestem-rocky-169276?id=1014250"
+  },
+  {
+   "t": "Struś Pędziwiatr i zemsta Kojota / Dubbing",
+   "d": "2026-11-26",
+   "h": "15:00",
+   "u": "https://www.bilety24.pl/kino/623-strus-pedziwiatr-i-zemsta-kojota-169268?id=1014226"
+  },
+  {
+   "t": "Rozważna i romantyczna",
+   "d": "2026-11-26",
+   "h": "15:00",
+   "u": "https://www.bilety24.pl/kino/623-rozwazna-i-romantyczna-169274?id=1014237"
+  },
+  {
+   "t": "Jestem Rocky",
+   "d": "2026-11-26",
+   "h": "17:00",
+   "u": "https://www.bilety24.pl/kino/623-jestem-rocky-169276?id=1014249"
+  },
+  {
+   "t": "Zobaczysz wszystko",
+   "d": "2026-11-26",
+   "h": "17:30",
+   "u": "https://www.bilety24.pl/kino/623-zobaczysz-wszystko-169275?id=1014245"
+  },
+  {
+   "t": "Zróbmy sobie przerwę",
+   "d": "2026-11-26",
+   "h": "19:30",
+   "u": "https://www.bilety24.pl/kino/623-zrobmy-sobie-przerwe-169284?id=1014344"
+  },
+  {
+   "t": "Nasza rewolucja",
+   "d": "2026-11-26",
+   "h": "20:30",
+   "u": "https://www.bilety24.pl/kino/623-nasza-rewolucja-169258?id=1014131"
+  },
+  {
+   "t": "Pikkuli i Świąteczny Renifer",
+   "d": "2026-11-27",
+   "h": "15:30",
+   "u": "https://www.bilety24.pl/kino/623-pikkuli-i-swiateczny-renifer-169277?id=1014255"
+  },
+  {
+   "t": "Struś Pędziwiatr i zemsta Kojota / Dubbing",
+   "d": "2026-11-27",
+   "h": "15:30",
+   "u": "https://www.bilety24.pl/kino/623-strus-pedziwiatr-i-zemsta-kojota-169268?id=1014227"
+  },
+  {
+   "t": "Najlepsza owsianka na świecie",
+   "d": "2026-11-27",
+   "h": "17:30",
+   "u": "https://www.bilety24.pl/kino/623-najlepsza-owsianka-na-swiecie-169288?id=1014382"
+  },
+  {
+   "t": "Przepis na Święta",
+   "d": "2026-11-27",
+   "h": "17:30",
+   "u": "https://www.bilety24.pl/kino/623-przepis-na-swieta-168988?id=1024592"
+  },
+  {
+   "t": "Jestem Rocky",
+   "d": "2026-11-27",
+   "h": "19:30",
+   "u": "https://www.bilety24.pl/kino/623-jestem-rocky-169276?id=1014251"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-11-27",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014217"
+  },
+  {
+   "t": "Struś Pędziwiatr i zemsta Kojota / Dubbing",
+   "d": "2026-11-28",
+   "h": "15:30",
+   "u": "https://www.bilety24.pl/kino/623-strus-pedziwiatr-i-zemsta-kojota-169268?id=1014229"
+  },
+  {
+   "t": "Pikkuli i Świąteczny Renifer",
+   "d": "2026-11-28",
+   "h": "16:00",
+   "u": "https://www.bilety24.pl/kino/623-pikkuli-i-swiateczny-renifer-169277?id=1014256"
+  },
+  {
+   "t": "Najlepsza owsianka na świecie",
+   "d": "2026-11-28",
+   "h": "17:30",
+   "u": "https://www.bilety24.pl/kino/623-najlepsza-owsianka-na-swiecie-169288?id=1014381"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-11-28",
+   "h": "18:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014218"
+  },
+  {
+   "t": "Jestem Rocky",
+   "d": "2026-11-28",
+   "h": "19:30",
+   "u": "https://www.bilety24.pl/kino/623-jestem-rocky-169276?id=1014252"
+  },
+  {
+   "t": "Forrest Gump",
+   "d": "2026-11-28",
+   "h": "20:30",
+   "u": "https://www.bilety24.pl/kino/623-forrest-gump-169292?id=1014374"
+  },
+  {
+   "t": "Pikkuli i Świąteczny Renifer",
+   "d": "2026-11-29",
+   "h": "15:00",
+   "u": "https://www.bilety24.pl/kino/623-pikkuli-i-swiateczny-renifer-169277?id=1014257"
+  },
+  {
+   "t": "Struś Pędziwiatr i zemsta Kojota / Dubbing",
+   "d": "2026-11-29",
+   "h": "15:30",
+   "u": "https://www.bilety24.pl/kino/623-strus-pedziwiatr-i-zemsta-kojota-169268?id=1014230"
+  },
+  {
+   "t": "Przepis na Święta",
+   "d": "2026-11-29",
+   "h": "17:00",
+   "u": "https://www.bilety24.pl/kino/623-przepis-na-swieta-168988?id=1024593"
+  },
+  {
+   "t": "Najlepsza owsianka na świecie",
+   "d": "2026-11-29",
+   "h": "17:30",
+   "u": "https://www.bilety24.pl/kino/623-najlepsza-owsianka-na-swiecie-169288?id=1014383"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-11-29",
+   "h": "19:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014220"
+  },
+  {
+   "t": "Jestem Rocky",
+   "d": "2026-11-29",
+   "h": "19:30",
+   "u": "https://www.bilety24.pl/kino/623-jestem-rocky-169276?id=1014254"
+  },
+  {
+   "t": "Najlepsza owsianka na świecie",
+   "d": "2026-12-01",
+   "h": "17:30",
+   "u": "https://www.bilety24.pl/kino/623-najlepsza-owsianka-na-swiecie-169288?id=1014385"
+  },
+  {
+   "t": "Jestem Rocky",
+   "d": "2026-12-01",
+   "h": "19:30",
+   "u": "https://www.bilety24.pl/kino/623-jestem-rocky-169276?id=1014387"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-12-01",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014219"
+  },
+  {
+   "t": "Najlepsza owsianka na świecie",
+   "d": "2026-12-02",
+   "h": "18:00",
+   "u": "https://www.bilety24.pl/kino/623-najlepsza-owsianka-na-swiecie-169288?id=1014386"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-12-02",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014340"
+  },
+  {
+   "t": "Najlepsza owsianka na świecie",
+   "d": "2026-12-03",
+   "h": "18:00",
+   "u": "https://www.bilety24.pl/kino/623-najlepsza-owsianka-na-swiecie-169288?id=1014384"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-12-03",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014341"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-12-04",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014221"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-12-05",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014337"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-12-06",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014342"
+  },
+  {
+   "t": "Czytając Lolitę w Teheranie",
+   "d": "2026-12-07",
+   "h": "19:00",
+   "u": "https://www.bilety24.pl/kino/623-czytajac-lolite-w-teheranie-166098?id=998019"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-12-08",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014338"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-12-09",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014339"
+  },
+  {
+   "t": "Violetta Villas",
+   "d": "2026-12-10",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-violetta-villas-169272?id=1014343"
+  },
+  {
+   "t": "Wszystko na sprzedaż",
+   "d": "2026-12-12",
+   "h": "15:30",
+   "u": "https://www.bilety24.pl/kino/623-wszystko-na-sprzedaz-170198?id=1020397"
+  },
+  {
+   "t": "Skrzypek na dachu",
+   "d": "2026-12-13",
+   "h": "14:30",
+   "u": "https://www.bilety24.pl/kino/623-skrzypek-na-dachu--168808?id=1011729"
+  },
+  {
+   "t": "Pejzaż w kolorze sepii",
+   "d": "2026-12-14",
+   "h": "19:00",
+   "u": "https://www.bilety24.pl/kino/623-pejzaz-w-kolorze-sepii-166099?id=998022"
+  },
+  {
+   "t": "Avengers: Doomsday / 2D DUB",
+   "d": "2026-12-17",
+   "h": "16:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-2d-dub-170210?id=1020430"
+  },
+  {
+   "t": "Avengers: Doomsday / 3D DUB",
+   "d": "2026-12-17",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-3d-dub-170211?id=1020435"
+  },
+  {
+   "t": "Avengers: Doomsday / 2D DUB",
+   "d": "2026-12-18",
+   "h": "17:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-2d-dub-170210?id=1020429"
+  },
+  {
+   "t": "Avengers: Doomsday / 3D DUB",
+   "d": "2026-12-18",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-3d-dub-170211?id=1020447"
+  },
+  {
+   "t": "Avengers: Doomsday / 2D DUB",
+   "d": "2026-12-19",
+   "h": "17:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-2d-dub-170210?id=1020431"
+  },
+  {
+   "t": "Avengers: Doomsday / 3D DUB",
+   "d": "2026-12-19",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-3d-dub-170211?id=1020448"
+  },
+  {
+   "t": "Avengers: Doomsday / 2D DUB",
+   "d": "2026-12-20",
+   "h": "17:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-2d-dub-170210?id=1020433"
+  },
+  {
+   "t": "Avengers: Doomsday / 2D NAP",
+   "d": "2026-12-20",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-2d-nap-170208?id=1020434"
+  },
+  {
+   "t": "Avengers: Doomsday / 2D DUB",
+   "d": "2026-12-26",
+   "h": "17:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-2d-dub-170210?id=1020441"
+  },
+  {
+   "t": "Avengers: Doomsday / 2D DUB",
+   "d": "2026-12-27",
+   "h": "17:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-2d-dub-170210?id=1020440"
+  },
+  {
+   "t": "Avengers: Doomsday / 2D NAP",
+   "d": "2026-12-27",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-2d-nap-170208?id=1020442"
+  },
+  {
+   "t": "Avengers: Doomsday / 3D DUB",
+   "d": "2026-12-28",
+   "h": "17:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-3d-dub-170211?id=1020436"
+  },
+  {
+   "t": "Avengers: Doomsday / 3D NAP",
+   "d": "2026-12-28",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-3d-nap-170209?id=1020437"
+  },
+  {
+   "t": "Avengers: Doomsday / 2D DUB",
+   "d": "2026-12-29",
+   "h": "17:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-2d-dub-170210?id=1020443"
+  },
+  {
+   "t": "Avengers: Doomsday / 3D NAP",
+   "d": "2026-12-29",
+   "h": "20:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-3d-nap-170209?id=1020444"
+  },
+  {
+   "t": "Avengers: Doomsday / 2D DUB",
+   "d": "2026-12-30",
+   "h": "17:00",
+   "u": "https://www.bilety24.pl/kino/623-avengers-doomsday-2d-dub-170210?id=1020445"
+  }
+ ],
+ "leaflets": [
+  {
+   "shop": "Kaufland",
+   "name": "Gazetka Tygodnia",
+   "from": "2026-11-26",
+   "to": "2026-12-02",
+   "url": "https://blix.pl/sklep/kaufland/gazetka/537945/"
+  },
+  {
+   "shop": "Kaufland",
+   "name": "Gazetka tygodnia",
+   "from": "2026-11-19",
+   "to": "2026-11-25",
+   "url": "https://blix.pl/sklep/kaufland/gazetka/537726/"
+  },
+  {
+   "shop": "Kaufland",
+   "name": "Oferta Kaufland - Non Food",
+   "from": "2026-11-26",
+   "to": "2026-12-09",
+   "url": "https://blix.pl/sklep/kaufland/gazetka/537942/"
+  },
+  {
+   "shop": "Kaufland",
+   "name": "Mocny Start",
+   "from": "2026-11-23",
+   "to": "2026-11-25",
+   "url": "https://blix.pl/sklep/kaufland/gazetka/537390/"
+  },
+  {
+   "shop": "Lidl",
+   "name": "Black Weeks w Lidlu",
+   "from": "2026-11-23",
+   "to": "2026-11-28",
+   "url": "https://blix.pl/sklep/lidl/gazetka/537810/"
+  },
+  {
+   "shop": "Lidl",
+   "name": "Katalog",
+   "from": "2026-11-30",
+   "to": "2026-12-06",
+   "url": "https://blix.pl/sklep/lidl/gazetka/537714/"
+  },
+  {
+   "shop": "Lidl",
+   "name": "Oferta od poniedziałku",
+   "from": "2026-11-23",
+   "to": "2026-11-25",
+   "url": "https://blix.pl/sklep/lidl/gazetka/537939/"
+  },
+  {
+   "shop": "Lidl",
+   "name": "Katalog",
+   "from": "2026-11-23",
+   "to": "2026-11-28",
+   "url": "https://blix.pl/sklep/lidl/gazetka/537255/"
+  },
+  {
+   "shop": "Biedronka",
+   "name": "Od poniedziałku, Z ladą tradycyjną",
+   "from": "2026-11-23",
+   "to": "2026-11-28",
+   "url": "https://blix.pl/sklep/biedronka/gazetka/537960/"
+  },
+  {
+   "shop": "Biedronka",
+   "name": "Od poniedziałku",
+   "from": "2026-11-23",
+   "to": "2026-11-28",
+   "url": "https://blix.pl/sklep/biedronka/gazetka/537957/"
+  },
+  {
+   "shop": "Biedronka",
+   "name": "Od czwartku, Z ladą tradycyjną",
+   "from": "2026-11-19",
+   "to": "2026-11-25",
+   "url": "https://blix.pl/sklep/biedronka/gazetka/537453/"
+  },
+  {
+   "shop": "Biedronka",
+   "name": "Od czwartku",
+   "from": "2026-11-19",
+   "to": "2026-11-25",
+   "url": "https://blix.pl/sklep/biedronka/gazetka/537633/"
+  },
+  {
+   "shop": "Netto",
+   "name": "Gazetka Spożywcza",
+   "from": "2026-11-23",
+   "to": "2026-11-28",
+   "url": "https://blix.pl/sklep/netto/gazetka/537270/"
+  },
+  {
+   "shop": "Netto",
+   "name": "Inspiracje tygodnia",
+   "from": "2026-11-23",
+   "to": "2026-11-28",
+   "url": "https://blix.pl/sklep/netto/gazetka/537273/"
+  },
+  {
+   "shop": "Netto",
+   "name": "Inspiracje tygodnia",
+   "from": "2026-11-19",
+   "to": "2026-11-25",
+   "url": "https://blix.pl/sklep/netto/gazetka/536247/"
+  },
+  {
+   "shop": "Netto",
+   "name": "Katalog zabawek",
+   "from": "2026-11-05",
+   "to": "2026-12-23",
+   "url": "https://blix.pl/sklep/netto/gazetka/533970/"
+  },
+  {
+   "shop": "Dino",
+   "name": "Owoce i warzywa - przegląd cen i ciekawostki",
+   "from": "2026-11-23",
+   "to": "2026-11-29",
+   "url": "https://blix.pl/sklep/dino/gazetka/537549/"
+  },
+  {
+   "shop": "Dino",
+   "name": "Świąteczny czas 2026",
+   "from": "2026-11-23",
+   "to": "2026-12-06",
+   "url": "https://blix.pl/sklep/dino/gazetka/537672/"
+  },
+  {
+   "shop": "Dino",
+   "name": "Zakupowe inspiracje w Dino",
+   "from": "2026-11-21",
+   "to": "2026-11-24",
+   "url": "https://blix.pl/sklep/dino/gazetka/537321/"
+  },
+  {
+   "shop": "Dino",
+   "name": "Ozdoby świąteczne",
+   "from": "2026-11-19",
+   "to": "2026-11-24",
+   "url": "https://blix.pl/sklep/dino/gazetka/537168/"
+  }
+ ]
 }
