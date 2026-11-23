@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-23T23:25:53.727Z",
+ "updated": "2026-11-23T23:30:06.533Z",
  "news": [
   {
    "t": "Sprawdź, czy spadnie dzisiaj (23.11) śnieg w Wągrowcu. Prognoza pogody na najbliższe dni",
@@ -49,5 +49,87 @@
    "s": "Wągrowiec Nasze Miasto",
    "d": "2026-11-23"
   }
- ]
+ ],
+ "fuel": {
+  "src": "autocentrum.pl, woj. wielkopolskie",
+  "pb95": 5.91,
+  "on": 7.37,
+  "lpg": 3.87,
+  "date": "2026-11-24",
+  "hist": [
+   {
+    "d": "2026-11-24",
+    "pb95": 5.91,
+    "on": 7.37,
+    "lpg": 3.87
+   }
+  ]
+ },
+ "lotto": {
+  "date": "2026-11-21",
+  "games": [
+   [
+    "Lotto",
+    [
+     21,
+     25,
+     30,
+     36,
+     43,
+     44
+    ],
+    []
+   ],
+   [
+    "Lotto Plus",
+    [
+     13,
+     31,
+     35,
+     36,
+     39,
+     46
+    ],
+    []
+   ],
+   [
+    "Mini Lotto",
+    [
+     1,
+     7,
+     9,
+     27,
+     35
+    ],
+    []
+   ],
+   [
+    "Eurojackpot",
+    [
+     15,
+     28,
+     29,
+     34,
+     35
+    ],
+    [
+     5,
+     9
+    ]
+   ],
+   [
+    "Ekstra Pensja",
+    [
+     1,
+     5,
+     25,
+     30,
+     32
+    ],
+    [
+     2
+    ]
+   ]
+  ]
+ }
 }
