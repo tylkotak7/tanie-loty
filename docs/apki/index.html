@@ -4,74 +4,140 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Moje apki i gry</title>
-<meta name="theme-color" content="#0e1320">
+<meta name="description" content="Zbiór moich apek i gier — otwórz albo udostępnij znajomym.">
+<meta name="theme-color" content="#0a0e1a">
+<meta property="og:title" content="Moje apki i gry">
+<meta property="og:description" content="Disc golf, darts, tanie loty, Dziś w Wągrowcu i więcej.">
 <link rel="icon" href="../wagrowiec/icon-192.png">
 <style>
-:root{--bg:#0e1320;--card:#171e2e;--tx:#eef2f8;--mu:#93a0b4;--ac:#6ea8ff;color-scheme:dark}
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(1200px 500px at 20% -10%,#24345a 0,transparent 60%),var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
-main{max-width:720px;margin:0 auto;padding:calc(24px + env(safe-area-inset-top,0px)) 16px 40px}
-h1{font-size:30px;margin:0 0 4px;letter-spacing:-.01em}
-.lead{color:var(--mu);margin:0 0 22px}
-.tabs{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
-.tabs button{background:var(--card);color:var(--tx);border:1px solid rgba(255,255,255,.08);border-radius:99px;padding:7px 14px;font:inherit;font-size:14px;cursor:pointer}
-.tabs button.on{background:var(--ac);color:#0b1020;border-color:var(--ac);font-weight:600}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
-.it{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;color:inherit;text-decoration:none;transition:transform .15s,border-color .15s}
-.it:hover{transform:translateY(-2px);border-color:rgba(110,168,255,.4)}
-.ic{flex:none;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--g)}
-.bd{flex:1;min-width:0}
-.bd b{display:block;font-size:17px}
-.bd p{margin:2px 0 8px;color:var(--mu);font-size:14px}
-.tg{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);border:1px solid rgba(255,255,255,.12);border-radius:99px;padding:1px 8px;margin-right:6px}
-.act{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-.act a,.act button{font:inherit;font-size:13px;border:0;border-radius:10px;padding:6px 10px;cursor:pointer;text-decoration:none}
-.act .go{background:var(--ac);color:#0b1020;font-weight:600}
+:root{--bg:#0a0e1a;--card:rgba(23,30,48,.72);--line:rgba(255,255,255,.08);--tx:#eef2f8;--mu:#93a0b4;--ac:#7cb4ff;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;overflow-x:hidden}
+.bgfx{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bgfx i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.45;animation:fl 18s ease-in-out infinite alternate}
+.bgfx i:nth-child(1){width:420px;height:420px;left:-120px;top:-140px;background:#2b4fd8}
+.bgfx i:nth-child(2){width:360px;height:360px;right:-120px;top:120px;background:#7b2fd1;animation-delay:-6s}
+.bgfx i:nth-child(3){width:340px;height:340px;left:20%;bottom:-180px;background:#0f8f7a;animation-delay:-12s;opacity:.3}
+@keyframes fl{to{transform:translate(40px,30px) scale(1.12)}}
+@media (prefers-reduced-motion:reduce){.bgfx i{animation:none}}
+main{max-width:980px;margin:0 auto;padding:calc(28px + env(safe-area-inset-top,0px)) 16px 48px}
+
+.hero{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+.av{flex:none;width:64px;height:64px;border-radius:20px;background:conic-gradient(from 200deg,#5b8cff,#b36bff,#2dd4bf,#5b8cff);display:grid;place-items:center;box-shadow:0 10px 30px rgba(91,140,255,.35)}
+.av span{width:56px;height:56px;border-radius:17px;background:#0f1424;display:grid;place-items:center;font-weight:800;font-size:22px;letter-spacing:-.02em}
+h1{font-size:clamp(26px,6vw,36px);line-height:1.1;margin:0;letter-spacing:-.02em;background:linear-gradient(90deg,#fff,#b9cdfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--mu);margin:4px 0 0;font-size:15px}
+.stats{display:flex;gap:8px;margin:0 0 18px;flex-wrap:wrap}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.stat b{font-size:18px;margin-right:4px}.stat{color:var(--mu);font-size:13px}.stat b{color:var(--tx)}
+.share-all{margin-left:auto;background:linear-gradient(135deg,#5b8cff,#8b5cf6);color:#fff;border:0;border-radius:14px;padding:8px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+
+.bar{position:sticky;top:0;z-index:5;padding:10px 0;margin:0 0 8px}
+.tabs{display:inline-flex;gap:4px;padding:4px;border-radius:99px;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.tabs button{background:none;color:var(--mu);border:0;border-radius:99px;padding:7px 16px;font:inherit;font-size:14px;cursor:pointer;transition:.2s}
+.tabs button.on{background:#fff;color:#0a0e1a;font-weight:700}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.it{position:relative;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform .2s,border-color .2s,box-shadow .2s;animation:in .45s both}
+.it:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.18);box-shadow:0 18px 40px rgba(0,0,0,.35)}
+@keyframes in{from{opacity:0;transform:translateY(12px)}}
+.ban{position:relative;height:120px;background:var(--g);display:flex;align-items:center;justify-content:center;overflow:hidden;text-decoration:none}
+.ban:before{content:"";position:absolute;inset:0;background:radial-gradient(160px 90px at 80% 0,rgba(255,255,255,.35),transparent 70%),repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 2px,transparent 2px 14px)}
+.ban svg{position:relative;width:72px;height:72px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));transition:transform .3s}
+.it:hover .ban svg{transform:scale(1.08) rotate(-4deg)}
+.new{position:absolute;top:10px;left:10px;background:#fff;color:#111;font-size:11px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:99px}
+.tg{position:absolute;top:10px;right:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:rgba(0,0,0,.28);border-radius:99px;padding:3px 9px;backdrop-filter:blur(6px)}
+.bd{padding:14px 16px 16px;display:flex;flex-direction:column;flex:1}
+.bd b{font-size:18px;letter-spacing:-.01em}
+.bd p{margin:4px 0 12px;color:var(--mu);font-size:14px;flex:1}
+.act{display:flex;gap:6px;flex-wrap:wrap}
+.act a,.act button{font:inherit;font-size:13px;border:0;border-radius:12px;padding:8px 12px;cursor:pointer;text-decoration:none;transition:filter .15s}
+.act a:hover,.act button:hover{filter:brightness(1.15)}
+.act .go{background:#fff;color:#0a0e1a;font-weight:700;flex:1;text-align:center}
 .act .sh,.act .sub{background:rgba(255,255,255,.08);color:var(--tx)}
-footer{color:var(--mu);font-size:12px;text-align:center;margin-top:28px}
+
+.tip{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;color:var(--mu);font-size:14px;display:flex;gap:12px;align-items:center}
+.tip span{font-size:22px}
+footer{color:var(--mu);font-size:12px;text-align:center;margin-top:20px;opacity:.7}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#fff;color:#0a0e1a;padding:10px 16px;border-radius:99px;font-weight:600;font-size:14px;opacity:0;transition:.25s;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
+<div class="bgfx"><i></i><i></i><i></i></div>
 <main>
-<h1>Moje apki i gry</h1>
-<p class="lead">Wszystko, co zrobiłem i chcę pokazać. Kliknij, żeby otworzyć, albo udostępnij link znajomym.</p>
-<div class="tabs" id="tabs"><button data-k="" class="on">Wszystko</button><button data-k="apka">Apki</button><button data-k="gra">Gry</button></div>
-<div class="grid" id="grid"></div>
-<footer>Nowe apki dopisuje się w jednym miejscu w kodzie tej strony (lista APPS).</footer>
+  <header class="hero">
+    <div class="av"><span>T7</span></div>
+    <div>
+      <h1>Moje apki i gry</h1>
+      <p class="lead">Wszystko, co zrobiłem. Kliknij, żeby zagrać, albo wyślij link znajomym.</p>
+    </div>
+  </header>
+  <div class="stats">
+    <div class="stat"><b id="nA">0</b>apek</div>
+    <div class="stat"><b id="nG">0</b>gier</div>
+    <button class="share-all" id="shareAll" type="button">Udostępnij stronę</button>
+  </div>
+  <div class="bar"><div class="tabs" id="tabs"><button data-k="" class="on">Wszystko</button><button data-k="gra">Gry</button><button data-k="apka">Apki</button></div></div>
+  <div class="grid" id="grid"></div>
+  <div class="tip"><span>📲</span><div>Na telefonie otwórz apkę i wybierz w menu przeglądarki <b style="color:var(--tx)">„Dodaj do ekranu głównego”</b> — będzie działać jak zwykła aplikacja.</div></div>
+  <footer>Nowe apki dopisuje się w jednym miejscu w kodzie tej strony (lista APPS).</footer>
 </main>
+<div class="toast" id="toast">Skopiowano link ✓</div>
 <script>
+// Ikony (SVG) — klucz z pola ic w liście APPS.
+var IC = {
+  disc:'<svg viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M32 6v10"/><ellipse cx="32" cy="18" rx="16" ry="4"/><path d="M18 19l6 13M46 19l-6 13M26 19l2 13M38 19l-2 13"/><path d="M20 32h24l-3 8H23z" fill="rgba(255,255,255,.25)"/><path d="M32 40v16M22 58h20"/></svg>',
+  dart:'<svg viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="3"><circle cx="30" cy="34" r="22"/><circle cx="30" cy="34" r="14"/><circle cx="30" cy="34" r="6" fill="rgba(255,255,255,.35)"/><path d="M30 34L54 10" stroke-linecap="round"/><path d="M50 8l6 0 0 6-4 0z" fill="#fff"/></svg>',
+  sun:'<svg viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><circle cx="24" cy="24" r="9" fill="rgba(255,220,120,.6)"/><path d="M24 6v4M24 38v4M6 24h4M38 24h4M11 11l3 3M34 34l3 3M11 37l3-3M37 11l-3 3"/><path d="M22 52h26a9 9 0 0 0 0-18 13 13 0 0 0-25 4 7 7 0 0 0-1 14z" fill="rgba(255,255,255,.3)"/></svg>',
+  plane:'<svg viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"><path d="M8 34l48-22-14 42-9-15-17-1z" fill="rgba(255,255,255,.25)"/><path d="M33 39l23-27"/></svg>',
+  chart:'<svg viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M8 56h48"/><path d="M16 40v-10M16 46v-4M28 34v-16M28 40v-4M40 42v-12M40 48v-4M52 26v-16M52 32v-4"/><rect x="13" y="30" width="6" height="12" rx="1" fill="rgba(255,255,255,.3)"/><rect x="25" y="18" width="6" height="18" rx="1" fill="rgba(255,255,255,.3)"/><rect x="37" y="30" width="6" height="14" rx="1" fill="rgba(255,255,255,.3)"/><rect x="49" y="10" width="6" height="18" rx="1" fill="rgba(255,255,255,.3)"/></svg>'
+};
 // Żeby dodać apkę lub grę, dopisz jeden wpis do tej listy.
-// typ: 'apka' albo 'gra'. url: adres względny (w tym repo) albo pełny link.
+// typ: 'gra' albo 'apka'. url: adres względny (w tym repo) albo pełny link. nowe:true = plakietka NOWE.
 var APPS = [
-  {n:'Dziś w Wągrowcu', typ:'apka', ic:'⛅', g:'linear-gradient(160deg,#1d6fd8,#6a3fd1)', url:'../wagrowiec/',
+  {n:'Disc Golf', typ:'gra', ic:'disc', nowe:true, g:'linear-gradient(150deg,#14532d,#16a34a 55%,#a3e635)', url:'https://tylkotak7.github.io/discgolf/',
+   d:'Rzuć dyskiem do kosza! Pola Złotów, Międzybłocie, WRC Street, kariera i ranking online.'},
+  {n:'Darts', typ:'gra', ic:'dart', nowe:true, g:'linear-gradient(150deg,#7f1d1d,#dc2626 55%,#f59e0b)', url:'https://tylkotak7.github.io/darts/',
+   d:'Licznik do darta: 501, Szanghaj, do 4 graczy, gra online, głos i statystyki na tarczy.'},
+  {n:'Dziś w Wągrowcu', typ:'apka', ic:'sun', g:'linear-gradient(150deg,#1d4ed8,#6a3fd1)', url:'../wagrowiec/',
    d:'Pogoda, powietrze, ceny paliw, odbiór śmieci, pociągi do Poznania, Lotto, budżet i notatki.'},
-  {n:'Tanie loty', typ:'apka', ic:'✈️', g:'linear-gradient(160deg,#0f766e,#22c55e)', url:'../',
+  {n:'Tanie loty', typ:'apka', ic:'plane', g:'linear-gradient(150deg,#0e7490,#14b8a6 55%,#86efac)', url:'../',
    d:'Okazje lotnicze z Poznania, Wrocławia, Warszawy i Gdańska.'},
-  {n:'Sygnały', typ:'apka', ic:'📈', g:'linear-gradient(160deg,#7c2d12,#f59e0b)', url:'../sygnaly/',
+  {n:'Sygnały', typ:'apka', ic:'chart', g:'linear-gradient(150deg,#78350f,#ea580c 55%,#facc15)', url:'../sygnaly/',
    d:'Sygnały wejścia na BTC, ETH, złoto i ropę na 15m, 1h i 4h.',
    sub:[['Kokpit','../sygnaly/kokpit.html'],['HUD','../sygnaly/hud.html']]}
 ];
-var grid=document.getElementById('grid'),flt='';
+var grid=document.getElementById('grid'),flt='',toast=document.getElementById('toast');
 function abs(u){return new URL(u,location.href).href}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+document.getElementById('nA').textContent=APPS.filter(function(a){return a.typ==='apka'}).length;
+document.getElementById('nG').textContent=APPS.filter(function(a){return a.typ==='gra'}).length;
 function render(){
-  var h='';
+  var h='',k=0;
   APPS.forEach(function(a,i){
     if(flt&&a.typ!==flt)return;
-    h+='<div class="it"><div class="ic" style="--g:'+a.g+'">'+a.ic+'</div><div class="bd"><b>'+esc(a.n)+'</b><p>'+esc(a.d)+'</p><span class="tg">'+(a.typ==='gra'?'gra':'apka')+'</span>'+
-      '<div class="act"><a class="go" href="'+esc(a.url)+'">Otwórz</a>'+
+    h+='<div class="it" style="animation-delay:'+(k++*60)+'ms">'+
+      '<a class="ban" href="'+esc(a.url)+'" style="--g:'+a.g+'" aria-label="'+esc(a.n)+'">'+(IC[a.ic]||'')+
+      (a.nowe?'<span class="new">NOWE</span>':'')+'<span class="tg">'+(a.typ==='gra'?'🎮 gra':'📱 apka')+'</span></a>'+
+      '<div class="bd"><b>'+esc(a.n)+'</b><p>'+esc(a.d)+'</p>'+
+      '<div class="act"><a class="go" href="'+esc(a.url)+'">'+(a.typ==='gra'?'Graj':'Otwórz')+'</a>'+
       (a.sub||[]).map(function(s){return '<a class="sub" href="'+esc(s[1])+'">'+esc(s[0])+'</a>'}).join('')+
       '<button class="sh" data-i="'+i+'" type="button">Udostępnij</button></div></div></div>';
   });
   grid.innerHTML=h||'<p class="lead">Nic tu jeszcze nie ma.</p>';
 }
+function share(title,text,u){
+  if(navigator.share){navigator.share({title:title,text:text,url:u}).catch(function(){});return}
+  function ok(){toast.classList.add('on');setTimeout(function(){toast.classList.remove('on')},1600)}
+  try{navigator.clipboard.writeText(u).then(ok,function(){prompt('Skopiuj link:',u)})}catch(x){prompt('Skopiuj link:',u)}
+}
 grid.onclick=function(e){
   var i=e.target.getAttribute('data-i');if(i===null)return;
-  var a=APPS[+i],u=abs(a.url),b=e.target;
-  if(navigator.share){navigator.share({title:a.n,text:a.d,url:u}).catch(function(){});return}
-  function ok(){b.textContent='Skopiowano link ✓';setTimeout(function(){b.textContent='Udostępnij'},1500)}
-  try{navigator.clipboard.writeText(u).then(ok,function(){prompt('Skopiuj link:',u)})}catch(x){prompt('Skopiuj link:',u)}
+  var a=APPS[+i];share(a.n,a.d,abs(a.url));
 };
+document.getElementById('shareAll').onclick=function(){share('Moje apki i gry','Zobacz moje apki i gry:',location.href.split('#')[0])};
 [].forEach.call(document.querySelectorAll('#tabs button'),function(b){b.onclick=function(){flt=b.getAttribute('data-k');[].forEach.call(document.querySelectorAll('#tabs button'),function(x){x.classList.toggle('on',x===b)});render()}});
 render();
 </script>
