@@ -40,7 +40,7 @@ async function fuel() {
   for (const [src, url] of FUEL_SOURCES) {
     try {
       const t = text(await get(url));
-      const pb95 = findPrice(t, ['Pb\\s?95', 'benzyna 95', 'E10'], 4, 10);
+      const pb95 = findPrice(t, ['Pb\\s?95', 'benzyna 95', '(?:^|\\s)95(?=\\s)'], 4, 10);
       const on = findPrice(t, ['\\bON\\b', 'olej napędowy', 'diesel'], 4, 10);
       const lpg = findPrice(t, ['LPG', 'autogaz'], 1.5, 5);
       if (pb95 && on && lpg) return { src, pb95, on, lpg };
@@ -50,31 +50,23 @@ async function fuel() {
   return null;
 }
 
-// ---------- Lotto ----------
-const GAMES = [['Lotto', 'Lotto'], ['LottoPlus', 'Lotto Plus'], ['MiniLotto', 'Mini Lotto'], ['EuroJackpot', 'Eurojackpot'], ['EkstraPensja', 'Ekstra Pensja']];
-function collect(node, out) {
-  if (Array.isArray(node)) node.forEach(n => collect(n, out));
-  else if (node && typeof node === 'object') {
-    if (node.gameType && Array.isArray(node.resultsJson) && node.resultsJson.length) {
-      const prev = out[node.gameType];
-      if (!prev || String(node.drawDate) > String(prev.drawDate)) out[node.gameType] = node;
-    }
-    Object.values(node).forEach(v => collect(v, out));
-  }
+// ---------- Lotto (wynikilotto.net.pl; lotto.pl blokuje serwery GitHuba) ----------
+const GAMES = [['lotto', 'Lotto'], ['lotto-plus', 'Lotto Plus'], ['mini-lotto', 'Mini Lotto'], ['eurojackpot', 'Eurojackpot'], ['ekstra-pensja', 'Ekstra Pensja']];
+async function lastDraw(slug) {
+  const h = await get('https://www.wynikilotto.net.pl/' + slug + '/wyniki/');
+  const m = h.match(/<tbody>\s*<tr>\s*<td>\d+<\/td>\s*<td>(\d{2})\.(\d{2})\.(\d{4})<\/td>\s*<td>([\s\S]*?)<\/td>/);
+  if (!m) throw new Error('lotto: brak tabeli ' + slug);
+  const [main, extra = ''] = m[4].replace(/<[^>]+>/g, '').split('+');
+  const nums = s => (s.match(/\d+/g) || []).map(Number);
+  return { date: `${m[3]}-${m[2]}-${m[1]}`, main: nums(main), extra: nums(extra) };
 }
 async function lotto() {
-  const found = {};
-  for (const g of ['Lotto', 'MiniLotto', 'EuroJackpot', 'EkstraPensja']) {
-    try {
-      collect(await get('https://www.lotto.pl/api/lotteries/draw-results/last-results-per-game?gameType=' + g, true), found);
-    } catch (e) { console.log('lotto:', e.message); }
-  }
-  if (!found.Lotto) return null;
-  const games = GAMES.filter(([k]) => found[k]).map(([k, name]) => [name,
-    found[k].resultsJson.map(Number).sort((a, b) => a - b),
-    (found[k].specialResults || []).map(Number).sort((a, b) => a - b)]);
-  const date = new Date(found.Lotto.drawDate).toLocaleDateString('sv-SE', { timeZone: 'Europe/Warsaw' });
-  return { date, games };
+  const res = await Promise.allSettled(GAMES.map(([slug]) => lastDraw(slug)));
+  res.forEach(r => r.reason && console.log(r.reason.message));
+  const L = res[0].value;
+  if (!L || L.main.length !== 6) return null;
+  const games = GAMES.map(([, name], i) => res[i].value && [name, res[i].value.main, res[i].value.extra]).filter(Boolean);
+  return { date: L.date, games };
 }
 
 // ---------- Wiadomości ----------
