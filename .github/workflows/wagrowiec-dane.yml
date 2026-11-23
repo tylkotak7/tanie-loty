@@ -1,0 +1,33 @@
+name: Dane Wągrowiec (paliwa, Lotto, wiadomości)
+on:
+  schedule:
+    - cron: "23 */3 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/scripts/wagrowiec-data.mjs
+      - .github/workflows/wagrowiec-dane.yml
+permissions:
+  contents: write
+concurrency:
+  group: wagrowiec-dane
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node .github/scripts/wagrowiec-data.mjs
+      - name: Zapisz zmiany
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898733+github-actions[bot]@users.noreply.github.com"
+          git add docs/wagrowiec/data.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Dane Wągrowiec: aktualizacja"
+          git pull --rebase
+          git push

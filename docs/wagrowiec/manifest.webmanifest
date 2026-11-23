@@ -1,0 +1,16 @@
+{
+  "name": "Dziś w Wągrowcu",
+  "short_name": "Wągrowiec",
+  "description": "Pogoda, powietrze, paliwa, śmieci, pociągi i codzienne sprawy w Wągrowcu",
+  "lang": "pl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#1d6fd8",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

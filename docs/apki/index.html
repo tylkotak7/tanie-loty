@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moje apki i gry</title>
+<meta name="theme-color" content="#0e1320">
+<link rel="icon" href="../wagrowiec/icon-192.png">
+<style>
+:root{--bg:#0e1320;--card:#171e2e;--tx:#eef2f8;--mu:#93a0b4;--ac:#6ea8ff;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 500px at 20% -10%,#24345a 0,transparent 60%),var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+main{max-width:720px;margin:0 auto;padding:calc(24px + env(safe-area-inset-top,0px)) 16px 40px}
+h1{font-size:30px;margin:0 0 4px;letter-spacing:-.01em}
+.lead{color:var(--mu);margin:0 0 22px}
+.tabs{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
+.tabs button{background:var(--card);color:var(--tx);border:1px solid rgba(255,255,255,.08);border-radius:99px;padding:7px 14px;font:inherit;font-size:14px;cursor:pointer}
+.tabs button.on{background:var(--ac);color:#0b1020;border-color:var(--ac);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.it{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;color:inherit;text-decoration:none;transition:transform .15s,border-color .15s}
+.it:hover{transform:translateY(-2px);border-color:rgba(110,168,255,.4)}
+.ic{flex:none;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--g)}
+.bd{flex:1;min-width:0}
+.bd b{display:block;font-size:17px}
+.bd p{margin:2px 0 8px;color:var(--mu);font-size:14px}
+.tg{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);border:1px solid rgba(255,255,255,.12);border-radius:99px;padding:1px 8px;margin-right:6px}
+.act{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.act a,.act button{font:inherit;font-size:13px;border:0;border-radius:10px;padding:6px 10px;cursor:pointer;text-decoration:none}
+.act .go{background:var(--ac);color:#0b1020;font-weight:600}
+.act .sh,.act .sub{background:rgba(255,255,255,.08);color:var(--tx)}
+footer{color:var(--mu);font-size:12px;text-align:center;margin-top:28px}
+</style>
+</head>
+<body>
+<main>
+<h1>Moje apki i gry</h1>
+<p class="lead">Wszystko, co zrobiłem i chcę pokazać. Kliknij, żeby otworzyć, albo udostępnij link znajomym.</p>
+<div class="tabs" id="tabs"><button data-k="" class="on">Wszystko</button><button data-k="apka">Apki</button><button data-k="gra">Gry</button></div>
+<div class="grid" id="grid"></div>
+<footer>Nowe apki dopisuje się w jednym miejscu w kodzie tej strony (lista APPS).</footer>
+</main>
+<script>
+// Żeby dodać apkę lub grę, dopisz jeden wpis do tej listy.
+// typ: 'apka' albo 'gra'. url: adres względny (w tym repo) albo pełny link.
+var APPS = [
+  {n:'Dziś w Wągrowcu', typ:'apka', ic:'⛅', g:'linear-gradient(160deg,#1d6fd8,#6a3fd1)', url:'../wagrowiec/',
+   d:'Pogoda, powietrze, ceny paliw, odbiór śmieci, pociągi do Poznania, Lotto, budżet i notatki.'},
+  {n:'Tanie loty', typ:'apka', ic:'✈️', g:'linear-gradient(160deg,#0f766e,#22c55e)', url:'../',
+   d:'Okazje lotnicze z Poznania, Wrocławia, Warszawy i Gdańska.'},
+  {n:'Sygnały', typ:'apka', ic:'📈', g:'linear-gradient(160deg,#7c2d12,#f59e0b)', url:'../sygnaly/',
+   d:'Sygnały wejścia na BTC, ETH, złoto i ropę na 15m, 1h i 4h.',
+   sub:[['Kokpit','../sygnaly/kokpit.html'],['HUD','../sygnaly/hud.html']]}
+];
+var grid=document.getElementById('grid'),flt='';
+function abs(u){return new URL(u,location.href).href}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function render(){
+  var h='';
+  APPS.forEach(function(a,i){
+    if(flt&&a.typ!==flt)return;
+    h+='<div class="it"><div class="ic" style="--g:'+a.g+'">'+a.ic+'</div><div class="bd"><b>'+esc(a.n)+'</b><p>'+esc(a.d)+'</p><span class="tg">'+(a.typ==='gra'?'gra':'apka')+'</span>'+
+      '<div class="act"><a class="go" href="'+esc(a.url)+'">Otwórz</a>'+
+      (a.sub||[]).map(function(s){return '<a class="sub" href="'+esc(s[1])+'">'+esc(s[0])+'</a>'}).join('')+
+      '<button class="sh" data-i="'+i+'" type="button">Udostępnij</button></div></div></div>';
+  });
+  grid.innerHTML=h||'<p class="lead">Nic tu jeszcze nie ma.</p>';
+}
+grid.onclick=function(e){
+  var i=e.target.getAttribute('data-i');if(i===null)return;
+  var a=APPS[+i],u=abs(a.url),b=e.target;
+  if(navigator.share){navigator.share({title:a.n,text:a.d,url:u}).catch(function(){});return}
+  function ok(){b.textContent='Skopiowano link ✓';setTimeout(function(){b.textContent='Udostępnij'},1500)}
+  try{navigator.clipboard.writeText(u).then(ok,function(){prompt('Skopiuj link:',u)})}catch(x){prompt('Skopiuj link:',u)}
+};
+[].forEach.call(document.querySelectorAll('#tabs button'),function(b){b.onclick=function(){flt=b.getAttribute('data-k');[].forEach.call(document.querySelectorAll('#tabs button'),function(x){x.classList.toggle('on',x===b)});render()}});
+render();
+</script>
+</body>
+</html>
