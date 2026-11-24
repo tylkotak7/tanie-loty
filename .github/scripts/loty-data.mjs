@@ -23,7 +23,7 @@ async function fares(origin, [w1, w2], [n1, n2]) {
     outboundDepartureDateFrom: day(w1), outboundDepartureDateTo: day(w2),
     inboundDepartureDateFrom: day(w1), inboundDepartureDateTo: day(w2 + n2),
     durationFrom: String(n1), durationTo: String(n2),
-    priceValueTo: String(MAX_PRICE), currency: "PLN", market: "pl-pl", language: "pl", limit: "100", offset: "0",
+    priceValueTo: String(MAX_PRICE), currency: "PLN", market: "pl-pl", language: "pl",
   });
   const url = "https://services-api.ryanair.com/farfnd/v4/roundTripFares?" + q;
   for (let attempt = 0; attempt < 2; attempt++) {

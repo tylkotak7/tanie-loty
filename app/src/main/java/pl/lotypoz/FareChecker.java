@@ -78,7 +78,7 @@ public class FareChecker {
                 + "&inboundDepartureDateFrom=" + outFrom + "&inboundDepartureDateTo=" + inTo
                 + "&durationFrom=" + s.minDays + "&durationTo=" + s.maxDays
                 + "&priceValueTo=" + s.maxPrice
-                + "&currency=PLN&market=pl-pl&language=pl&limit=100&offset=0";
+                + "&currency=PLN&market=pl-pl&language=pl";
 
         JSONObject root = new JSONObject(get(url));
         JSONArray fares = root.optJSONArray("fares");
