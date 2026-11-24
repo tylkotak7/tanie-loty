@@ -1,19 +1,8 @@
 {
- "time": "2026-11-24T20:36:11.872Z",
- "ok": 0,
- "fail": 144,
- "flights": 0,
- "errors": [
-  "POZ: HTTP 400 {\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}",
-  "POZ: HTTP 400 {\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}",
-  "POZ: HTTP 400 {\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}",
-  "POZ: HTTP 400 {\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}",
-  "POZ: HTTP 400 {\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}",
-  "POZ: HTTP 400 {\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}",
-  "POZ: HTTP 400 {\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}",
-  "POZ: HTTP 400 {\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}",
-  "POZ: HTTP 400 {\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}",
-  "POZ: HTTP 400 {\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}"
- ],
- "sample": "400 {\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}"
+ "time": "2026-11-24T20:37:53.502Z",
+ "ok": 144,
+ "fail": 0,
+ "flights": 808,
+ "errors": [],
+ "sample": "200 {\"arrivalAirportCategories\":null,\"fares\":[{\"outbound\":{\"departureAirport\":{\"countryName\":\"Polska\",\"iataCode\":\"POZ\",\"name\":\"Poznań\",\"seoName\":\"poznan\",\"city\":{\"code\":\"POZNAN\",\"countryCode\":\"pl\",\"name\":\"Poznań\"}},\"arrivalAirport\":{\"countryName\":\"Włochy\",\"iataCode\":\"BGY\",\"name\":\"Mediolan-Bergamo\",\"seoN"
 }
