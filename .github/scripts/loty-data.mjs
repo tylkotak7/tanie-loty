@@ -1,6 +1,7 @@
 // Pobiera najtańsze loty Ryanair (tam i z powrotem) z polskich lotnisk
 // i zapisuje je do docs/loty/deals.json dla strony i apki „Tanie loty”.
-import { writeFileSync, readFileSync, existsSync } from "node:fs";
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
+mkdirSync("docs/loty", { recursive: true });
 
 const ORIGINS = ["POZ","WRO","WAW","WMI","GDN","KRK","KTW","SZZ","BZG","LCJ","RZE","LUZ"];
 // przedziały liczby nocy: od 2 dni (1 noc) do 2 tygodni i dłużej
