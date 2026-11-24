@@ -64,6 +64,10 @@ nav button.on{color:var(--acc)}
 .hol{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .hol .d{color:var(--mut);font-size:12.5px}
 a.plain{color:var(--acc)}
+.week{border:1px solid #ffb54777;background:linear-gradient(150deg,#3a2a10,#152033 70%);border-radius:18px;padding:16px;margin:16px 0 6px}
+.week .big{font:700 34px "Space Grotesk";color:var(--acc)}
+.week h3{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--acc)}
+.mini{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
 .foot{color:var(--mut);font-size:11.5px;margin:18px 0}
 </style>
 </head>
@@ -77,12 +81,21 @@ a.plain{color:var(--acc)}
     <button class="chip" data-v="WRO">Wrocław</button>
     <button class="chip" data-v="WAW">Warszawa</button>
     <button class="chip" data-v="GDN">Gdańsk</button>
+    <button class="chip" data-v="KRK">Kraków</button>
+    <button class="chip" data-v="KTW">Katowice</button>
+    <button class="chip" data-v="SZZ">Szczecin</button>
+    <button class="chip" data-v="BZG">Bydgoszcz</button>
+    <button class="chip" data-v="LCJ">Łódź</button>
+    <button class="chip" data-v="RZE">Rzeszów</button>
+    <button class="chip" data-v="LUZ">Lublin</button>
+    <button class="chip" data-v="ALL" style="border-style:dashed">Cała Polska</button>
   </div>
 </header>
 <main>
 
 <!-- OKAZJE -->
 <section id="s-deals" class="on">
+  <div id="weekBox"></div>
   <div class="card" id="thai" style="margin-top:16px;border-color:#3dd6a355;background:linear-gradient(160deg,#16303a,#152033)">
     <h3 style="font-size:18px">🌴 Tajlandia</h3>
     <div class="note" style="margin:6px 0 10px">Ceny orientacyjne w obie strony (listopad 2026). Ryanair i Wizz Air tam nie latają, więc szukaj w wyszukiwarkach poniżej.</div>
@@ -109,6 +122,7 @@ a.plain{color:var(--acc)}
   </div>
 
   <h2 id="dealsH">🔥 Okazje</h2>
+  <div class="note" id="liveStatus" style="margin-top:-4px">Ładuję ceny na żywo…</div>
   <p class="note">Ceny za bilet tam i z powrotem za osobę, czyli tani jest też powrót. Znalezione w serwisach z okazjami (stan 21–22.11.2026). Na majówkę, wakacje i do ciepłych krajów zimą ceny są wyższe. Tanie bilety znikają szybko — kliknij „Sprawdź”, żeby zobaczyć aktualną cenę.</p>
   <label>Maks. cena</label>
   <div class="range"><input id="dealMax" type="range" min="100" max="1000" step="10" value="1000"><b id="dealMaxV">1000 zł</b></div>
@@ -125,9 +139,18 @@ a.plain{color:var(--acc)}
     <button class="chip" data-v="near">Najbliższe 3 mies.</button>
     <button class="chip" data-v="far">Daleko (za 3+ mies.)</button>
   </div>
-  <div class="toggle"><input type="checkbox" id="dealWeek" checked><span><b>Maks. tydzień</b> (do 7 nocy)</span></div>
+  <label>Długość wyjazdu (zaznacz kilka)</label>
+  <div class="chips" id="dealLen">
+    <button class="chip" data-v="1-2">2–3 dni</button>
+    <button class="chip" data-v="3-5">4–6 dni</button>
+    <button class="chip" data-v="6-8">Tydzień</button>
+    <button class="chip" data-v="9-11">10–12 dni</button>
+    <button class="chip" data-v="12-14">2 tygodnie</button>
+    <button class="chip" data-v="15-99">Dłużej</button>
+  </div>
   <div class="chips" id="dealMonth" style="margin-top:12px"></div>
   <div id="dealList" style="margin-top:12px"></div>
+  <div class="row" style="justify-content:center;margin:6px 0 14px"><button class="btn" id="dealMore" style="display:none">Pokaż więcej</button></div>
 </section>
 
 <!-- SZUKAJ -->
@@ -197,6 +220,13 @@ a.plain{color:var(--acc)}
         <button class="chip" data-v="WRO">Wrocław</button>
         <button class="chip" data-v="WAW">Warszawa</button>
         <button class="chip" data-v="GDN">Gdańsk</button>
+        <button class="chip" data-v="KRK">Kraków</button>
+        <button class="chip" data-v="KTW">Katowice</button>
+        <button class="chip" data-v="SZZ">Szczecin</button>
+        <button class="chip" data-v="BZG">Bydgoszcz</button>
+        <button class="chip" data-v="LCJ">Łódź</button>
+        <button class="chip" data-v="RZE">Rzeszów</button>
+        <button class="chip" data-v="LUZ">Lublin</button>
       </div>
       <label>Linie lotnicze</label>
       <div class="chips" id="alAir">
@@ -372,9 +402,18 @@ const ORIGINS = {
  WAW:{name:"Warszawa",gen:"Warszawy",az:"Warsaw [WAW] (+WMI)",kiwi:"warszawa-polska",en:"Warsaw",sky:"wars"},
  GDN:{name:"Gdańsk",gen:"Gdańska",az:"Gdansk [GDN]",kiwi:"gdansk-polska",en:"Gdansk",sky:"gdn"},
 };
-const ORDER=["POZ","WRO","WAW","GDN"];
+Object.assign(ORIGINS,{
+ KRK:{name:"Kraków",gen:"Krakowa",az:"Krakow [KRK]",kiwi:"krakow-polska",en:"Krakow",sky:"krk"},
+ KTW:{name:"Katowice",gen:"Katowic",az:"Katowice [KTW]",kiwi:"katowice-polska",en:"Katowice",sky:"ktw"},
+ SZZ:{name:"Szczecin",gen:"Szczecina",az:"Szczecin [SZZ]",kiwi:"szczecin-polska",en:"Szczecin",sky:"szz"},
+ BZG:{name:"Bydgoszcz",gen:"Bydgoszczy",az:"Bydgoszcz [BZG]",kiwi:"bydgoszcz-polska",en:"Bydgoszcz",sky:"bzg"},
+ LCJ:{name:"Łódź",gen:"Łodzi",az:"Lodz [LCJ]",kiwi:"lodz-polska",en:"Lodz",sky:"lcj"},
+ RZE:{name:"Rzeszów",gen:"Rzeszowa",az:"Rzeszow [RZE]",kiwi:"rzeszow-polska",en:"Rzeszow",sky:"rze"},
+ LUZ:{name:"Lublin",gen:"Lublina",az:"Lublin [LUZ]",kiwi:"lublin-polska",en:"Lublin",sky:"luz"},
+});
+const ORDER=["POZ","WRO","WAW","GDN","KRK","KTW","SZZ","BZG","LCJ","RZE","LUZ"];
 // Kierunki z danego lotniska: code: [notatka, nowość?]
-const ROUTES = {
+const ROUTES = {KRK:{},KTW:{},SZZ:{},BZG:{},LCJ:{},RZE:{},LUZ:{},
  POZ:{STN:["Ryanair"],LTN:["Wizz Air"],DUB:[""],SNN:["Ryanair · nowość zima 26/27",1],EDI:[""],LBA:[""],BHX:[""],BRS:[""],
   BCN:["Ryanair · nowość zima 26/27",1],VLC:["Ryanair"],ALC:[""],AGP:[""],TFS:[""],LPA:[""],OPO:["Ryanair · nowość zima 26/27",1],
   LIS:[""],FAO:["Ryanair · od 30.03.2027",1],MLA:[""],PFO:[""],BGY:["Ryanair"],CIA:[""],BRI:[""],TIA:["Ryanair · nowość",1],
@@ -685,13 +724,64 @@ function show(id){
 function chipGroup(el,cb){el.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{el.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");cb(c.dataset.v)})}
 
 // ---------- OKAZJE ----------
-let dealMonth="all", dealWhen="all", dealWarm=false;
+let dealMonth="all", dealWhen="all", dealWarm=false, dealShown=40;
+let LENS = store.get("deal_lens",["1-2","3-5","6-8","9-11","12-14"]);
 const FAR = addDays(TODAY,90);
+const isWarm = d => d.warm || /Ciepło|Kanary|Maroko|Egipt|Madera/.test(d.tag) || (DMAP[d.to]&&DMAP[d.to][4].includes("warm"));
+function lenOk(n){ return LENS.some(r=>{const [a,b]=r.split("-").map(Number);return n>=a&&n<=b}); }
 function dealsFor(){
-  const week=$("#dealWeek").checked;
-  return DEALS.filter(d=>ORIGS.includes(d.from) && d.d1>=TODAY && (!week || nights(d.d1,d.d2)<=7)
+  return DEALS.filter(d=>ORIGS.includes(d.from) && d.d1>=TODAY && lenOk(nights(d.d1,d.d2))
     && (dealWhen==="all" || (dealWhen==="near" ? d.d1<FAR : d.d1>=FAR))
-    && (!dealWarm || d.warm || /Ciepło|Kanary|Maroko|Egipt|Madera/.test(d.tag)));
+    && (!dealWarm || isWarm(d)));
+}
+// ---------- CENY NA ŻYWO (automat na GitHubie, co 6 godzin) ----------
+const LIVE_URL="https://tylkotak7.github.io/tanie-loty/loty/deals.json";
+let LIVE_TIME=null;
+function addLive(data){
+  const c=data.cols, ix=k=>c.indexOf(k);
+  data.rows.forEach(r=>{
+    const from=r[ix("from")], to=r[ix("to")], city=r[ix("city")], country=r[ix("country")];
+    if(!ORIGINS[from]) return;
+    if(!DMAP[to]){ const e=[to,city,`${city} [${to}]`,country,[],300]; CAT.push(e); DMAP[to]=e; }
+    ROUTES[from]=ROUTES[from]||{}; if(!ROUTES[from][to]) ROUTES[from][to]=["Ryanair"];
+    DEALS.push({from,to,en:to,city,country,p:r[ix("price")],d1:r[ix("out")],d2:r[ix("in")],outP:r[ix("outPrice")],inP:r[ix("inPrice")],
+      airport:r[ix("airport")]||from,src:"Ryanair na żywo",tag:country||"Ryanair",live:1});
+  });
+  LIVE_TIME=new Date(data.updated);
+}
+function liveStatus(){
+  $("#liveStatus").textContent = LIVE_TIME
+    ? `✅ Ceny Ryanair na żywo z 11 lotnisk · aktualizacja ${LIVE_TIME.toLocaleString("pl-PL",{day:"numeric",month:"numeric",hour:"2-digit",minute:"2-digit"})} (co 6 h) + okazje z serwisów`
+    : "Pokazuję okazje z serwisów (ceny na żywo niedostępne).";
+}
+function bookUrl(d){
+  return `https://www.ryanair.com/pl/pl/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=${d.d1}&dateIn=${d.d2}&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=${d.airport||d.from}&destinationIata=${d.to}`;
+}
+// Okazja tygodnia: najlepsza cena w stosunku do zwykłej „dobrej ceny” kierunku
+function renderWeek(){
+  const max=+$("#dealMax").value;
+  const pool=dealsFor().filter(d=>d.p<=max && nights(d.d1,d.d2)>=1);
+  if(!pool.length){$("#weekBox").innerHTML="";return}
+  const score=d=>d.p/((DMAP[d.to]&&DMAP[d.to][5])||250) + (d.live?0:0.05);
+  const seen=new Set(), top=[];
+  [...pool].sort((a,b)=>score(a)-score(b)).forEach(d=>{const k=d.from+d.city; if(!seen.has(k)&&top.length<4){seen.add(k);top.push(d)}});
+  const b=top[0], n=nights(b.d1,b.d2), good=(DMAP[b.to]&&DMAP[b.to][5])||250;
+  const save=Math.max(0,Math.round((1-b.p/good)*100));
+  $("#weekBox").innerHTML=`<div class="week"><h3>🏆 Okazja tygodnia</h3>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:6px">
+      <div><div style="font:700 20px 'Space Grotesk'">${esc(ORIGINS[b.from].name)} → ${esc(b.city)}</div>
+      <div class="meta" style="color:var(--mut);font-size:13px">${pl(b.d1)} → ${pl(b.d2)} · ${n} ${n===1?"noc":"nocy"}${b.outP?` · tam ${b.outP} zł, powrót ${b.inP} zł`:""}</div>
+      ${save>=10?`<span class="tag hot">${save}% taniej niż zwykle</span>`:""}</div>
+      <div class="big">${b.p} zł</div></div>
+    <div class="row" style="margin-top:10px">${b.live?`<a class="btn pri sm" href="${esc(bookUrl(b))}" target="_blank" rel="noopener">Kup w Ryanair ↗</a>`:`<button class="btn pri sm" data-wk="${DEALS.indexOf(b)}">Sprawdź cenę ↗</button>`}</div>
+    <div style="margin-top:12px;font-size:12px;color:var(--mut)">Też warto:</div>
+    ${top.slice(1).map(d=>`<div class="mini"><span>${d.from} → ${esc(d.city)} · ${pl(d.d1)}–${pl(d.d2)}</span><b style="color:var(--acc)">${d.p} zł</b></div>`).join("")}
+  </div>`;
+  const wb=$("#weekBox").querySelector("[data-wk]"); if(wb) wb.onclick=()=>openGoogle(DEALS[wb.dataset.wk]);
+}
+function openGoogle(d){
+  const q=`Flights from ${ORIGINS[d.from].en} to ${d.en} on ${d.d1} through ${d.d2}`;
+  openUrl(`https://www.google.com/travel/flights?q=${encodeURIComponent(q)}&hl=pl&curr=PLN`);
 }
 function renderDealMonths(){
   const ms=[...new Set(dealsFor().map(d=>d.d1.slice(0,7)))].sort();
@@ -701,21 +791,23 @@ function renderDealMonths(){
 }
 function renderDeals(){
   const max=+$("#dealMax").value; $("#dealMaxV").textContent=max+" zł";
-  const list=dealsFor().filter(d=>d.p<=max && (dealMonth==="all"||d.d1.slice(0,7)===dealMonth)).sort((a,b)=>a.p-b.p);
+  renderWeek();
+  const all=dealsFor().filter(d=>d.p<=max && (dealMonth==="all"||d.d1.slice(0,7)===dealMonth)).sort((a,b)=>a.p-b.p);
+  const list=all.slice(0,dealShown);
+  $("#dealMore").style.display=all.length>dealShown?"":"none";
+  $("#dealMore").textContent=`Pokaż więcej (jeszcze ${all.length-dealShown})`;
+  $("#dealsH").dataset.count=all.length;
   $("#dealList").innerHTML = list.length? list.map(d=>{
     const n=nights(d.d1,d.d2), i=DEALS.indexOf(d);
     return `<div class="card"><div class="deal">
       <div class="info"><div class="city">${d.from} → ${esc(d.city)}</div>
-      <div class="meta">${pl(d.d1)} → ${pl(d.d2)} · ${n} ${n===1?"noc":"nocy"}</div>
-      <div>${d.hot?'<span class="tag hot">🔥 hit</span>':""}<span class="tag">${esc(d.tag)}</span><span class="tag">${esc(d.src)}</span></div></div>
+      <div class="meta">${pl(d.d1)} → ${pl(d.d2)} · ${n} ${n===1?"noc":"nocy"}${d.airport==="WMI"?" · Modlin":""}</div>
+      ${d.outP?`<div class="meta">tam ${d.outP} zł · powrót ${d.inP} zł</div>`:""}
+      <div>${d.hot?'<span class="tag hot">🔥 hit</span>':""}${d.live?'<span class="tag new">● na żywo</span>':""}<span class="tag">${esc(d.tag)}</span>${d.live?"":`<span class="tag">${esc(d.src)}</span>`}</div></div>
       <div class="price">${d.p} zł<small>tam i z powrotem</small></div></div>
-      <div class="row" style="margin-top:10px"><button class="btn pri sm" data-deal="${i}">Sprawdź cenę ↗</button><button class="btn sm" data-dsky="${i}">Skyscanner ↗</button></div>
-    </div>`}).join("") : `<div class="empty">Brak okazji w tym filtrze. Zaznacz więcej lotnisk albo wyłącz „Maks. tydzień”.</div>`;
-  $("#dealList").querySelectorAll("[data-deal]").forEach(b=>b.onclick=()=>{
-    const d=DEALS[b.dataset.deal];
-    const q=`Flights from ${ORIGINS[d.from].en} to ${d.en} on ${d.d1} through ${d.d2}`;
-    openUrl(`https://www.google.com/travel/flights?q=${encodeURIComponent(q)}&hl=pl&curr=PLN`);
-  });
+      <div class="row" style="margin-top:10px">${d.live?`<a class="btn pri sm" href="${esc(bookUrl(d))}" target="_blank" rel="noopener">Kup w Ryanair ↗</a><button class="btn sm" data-deal="${i}">Google ↗</button>`:`<button class="btn pri sm" data-deal="${i}">Sprawdź cenę ↗</button><button class="btn sm" data-dsky="${i}">Skyscanner ↗</button>`}</div>
+    </div>`}).join("") : `<div class="empty">Brak okazji w tym filtrze. Zaznacz więcej lotnisk, długości wyjazdu albo podnieś cenę.</div>`;
+  $("#dealList").querySelectorAll("[data-deal]").forEach(b=>b.onclick=()=>openGoogle(DEALS[b.dataset.deal]));
   $("#dealList").querySelectorAll("[data-dsky]").forEach(b=>b.onclick=()=>{
     const d=DEALS[b.dataset.dsky];
     openUrl(`https://www.skyscanner.pl/transport/loty/${ORIGINS[d.from].sky}/anywhere/${ymd6(d.d1)}/${ymd6(d.d2)}/?adultsv2=1&rtn=1&preferdirects=true`);
@@ -728,7 +820,17 @@ $("#dealPrice").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
   else { $("#dealPrice").querySelectorAll(".chip:not([data-v=warm])").forEach(x=>x.classList.toggle("on",x===c)); $("#dealMax").value=v; }
   renderDealMonths(); renderDeals();
 });
-$("#dealWeek").onchange=()=>{renderDealMonths();renderDeals()};
+$("#dealLen").querySelectorAll(".chip").forEach(c=>{
+  c.classList.toggle("on",LENS.includes(c.dataset.v));
+  c.onclick=()=>{
+    const v=c.dataset.v;
+    LENS = LENS.includes(v) ? LENS.filter(x=>x!==v) : [...LENS,v];
+    if(!LENS.length) LENS=[v];
+    $("#dealLen").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",LENS.includes(x.dataset.v)));
+    store.set("deal_lens",LENS); dealShown=40; renderDealMonths(); renderDeals();
+  };
+});
+$("#dealMore").onclick=()=>{dealShown+=40;renderDeals()};
 chipGroup($("#dealWhen"),v=>{dealWhen=v;renderDealMonths();renderDeals()});
 
 // ---------- SZUKAJ ----------
@@ -853,16 +955,22 @@ function applyOrigins(){
   $("#hSub").textContent="Okazje i wyszukiwanie tanich lotów z: "+sel.map(o=>ORIGINS[o].name).join(", ");
   $("#dealsH").textContent=sel.length===1?"🔥 Okazje z "+ORIGINS[sel[0]].gen:"🔥 Okazje z "+sel.length+" lotnisk";
   $("#destH").textContent=sel.length===1?"🗺 Kierunki z "+ORIGINS[sel[0]].gen:"🗺 Kierunki z "+sel.length+" lotnisk";
-  $("#origin").querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",ORIGS.includes(c.dataset.v)));
+  $("#origin").querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.v==="ALL"?ORIGS.length===ORDER.length:ORIGS.includes(c.dataset.v)));
+  if(sel.length>3){ $("#hOrig").textContent=sel.length===ORDER.length?"całej Polski":sel.length+" lotnisk"; }
   fillDestSelect(); renderLinks(); renderDest(); renderDealMonths(); renderDeals(); renderThai();
 }
 $("#origin").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
   const v=c.dataset.v;
-  if(ORIGS.includes(v)){ if(ORIGS.length>1) ORIGS=ORIGS.filter(x=>x!==v); }
+  if(v==="ALL"){ ORIGS = ORIGS.length===ORDER.length ? ["POZ"] : [...ORDER]; }
+  else if(ORIGS.includes(v)){ if(ORIGS.length>1) ORIGS=ORIGS.filter(x=>x!==v); }
   else ORIGS=[...ORIGS,v];
-  applyOrigins();
+  dealShown=40; applyOrigins();
 });
-applyOrigins();
+applyOrigins(); liveStatus();
+// Wczytaj ceny na żywo
+fetch(LIVE_URL,{cache:"no-cache"}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(data=>{
+  addLive(data); liveStatus(); applyOrigins();
+}).catch(()=>{ LIVE_TIME=null; liveStatus(); });
 
 // ---------- ALERTY (tylko w apce na Androida) ----------
 const APP = (typeof window.Android!=="undefined" && window.Android.getSettings) ? window.Android : null;
