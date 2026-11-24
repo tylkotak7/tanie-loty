@@ -111,6 +111,14 @@ h1{font-size:24px;margin:8px 0 2px}
 .card:has(#news) h2::before{content:"📰 "}
 :root[data-icons=mini] .card:has(#news) h2::before{content:"≡ "}
 .inst{order:9}
+a.plink{color:inherit;text-decoration:none}
+.card>h2{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.card>h2::after{content:"▾";float:right;display:inline-block;color:var(--mu);font-size:14px;transition:transform .2s}
+.card.fold>h2::after{transform:rotate(-90deg)}
+.card.fold>:not(h2){display:none!important}
+.card.fold>h2{margin:0}
+.card.fold{padding-top:12px;padding-bottom:12px}
+#promo .pg:first-child,#cinema .pg:first-child{margin-top:0}
 .lrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid rgba(128,128,128,.2);transition:background .4s}
 .lrow:first-child{border-top:0}
 .lrow input{width:20px;height:20px;flex:none}
@@ -130,7 +138,7 @@ body{background-image:linear-gradient(var(--tint,transparent),var(--tint,transpa
 .hud.v-mini{border-top:3px solid var(--ac)}
 :root{--i-shop:"🏷️"}
 :root[data-icons=mini]{--i-shop:"%"}
-.card:has(.shop) h2::before{content:var(--i-shop) " "}
+.card:has(.shop) h2::before,.card:has(#promo) h2::before{content:var(--i-shop) " "}
 .shop{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid rgba(128,128,128,.2);color:var(--tx);text-decoration:none}
 .shop:first-of-type{border-top:0}
 .shop b{color:var(--ac)}
@@ -369,17 +377,15 @@ footer{color:var(--mu);font-size:12px;text-align:center;padding:8px 0 24px;order
 </section>
 
 <section class="card">
-<h2>Promocje · Kaufland</h2>
+<h2>Gazetki promocyjne</h2>
 <div class="pstat" id="pstat"></div>
 <div id="promo"></div>
-<a class="shop" href="https://www.kaufland.pl/" target="_blank" rel="noopener"><span>Kaufland</span><b>Gazetka tygodnia ›</b></a>
-<a class="shop" href="https://www.netto.pl/" target="_blank" rel="noopener"><span>Netto</span><b>Gazetka ›</b></a>
-<div class="src">Źródło: gazetka Kaufland nr 46, 12–18.11.2026, do wyczerpania zapasów. Kaufland Wągrowiec: ul. Pałucka 4 (adres z gazetki). Netto jeszcze nie dodane.</div>
+<div class="src" id="promosrc"></div>
 </section>
 <section class="card">
 <h2>Kino MDK Wągrowiec</h2>
 <div id="cinema"></div>
-<div class="src">Stan na 11.11 (strona miasta i Bilety24). Repertuar może się zmienić.</div>
+<div class="src" id="cinsrc">Repertuar z Bilety24.</div>
 <a class="shop" href="https://www.wagrowiec.eu/pl/dla-turysty/kultura/repertuar-kina" target="_blank" rel="noopener"><span>Pełny repertuar i godziny</span><b>wagrowiec.eu ›</b></a>
 <a class="shop" href="https://www.bilety24.pl/kino/organizator/miejski-dom-kultury-623" target="_blank" rel="noopener"><span>Bilety</span><b>Bilety24 ›</b></a>
 </section>
@@ -392,7 +398,7 @@ footer{color:var(--mu);font-size:12px;text-align:center;padding:8px 0 24px;order
 <section class="card">
 <h2>Pomysł na obiad</h2>
 <button class="dbtn" id="dbtn">🎲 Wylosuj obiad</button><button class="dtog" id="dtog" type="button">Pokaż wszystkie</button><div class="dall" id="dall"></div>
-<div class="dres" id="dres"><div class="src">Klikasz, a ja losuję danie z krótkim przepisem i kosztem z cen w gazetce Kaufland. Netto dodam, gdy wgrasz jego gazetkę. Jest już 10 dań, a wszystkie zobaczysz pod przyciskiem „Pokaż wszystkie".</div></div>
+<div class="dres" id="dres"><div class="src">Klikasz, a ja losuję danie z krótkim przepisem i orientacyjnym kosztem składników. Jest 22 dań, a wszystkie zobaczysz pod przyciskiem „Pokaż wszystkie".</div></div>
 </section>
 <section class="card">
 <h2>Działka · Gnieźnieńska</h2>
@@ -686,6 +692,8 @@ document.getElementById('waste').innerHTML=out;
 <h4 class="sh">Karty na stronie</h4>
 <p class="src" style="margin:0 0 4px">Odznacz, czego nie chcesz widzieć. Strzałkami ▲▼ przestawiasz kolejność, zmiany widać od razu.</p>
 <div id="lay"></div>
+<div class="nrow"><button id="fall" type="button">Zwiń wszystkie</button><button id="funf" type="button">Rozwiń wszystkie</button></div>
+<p class="src" style="margin:6px 0 0">Kartę zwiniesz też, stukając w jej nagłówek.</p>
 <div class="nrow"><button id="erst" type="button">Przywróć domyślny układ</button></div>
 <button class="close" id="ovx">Zamknij</button></div></div>
 <script>
@@ -717,34 +725,53 @@ setSkin(get('skin')||'sky');setIc(get('icons')||'emoji');
 </script>
 <script>
 (function(){
-var G=[['12–18.11',[['Karkówka wieprzowa, 1 kg','11,99','22,99','do 3 kg'],['Masło Łaciate 200 g','3,99','5,99','do 6 opak.'],['Nescafé Classic 200 g','19,99','36,99','do 6 opak.'],['Mandarynki, 1 kg','5,99','9,99',''],['Pieczarki polskie 500 g','4,99','7,99',''],['Coca-Cola 4×2 l','31,96','','4-pak, 7,99 za butelkę'],['Żywiec Zdrój 6×1,5 l','9,54','','6-pak, 1,59 za butelkę'],['Ziemniaki 2,5 kg','6,99','8,99','kupon w aplikacji']]],['Tylko 12–14.11',[['Kapusta polska, 1 kg','2,99','5,99',''],['Cebula żółta, 1 kg','1,99','3,99',''],['Marchew polska, 1 kg','1,99','3,99',''],['Awokado, szt.','2,99','5,99','']]],['Sobota 14.11',[['Kaczka tuszka, 1 kg','9,99','16,99','do 6 kg'],['Pomidory malinowe, 1 kg','9,99','18,99',''],['Mleko Łowicz UHT 1 l','1,99','3,99','z kartą XTRA, przy 6 szt.']]],['Od poniedziałku 16.11',[['Jaja z wolnego wybiegu, 10 szt.','9,99','13,49','1,00 zł za sztukę'],['Podudzie lub udo z kurczaka, 1 kg','6,49','11,99','do 4 kg'],['Jabłka polskie, 1 kg','2,99','4,99',''],['Ogórek długi, szt.','2,39','4,99','']]]];
-var out='';
-G.forEach(function(g){out+='<div class="pg">'+g[0]+'</div>';g[1].forEach(function(i){out+='<div class="pi"><span>'+i[0]+(i[3]?'<small>'+i[3]+'</small>':'')+'</span><span class="pp">'+i[1]+' zł'+(i[2]?'<s>'+i[2]+'</s>':'')+'</span></div>'})});
-var h=document.getElementById('promo'),n=0;G.forEach(function(g){n+=g[1].length});h.innerHTML=out;
-var f=h.querySelector('.pi');f.classList.add('pfirst');
-var b=document.createElement('button');b.className='pexp';b.setAttribute('aria-label','Rozwiń promocje');b.setAttribute('aria-expanded','false');b.textContent='▾';f.appendChild(b);
-var c=document.createElement('div');c.className='pcnt';c.textContent='+'+(n-1)+' innych promocji';f.after(c);
-b.onclick=function(){var o=h.classList.toggle('open');b.setAttribute('aria-expanded',o?'true':'false');b.classList.toggle('on',o)};
-c.onclick=function(){b.click()};
-var t=new Date();t.setHours(0,0,0,0);var s=new Date(2026,10,12),e=new Date(2026,10,18),txt;
-if(t<s){var n=Math.round((s-t)/864e5);txt=n===1?'Gazetka zaczyna się jutro (czw. 12.11)':'Gazetka zaczyna się za '+n+' dni (12.11)'}else if(t<=e){txt='Gazetka trwa do śr. 18.11'}else{txt='Zapisana gazetka (12–18.11) się skończyła';h.innerHTML='<div class="src">Promocje z gazetki 12–18.11 już nie obowiązują. Aktualne oferty otworzysz poniżej.</div>';h.classList.add('open')}
-document.getElementById('pstat').textContent=txt;
+var h=document.getElementById('promo'),st=document.getElementById('pstat'),src=document.getElementById('promosrc');
+var DN=['niedz.','pon.','wt.','śr.','czw.','pt.','sob.'];
+function p2(n){return ('0'+n).slice(-2)}
+function iso(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
+function dm(s){var d=new Date(s+'T12:00:00');return DN[d.getDay()]+' '+d.getDate()+'.'+p2(d.getMonth()+1)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var SH=[['Kaufland','https://blix.pl/sklep/kaufland/'],['Lidl','https://blix.pl/sklep/lidl/'],['Biedronka','https://blix.pl/sklep/biedronka/'],['Netto','https://blix.pl/sklep/netto/'],['Dino','https://blix.pl/sklep/dino/']];
+function links(){return SH.map(function(x){return '<a class="pi plink" href="'+x[1]+'" target="_blank" rel="noopener"><span>'+x[0]+'</span><span class="pp">gazetki ›</span></a>'}).join('')}
+function collapse(n){var f=h.querySelector('.pi');if(!f||n<2)return;f.classList.add('pfirst');var b=document.createElement('button');b.className='pexp';b.type='button';b.setAttribute('aria-label','Pokaż wszystkie gazetki');b.textContent='▾';f.appendChild(b);var c=document.createElement('div');c.className='pcnt';c.textContent='+'+(n-1)+' innych gazetek';f.after(c);b.onclick=function(e){e.preventDefault();var o=h.classList.toggle('open');b.classList.toggle('on',o)};c.onclick=function(){b.click()}}
+WDATA.then(function(D){
+ var td=iso(new Date()),G=(D&&D.leaflets||[]).filter(function(x){return x.to>=td});
+ if(!G.length){st.textContent='Gazetki';h.innerHTML='<div class="src">Nie udało się pobrać listy gazetek. Otwórz je bezpośrednio:</div>'+links();h.classList.add('open');src.textContent='';return}
+ var order=SH.map(function(x){return x[0]});
+ G.sort(function(a,b){var an=a.from<=td,bn=b.from<=td;return order.indexOf(a.shop)-order.indexOf(b.shop)||(an===bn?a.from.localeCompare(b.from):an?-1:1)});
+ var now=G.filter(function(x){return x.from<=td}).length,out='';
+ G.forEach(function(x){var on=x.from<=td,lab=on?(x.to===td?'ostatni dzień':'do '+dm(x.to)):'od '+dm(x.from);
+  out+='<a class="pi plink" href="'+esc(x.url)+'" target="_blank" rel="noopener"><span>'+esc(x.shop)+' · '+esc(x.name)+'<small>'+(on?'trwa':'wkrótce')+' · '+dm(x.from)+' – '+dm(x.to)+'</small></span><span class="pp"'+(on?'':' style="color:var(--mu)"')+'>'+lab+' ›</span></a>'});
+ h.innerHTML=out;collapse(G.length);
+ st.textContent='Teraz: '+now+' gazetek'+(G.length>now?', wkrótce: '+(G.length-now):'');
+ src.textContent='Lista z blix.pl, odświeżana co kilka godzin. Kliknij, żeby przejrzeć gazetkę.';
+});
 })();
 </script>
 <script>
 (function(){
-function d(m,x){return new Date(2026,m-1,x)}
-function dm(x){return x.getDate()+'.'+('0'+(x.getMonth()+1)).slice(-2)}
-var F=[['Kot Prot',d(11,6),d(11,19)],['Niesamowite przygody skarpetek 4',d(11,6),d(11,19)],['Nasza rewolucja',d(11,11),d(11,26)],['Przez ścianę',d(11,11),d(11,11)],['Jestem Rocky',d(11,20),d(12,1)],['Rozważna i romantyczna',d(11,20),d(11,26)],['Najlepsza owsianka na świecie',d(11,22),d(12,3)],['Natura miłości',d(11,22),d(11,22)],['Homo sapiens?',d(11,23),d(11,23)],['Zróbmy sobie przerwę',d(11,26),d(11,26)],['Pikkuli i Świąteczny Renifer',d(11,27),d(11,29)],['Violetta Villas',d(11,27),d(12,10)],['Forrest Gump',d(11,28),d(11,28)]];
-var T=[['14:30','Niesamowite przygody skarpetek 4'],['15:00','Lalka'],['15:30','Camino dla opornych'],['17:30','Przez ścianę']];
-var t=new Date();t.setHours(0,0,0,0);var out='';
-var now=new Date(),nm=now.getHours()*60+now.getMinutes(),TT=T.filter(function(x){var p=x[0].split(':');return +p[0]*60+ +p[1]>=nm});
-if(t.getTime()===d(11,11).getTime()&&TT.length){out+='<div class="pg">Dziś (śr. 11.11)</div>';TT.forEach(function(x){out+='<div class="pi"><span>'+x[1]+'<small>dziś</small></span><span class="pp">'+x[0]+'</span></div>'})}
-var L=F.filter(function(f){return f[2]>=t}).sort(function(a,b){return a[1]-b[1]}).slice(0,8);
-if(L.length){out+='<div class="pg">W repertuarze</div>';L.forEach(function(f){var s=f[1],e=f[2],lab;if(s.getTime()===e.getTime())lab=dm(s);else if(s<=t)lab='do '+dm(e);else lab=dm(s)+'–'+dm(e);out+='<div class="pi"><span>'+f[0]+'</span><span class="pp">'+lab+'</span></div>'})}else{out='<div class="src">Zapisany repertuar się skończył. Aktualne seanse i godziny są pod linkami poniżej.</div>'}
-var h=document.getElementById('cinema');h.innerHTML=out;
-var items=h.querySelectorAll('.pi');
-if(items.length>1){var f=items[0];f.classList.add('pfirst');var b=document.createElement('button');b.className='pexp';b.setAttribute('aria-label','Rozwiń repertuar');b.setAttribute('aria-expanded','false');b.textContent='▾';f.appendChild(b);var c=document.createElement('div');c.className='pcnt';c.textContent='+'+(items.length-1)+' innych seansów';f.after(c);b.onclick=function(){var o=h.classList.toggle('open');b.setAttribute('aria-expanded',o?'true':'false');b.classList.toggle('on',o)};c.onclick=function(){b.click()}}
+var h=document.getElementById('cinema'),src=document.getElementById('cinsrc');
+var DN=['niedz.','pon.','wt.','śr.','czw.','pt.','sob.'];
+function p2(n){return ('0'+n).slice(-2)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function dl(s){var d=new Date(s+'T12:00:00');return DN[d.getDay()]+' '+d.getDate()+'.'+p2(d.getMonth()+1)}
+function row(x,lab,sub){return '<a class="pi plink" href="'+esc(x.u)+'" target="_blank" rel="noopener"><span>'+esc(x.t)+'<small>'+sub+'</small></span><span class="pp">'+lab+'</span></a>'}
+function render(S){
+ var n=new Date(),td=n.getFullYear()+'-'+p2(n.getMonth()+1)+'-'+p2(n.getDate()),hm=p2(n.getHours())+':'+p2(n.getMinutes());
+ S=S.filter(function(x){return x.d>td||(x.d===td&&x.h>=hm)});
+ if(!S.length){h.innerHTML='<div class="src">Brak seansów w pobranym repertuarze. Sprawdź pod linkami poniżej.</div>';h.classList.add('open');return}
+ var out='',today=S.filter(function(x){return x.d===td}),by={},cnt={},films=[];
+ S.forEach(function(x){if(!by[x.t]){by[x.t]=x;films.push(x)}cnt[x.t]=(cnt[x.t]||0)+1});
+ if(today.length){out+='<div class="pg">Dziś</div>';today.forEach(function(x){out+=row(x,x.h,'kliknij, żeby kupić bilet')})}
+ out+='<div class="pg">W repertuarze · najbliższy seans</div>';
+ films.forEach(function(x){out+=row(x,(x.d===td?'dziś':dl(x.d))+' '+x.h,cnt[x.t]>1?'seansów: '+cnt[x.t]:'jeden seans')});
+ h.innerHTML=out;h.classList.remove('open');
+ var items=h.querySelectorAll('.pi');if(items.length<2)return;
+ var f=items[0];f.classList.add('pfirst');var b=document.createElement('button');b.className='pexp';b.type='button';b.setAttribute('aria-label','Rozwiń repertuar');b.textContent='▾';f.appendChild(b);
+ var c=document.createElement('div');c.className='pcnt';c.textContent='+'+(items.length-1)+' innych seansów i filmów';f.after(c);
+ b.onclick=function(e){e.preventDefault();var o=h.classList.toggle('open');b.classList.toggle('on',o)};c.onclick=function(){b.click()};
+}
+WDATA.then(function(D){var S=D&&D.cinema;if(S&&S.length){render(S);src.textContent='Repertuar z Bilety24, odświeżany co kilka godzin. Kliknij seans, żeby kupić bilet.';setInterval(function(){render(S)},300000)}else{h.innerHTML='<div class="src">Nie udało się pobrać repertuaru. Sprawdź pod linkami poniżej.</div>';h.classList.add('open');src.textContent=''}});
 })();
 </script>
 <script>
@@ -782,7 +809,19 @@ var D=[
 {n:'Zapiekanka makaronowa z mięsem i serem',t:'45 min',p:3,v:'12–18.11',i:[['Mięso mielone z łopatki wieprzowej','0,4 kg',4.36],['Makaron Lubella','250 g',1.87],['Passata Mutti','pół butelki',3.50],['Ser Gouda Mlekovita w plastrach','100 g',3.00]],h:'sól, pieprz, cebula lub czosnek, olej, zioła',s:['Makaron ugotuj al dente.','Mięso podsmaż na oleju z solą i pieprzem (8 min), dodaj passatę i duś 10 min.','Wymieszaj makaron z sosem, przełóż do naczynia i przykryj plastrami sera.','Zapiekaj w 200 °C ok. 15 min, aż ser się zrumieni.']},
 {n:'Szybki bigos z kiełbasą',t:'30 min',p:3,v:'12–14.11',i:[['Kapusta kiszona Wąwoźny','800 g',3.99],['Kiełbasa polska ekstra Gzella','300 g',8.97],['Cebula żółta','0,2 kg',0.40]],h:'olej, sól, pieprz, liść laurowy, ziele angielskie, woda',s:['Cebulę pokrój w kostkę i zeszklij na oleju.','Dodaj kiełbasę pokrojoną w plasterki i podsmaż 5 min.','Wrzuć kapustę z liściem laurowym i zielem, wlej szklankę wody.','Duś pod przykryciem 20 min, dopraw solą i pieprzem. Podaj z chlebem.']},
 {n:'Naleśniki z twarogiem',t:'30 min',p:3,v:'16–18.11',i:[['Mąka szymanowska','150 g',0.45],['Jaja z wolnego wybiegu','2 szt.',2.00],['Mleko Mlekovita Polskie 3,2%','300 ml',0.90],['Twaróg sernikowy K-Stąd Takie Dobre','250 g',1.75]],h:'cukier, szczypta soli, olej do smażenia, cukier wanilinowy (opcjonalnie)',s:['Wymieszaj mąkę, jaja, mleko i szczyptę soli na gładkie ciasto, odstaw na 10 min.','Smaż cienkie naleśniki na rozgrzanej, lekko natłuszczonej patelni.','Twaróg rozgnieć z cukrem (i cukrem wanilinowym).','Nadziej naleśniki serem i zwiń.']},
-{n:'Zupa pomidorowa z makaronem',t:'25 min',p:4,v:'12–18.11',i:[['Passata Mutti','700 g',6.99],['Makaron Lubella','100 g',0.75],['Śmietanka łowicka 30%','100 ml',1.60]],h:'woda lub bulion, sól, pieprz, cukier, bazylia',s:['Zagotuj 1,2 l wody lub bulionu.','Wlej passatę, dopraw solą, pieprzem i szczyptą cukru, gotuj 10 min.','Makaron ugotuj osobno.','Do zupy dodaj śmietankę, wymieszaj, podaj z makaronem i bazylią.']}
+{n:'Zupa pomidorowa z makaronem',t:'25 min',p:4,v:'12–18.11',i:[['Passata Mutti','700 g',6.99],['Makaron Lubella','100 g',0.75],['Śmietanka łowicka 30%','100 ml',1.60]],h:'woda lub bulion, sól, pieprz, cukier, bazylia',s:['Zagotuj 1,2 l wody lub bulionu.','Wlej passatę, dopraw solą, pieprzem i szczyptą cukru, gotuj 10 min.','Makaron ugotuj osobno.','Do zupy dodaj śmietankę, wymieszaj, podaj z makaronem i bazylią.']},
+{n:'Gulasz wieprzowy z kaszą jęczmienną',t:'60 min',p:3,v:'orientacyjne',i:[['Łopatka wieprzowa','0,5 kg',9.50],['Kasza jęczmienna','200 g',1.20],['Papryka czerwona','1 szt.',2.50],['Cebula żółta','0,2 kg',0.60]],h:'olej, mąka, papryka słodka, sól, pieprz, liść laurowy',s:['Mięso pokrój w kostkę, obtocz w mące i obsmaż na oleju.','Dodaj cebulę w kostkę, paprykę słodką i liść laurowy, zalej wodą do przykrycia.','Duś pod przykryciem ok. 45 min, w połowie dodaj pokrojoną paprykę.','Kaszę ugotuj według opakowania i podaj z gulaszem.']},
+{n:'Kotlety mielone z ziemniakami i mizerią',t:'45 min',p:4,v:'orientacyjne',i:[['Mięso mielone wieprzowe','0,5 kg',9.00],['Jaja','1 szt.',0.90],['Bułka tarta','60 g',0.50],['Ziemniaki','0,8 kg',2.40],['Ogórek','1 szt.',2.50],['Śmietana 18%','150 g',1.50]],h:'cebula, czosnek, sól, pieprz, olej, koperek',s:['Ziemniaki obierz i gotuj w osolonej wodzie ok. 20 min.','Mięso wymieszaj z jajkiem, startą cebulą, solą, pieprzem i 2 łyżkami bułki tartej.','Uformuj kotlety, obtocz w bułce i smaż po 5–6 min z każdej strony.','Ogórek pokrój w plasterki, posol, wymieszaj ze śmietaną i koperkiem.']},
+{n:'Placki ziemniaczane ze śmietaną',t:'40 min',p:3,v:'orientacyjne',i:[['Ziemniaki','1 kg',3.00],['Jaja','2 szt.',1.80],['Cebula żółta','0,1 kg',0.30],['Mąka pszenna','50 g',0.20],['Śmietana 18%','200 g',2.40]],h:'sól, pieprz, olej do smażenia',s:['Ziemniaki i cebulę zetrzyj na tarce o drobnych oczkach, odlej sok.','Dodaj jaja, mąkę, sól i pieprz, wymieszaj.','Smaż na rozgrzanym oleju małe placki, po 3–4 min z każdej strony.','Podawaj ze śmietaną albo z cukrem, jeśli wolisz na słodko.']},
+{n:'Leczo z kiełbasą i cukinią',t:'35 min',p:3,v:'orientacyjne',i:[['Kiełbasa śląska','300 g',9.00],['Papryka','3 szt.',7.50],['Cukinia','1 szt.',3.50],['Passata pomidorowa','500 g',4.50],['Cebula żółta','0,2 kg',0.60]],h:'olej, czosnek, papryka słodka i ostra, sól, pieprz',s:['Kiełbasę pokrój w półplasterki, cebulę w kostkę i zrumień razem na oleju.','Dodaj paprykę i cukinię w kostkę, smaż 5 min.','Wlej passatę, dopraw papryką, czosnkiem, solą i pieprzem.','Duś pod przykryciem 15–20 min. Podaj z chlebem lub ryżem.']},
+{n:'Kurczak curry z mlekiem kokosowym i ryżem',t:'30 min',p:3,v:'orientacyjne',i:[['Filet z kurczaka','400 g',9.60],['Mleczko kokosowe','400 ml',6.50],['Ryż biały','200 g',1.00],['Cebula żółta','0,1 kg',0.30]],h:'olej, curry w proszku, czosnek, imbir, sól',s:['Ryż ugotuj (1 część ryżu na 2 części wody, ok. 12 min).','Kurczaka pokrój w kostkę i obsmaż na oleju z cebulą (6 min).','Dodaj 2 łyżeczki curry, czosnek i imbir, smaż 1 min.','Wlej mleczko kokosowe, gotuj 8 min, dopraw solą. Podaj z ryżem.']},
+{n:'Zupa ogórkowa',t:'40 min',p:4,v:'orientacyjne',i:[['Ogórki kiszone','500 g',5.00],['Ziemniaki','0,5 kg',1.50],['Marchew','0,2 kg',0.60],['Śmietana 18%','200 g',2.40]],h:'bulion lub woda z kostką, koperek, sól, pieprz',s:['Zagotuj 1,5 l bulionu, wrzuć ziemniaki i marchew w kostkę, gotuj 15 min.','Dodaj starte ogórki i trochę zalewy, gotuj 10 min.','Śmietanę zahartuj gorącą zupą i wlej do garnka.','Dopraw pieprzem i koperkiem, a sól dodaj dopiero na końcu, bo ogórki są słone.']},
+{n:'Łosoś pieczony z ziemniakami i brokułem',t:'35 min',p:2,v:'orientacyjne',i:[['Łosoś filet','300 g',18.00],['Ziemniaki','0,6 kg',1.80],['Brokuł','1 szt.',4.50]],h:'oliwa, cytryna, sól, pieprz, czosnek',s:['Ziemniaki pokrój w ćwiartki, wymieszaj z oliwą i solą, piecz w 200 °C 15 min.','Dołóż łososia skropionego cytryną i brokuł w różyczkach.','Piecz razem jeszcze 15 min.','Dopraw pieprzem i podaj z cząstką cytryny.']},
+{n:'Kurczak w panierce z frytkami z piekarnika',t:'45 min',p:3,v:'orientacyjne',i:[['Filet z kurczaka','400 g',9.60],['Jaja','2 szt.',1.80],['Bułka tarta','100 g',0.80],['Ziemniaki','0,8 kg',2.40]],h:'mąka, olej, sól, pieprz, papryka',s:['Ziemniaki pokrój w słupki, wymieszaj z olejem, solą i papryką, piecz w 220 °C ok. 30 min.','Filet przekrój na cienkie kotlety, oprósz solą i pieprzem.','Obtocz w mące, jajku i bułce tartej.','Smaż po 4 min z każdej strony na złoto.']},
+{n:'Makaron z boczkiem i jajkiem (carbonara po polsku)',t:'20 min',p:3,v:'orientacyjne',i:[['Makaron spaghetti','250 g',2.00],['Boczek wędzony','150 g',5.50],['Jaja','3 szt.',2.70],['Ser żółty lub parmezan','50 g',3.00]],h:'pieprz, sól',s:['Ugotuj makaron, zachowaj szklankę wody z gotowania.','Boczek w kostce wysmaż na patelni na chrupko.','Jaja wymieszaj ze startym serem i dużą ilością pieprzu.','Zdejmij patelnię z ognia, wrzuć makaron, wlej masę jajeczną i mieszaj, dolewając trochę wody, aż zrobi się kremowy sos.']},
+{n:'Gołąbki leniwe w sosie pomidorowym',t:'50 min',p:4,v:'orientacyjne',i:[['Mięso mielone wieprzowe','0,5 kg',9.00],['Kapusta biała','0,5 kg',1.50],['Ryż biały','100 g',0.50],['Passata pomidorowa','500 g',4.50],['Cebula żółta','0,1 kg',0.30]],h:'jajko, sól, pieprz, majeranek, olej',s:['Ryż ugotuj, kapustę drobno posiekaj i sparz wrzątkiem.','Wymieszaj mięso, ryż, kapustę, cebulę, jajko i przyprawy.','Uformuj kotlety i obsmaż je krótko z obu stron.','Zalej passatą z odrobiną wody i duś pod przykryciem 25 min.']},
+{n:'Zupa krem z dyni',t:'40 min',p:4,v:'orientacyjne',i:[['Dynia','1 kg',4.00],['Ziemniaki','0,3 kg',0.90],['Marchew','0,2 kg',0.60],['Śmietanka 30%','100 ml',2.00]],h:'bulion, cebula, czosnek, imbir lub gałka, sól, pieprz, pestki dyni',s:['Cebulę zeszklij w garnku, dodaj pokrojoną dynię, ziemniaki i marchew.','Zalej 1 l bulionu i gotuj 25 min do miękkości.','Zmiksuj na gładko, dodaj śmietankę i przyprawy.','Podawaj z prażonymi pestkami albo grzankami.']},
+{n:'Fasolka po bretońsku',t:'40 min',p:4,v:'orientacyjne',i:[['Fasola biała w puszce','2×400 g',7.00],['Kiełbasa','200 g',6.00],['Boczek wędzony','100 g',3.70],['Passata pomidorowa','500 g',4.50]],h:'cebula, majeranek, papryka słodka, sól, pieprz',s:['Boczek i kiełbasę pokrój w kostkę i podsmaż z cebulą.','Dodaj passatę i odsączoną fasolę.','Dopraw majerankiem, papryką, solą i pieprzem.','Duś 20 min na małym ogniu. Podaj z chlebem.']}
 ];
 function fm(x){return x.toFixed(2).replace('.',',')+' zł'}
 var last=-1,res=document.getElementById('dres'),btn=document.getElementById('dbtn');
@@ -790,13 +829,13 @@ function show(k){last=k;var d=D[k],tot=0,r='',st='';
 d.i.forEach(function(x){tot+=x[2];r+='<div class="pi"><span>'+x[0]+'<small>'+x[1]+'</small></span><span class="pp">'+fm(x[2])+'</span></div>'});
 tot=Math.round(tot*100)/100;
 d.s.forEach(function(s){st+='<li>'+s+'</li>'});
-res.innerHTML='<h3>'+d.n+'</h3><div class="dmeta"><span>'+d.t+'</span><span>'+d.p+' porcje</span><span class="dtot">razem '+fm(tot)+'</span><span class="dtot">'+fm(tot/d.p)+' / porcję</span></div>'+r+'<div class="src">Z domu (bez liczenia): '+d.h+(new Date()>new Date(2026,10,18,23,59)?'. Ceny orientacyjne z gazetki Kaufland 12–18.11 (dziś mogą być inne).':'. Ceny z gazetki Kaufland, ważne '+d.v+'.')+' Koszt dotyczy tylko użytych ilości.</div><ol>'+st+'</ol><button class="dtog" id="dadd" type="button">Dodaj składniki do listy zakupów</button>';
+res.innerHTML='<h3>'+d.n+'</h3><div class="dmeta"><span>'+d.t+'</span><span>'+d.p+' porcje</span><span class="dtot">razem '+fm(tot)+'</span><span class="dtot">'+fm(tot/d.p)+' / porcję</span></div>'+r+'<div class="src">Z domu (bez liczenia): '+d.h+'. Ceny orientacyjne, w sklepie mogą być inne.'+' Koszt dotyczy tylko użytych ilości.</div><ol>'+st+'</ol><button class="dtog" id="dadd" type="button">Dodaj składniki do listy zakupów</button>';
 var ad=document.getElementById('dadd');ad.onclick=function(){if(window.addShop){window.addShop(d.i.map(function(x){return x[0]+' ('+x[1]+')'}));ad.textContent='Dodano do listy ✓'}};btn.textContent='🎲 Losuj dalej'}
 btn.onclick=function(){var k;do{k=Math.floor(Math.random()*D.length)}while(k===last);show(k)};
 function cost(d){var s=0;d.i.forEach(function(x){s+=x[2]});return Math.round(s*100)/100}
 var all=document.getElementById('dall'),tg=document.getElementById('dtog');
 var ord=D.map(function(d,i){return i}).sort(function(a,b){return cost(D[a])/D[a].p-cost(D[b])/D[b].p});
-var lh='';ord.forEach(function(i){var d=D[i];lh+='<div class="pi dli" data-k="'+i+'"><span>'+d.n+'<small>'+d.t+' · '+d.p+' porcje · ważne '+d.v+'</small></span><span class="pp">'+fm(cost(d)/d.p)+'</span></div>'});
+var lh='';ord.forEach(function(i){var d=D[i];lh+='<div class="pi dli" data-k="'+i+'"><span>'+d.n+'<small>'+d.t+' · '+d.p+' porcje</small></span><span class="pp">'+fm(cost(d)/d.p)+'</span></div>'});
 all.innerHTML=lh;
 all.onclick=function(e){var el=e.target.closest('.dli');if(el){show(+el.getAttribute('data-k'));res.scrollIntoView({behavior:'smooth',block:'start'})}};
 function lab(){return all.classList.contains('open')?'Ukryj listę ▴':'Pokaż wszystkie ('+D.length+') ▾'}
@@ -959,16 +998,20 @@ function key(c){if(c.id==='hud'||c.id==='note')return c.id;for(var i=0;i<IDS.len
 function title(c){if(c.id==='hud')return 'Pogoda (góra strony)';if(c.id==='note')return 'Karteczka z notatką';var h=c.querySelector('h2');return h?h.textContent.split(' · ')[0].replace(/\s*\(.*/,''):'Karta'}
 var items=[].slice.call(main.children).filter(function(c){return c.id==='hud'||c.id==='note'||(c.classList.contains('card')&&c.id!=='inst')});
 var def=items.map(function(c,i){return{c:c,o:parseFloat(getComputedStyle(c).order)||0,i:i}}).sort(function(a,b){return a.o-b.o||a.i-b.i}).map(function(x){return x.c});
-var order=def.slice(),hid=[];
+var order=def.slice(),hid=[],fold=[];try{fold=JSON.parse(localStorage.getItem('foldcards'))||[]}catch(e){}
 try{var s=JSON.parse(localStorage.getItem(KO));if(s&&s.length){var by={};def.forEach(function(c){by[key(c)]=c});var out=[];s.forEach(function(k){if(by[k]){out.push(by[k]);delete by[k]}});def.forEach(function(c){if(by[key(c)]===c)out.push(c)});order=out}}catch(e){}
 try{hid=JSON.parse(localStorage.getItem(KH))||[]}catch(e){}
 var gear=document.createElement('button');gear.type='button';gear.className='opt fgear';gear.setAttribute('aria-label','Opcje');gear.onclick=function(){$('opt').click()};document.body.appendChild(gear);
-function apply(){order.forEach(function(c,i){c.style.order=i+1;c.classList.toggle('gone',hid.indexOf(key(c))>=0)});foot.style.order=1000;if($('inst'))$('inst').style.order=999;gear.hidden=hid.indexOf('hud')<0}
+function apply(){order.forEach(function(c,i){c.style.order=i+1;c.classList.toggle('gone',hid.indexOf(key(c))>=0)});foot.style.order=1000;if($('inst'))$('inst').style.order=999;gear.hidden=hid.indexOf('hud')<0;order.forEach(function(c){if(c.classList.contains('card'))c.classList.toggle('fold',fold.indexOf(key(c))>=0)})}
+function saveF(){try{localStorage.setItem('foldcards',JSON.stringify(fold))}catch(e){}}
+main.addEventListener('click',function(e){var h=e.target.closest('h2');if(!h||!h.parentNode.classList.contains('card'))return;var k=key(h.parentNode),i=fold.indexOf(k);if(i>=0)fold.splice(i,1);else fold.push(k);saveF();apply()});
+$('fall').onclick=function(){fold=order.filter(function(c){return c.classList.contains('card')}).map(key);saveF();apply()};
+$('funf').onclick=function(){fold=[];saveF();apply()};
 function save(){try{localStorage.setItem(KO,JSON.stringify(order.map(key)));localStorage.setItem(KH,JSON.stringify(hid))}catch(e){}}
 function build(hl){var h='';order.forEach(function(c,i){var k=key(c),off=hid.indexOf(k)>=0;h+='<div class="lrow'+(off?' off':'')+(i===hl?' hl':'')+'"><input type="checkbox" data-k="'+esc(k)+'"'+(off?'':' checked')+' aria-label="Pokazuj: '+esc(title(c))+'"><span>'+esc(title(c))+'</span><button type="button" data-m="'+i+'" data-d="-1"'+(i===0?' disabled':'')+' aria-label="W górę">▲</button><button type="button" data-m="'+i+'" data-d="1"'+(i===order.length-1?' disabled':'')+' aria-label="W dół">▼</button></div>'});$('lay').innerHTML=h;if(hl>=0)setTimeout(function(){var r=$('lay').querySelectorAll('.lrow')[hl];if(r)r.classList.remove('hl')},700)}
 $('lay').onclick=function(e){var b=e.target.closest('button');if(!b||b.disabled)return;var i=+b.getAttribute('data-m'),j=i+ +b.getAttribute('data-d');if(j<0||j>=order.length)return;var t=order[i];order[i]=order[j];order[j]=t;save();apply();build(j);var nb=$('lay').querySelectorAll('.lrow')[j].querySelector('button[data-d="'+b.getAttribute('data-d')+'"]');if(nb&&!nb.disabled)nb.focus()};
 $('lay').onchange=function(e){var k=e.target.getAttribute('data-k');if(k===null)return;var i=hid.indexOf(k);if(e.target.checked){if(i>=0)hid.splice(i,1)}else if(i<0)hid.push(k);save();apply();build(-1)};
-$('erst').onclick=function(){order=def.slice();hid=[];try{localStorage.removeItem(KO);localStorage.removeItem(KH)}catch(e){}apply();build(-1)};
+$('erst').onclick=function(){order=def.slice();hid=[];fold=[];try{localStorage.removeItem(KO);localStorage.removeItem(KH);localStorage.removeItem('foldcards')}catch(e){}apply();build(-1)};
 apply();build(-1);
 })();
 </script>
@@ -1103,7 +1146,7 @@ window.__bc={c128:c128,ean:ean,P:P};
 <script>
 (function(){
 function $(i){return document.getElementById(i)}
-var K='fridge',F=[],SYN={jajk:'jaj',jajo:'jaj',pomid:'pass',smiet:'smiet',karto:'ziemn',kiszo:'kiszo'};
+var K='fridge',F=[],SYN={jajk:'jaj',jajo:'jaj',jajec:'jaj',pomid:'pass',smiet:'smiet',karto:'ziemn',kiszo:'kiszo',piers:'filet',ogor:'ogor'};
 function load(){try{F=JSON.parse(localStorage.getItem(K))||[]}catch(e){F=[]}}
 function save(){try{localStorage.setItem(K,JSON.stringify(F))}catch(e){}}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -1272,7 +1315,25 @@ var A=[
 ['Randka w domu','🕯️','Świece, ulubione jedzenie i film wybrany tylko dla Was.','i',1,'3 h','d'],
 ['Telefon do kogoś bliskiego','📞','Zadzwoń do kogoś, z kim dawno nie rozmawiałeś.','b',0,'1 h','s'],
 ['Wizyta u rodziny','👨‍👩‍👧','Obiad u bliskich i wspólny spacer.','b',0,'3 h','dg'],
-['Pomoc sąsiadom lub wolontariat','🤝','Drobna pomoc komuś w okolicy.','b',0,'2 h','sdg']
+['Pomoc sąsiadom lub wolontariat','🤝','Drobna pomoc komuś w okolicy.','b',0,'2 h','sdg'],
+['Aquapark Wągrowiec','🌊','Baseny i zjeżdżalnie, dobre na deszczowy dzień. Sprawdź godziny otwarcia.','i',1,'2–3 h','sdg'],
+['Spacer po starym Wągrowcu','⛪','Klasztor pocysterski, fara i skrzyżowanie rzek Wełny i Nielby.','o',0,'1–2 h','sdg'],
+['Jarmark świąteczny w Poznaniu','🎄','Grzaniec, pierniki i światełka. Dojazd pociągiem, godziny w karcie Pociągi.','o',2,'pół dnia','sdg'],
+['Łyżwy lub kulig','⛸️','Gdy jest mróz, poszukaj lodowiska albo kuligu w okolicy.','o',1,'2 h','dg'],
+['Wycieczka do Kórnika i Rogalina','🏰','Zamek w Kórniku i stare dęby w Rogalinie.','o',2,'cały dzień','sdg'],
+['Morsowanie z ekipą','🧊','Tylko w grupie, po rozgrzewce i najwyżej kilka minut w wodzie.','o',0,'1 h','g'],
+['Ubieranie choinki i dekoracje','🎄','Lampki, ozdoby i świąteczna playlista.','i',1,'2 h','dg'],
+['Pisanie kartek świątecznych','✉️','Kilka kartek do bliskich, którzy się ucieszą.','i',0,'1 h','sd'],
+['Lepienie pierogów','🥟','Ciasto, farsz i zamrażarka pełna na zimę.','i',1,'3 h','dg'],
+['Domowy quiz','❓','Własne pytania dla domowników albo quiz z aplikacji.','i',0,'1–2 h','dg'],
+['Kręgle lub bilard','🎳','Kilka partii i coś do picia.','i',2,'2 h','dg'],
+['Ścianka wspinaczkowa','🧗','Sprawdź godziny i czy trzeba rezerwować.','i',2,'2–3 h','sdg'],
+['Biblioteka i nowa książka','📚','Wypożycz książkę albo komiks na cały tydzień.','i',0,'1 h','s'],
+['Wieczór gier retro','🕹️','Stare gry na komputerze lub konsoli.','i',0,'2 h','sdg'],
+['Domowe tacos lub wrapy','🌮','Każdy składa swoje, a sprzątania jest mało.','i',1,'2 h','dg'],
+['Pętla wokół Jeziora Durowskiego','🚶','Spacer lub rower z przerwą na herbatę z termosu.','o',0,'2 h','sd'],
+['Pomoc w schronisku lub zbiórce','🐾','Zanieś karmę, koc albo zapytaj, jak można pomóc.','b',1,'2 h','sdg'],
+['Dzień bez telefonu','📵','Telefon do szuflady na pół dnia i zobacz, co się stanie.','b',0,'pół dnia','sd']
 ];
 var CL=['za darmo','do ok. 50 zł','powyżej 50 zł'],WL={o:'na dworze',i:'w domu',b:'gdziekolwiek'},PL={s:'solo',d:'we dwoje',g:'z grupą'};
 var W='a',C='x',P='x',cur=[-1,-1];
