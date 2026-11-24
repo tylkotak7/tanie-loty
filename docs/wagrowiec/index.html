@@ -111,6 +111,30 @@ h1{font-size:24px;margin:8px 0 2px}
 .card:has(#news) h2::before{content:"📰 "}
 :root[data-icons=mini] .card:has(#news) h2::before{content:"≡ "}
 .inst{order:9}
+.hud-main{align-items:flex-start}
+.hsub{font-size:13px;opacity:.85;margin-top:2px}
+.hud .chips{gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.hud .chips::-webkit-scrollbar{display:none}
+.hud .chip{font-size:13px;padding:3px 10px;white-space:nowrap;flex:none}
+.hud .chip[hidden]{display:none}
+.hud.v-sky .big{font-size:48px}
+.v-sky .wx{zoom:1.25}
+.wx{margin-top:4px}
+.hours{display:flex;gap:4px;overflow-x:auto;margin:10px -2px 0;padding:0 2px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.hours::-webkit-scrollbar{display:none}
+.hr{flex:none;width:44px;text-align:center;font-size:11px;background:rgba(255,255,255,.14);border-radius:10px;padding:5px 0}
+.hr b{display:block;font-size:14px}
+.hr i{display:block;font-style:normal;font-size:17px;line-height:1.35}
+.hr small{display:block;font-size:10px;font-weight:600;color:#cfe8ff;min-height:12px}
+.hr.now{background:rgba(255,255,255,.3)}
+.v-mini .hr{background:rgba(128,128,128,.12)}
+.v-mini .hr.now{background:rgba(128,128,128,.24)}
+.v-mini .hr small{color:var(--ac)}
+.v-mini .hsub{color:var(--mu);opacity:1}
+.fcd{padding:4px 2px;cursor:pointer}
+.fcd i{font-size:17px}
+.fcsun[hidden]{display:none}
+.fcsun{margin-top:6px}
 a.plink{color:inherit;text-decoration:none}
 .card>h2{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
 .card>h2::after{content:"▾";float:right;display:inline-block;color:var(--mu);font-size:14px;transition:transform .2s}
@@ -339,11 +363,11 @@ footer{color:var(--mu);font-size:12px;text-align:center;padding:8px 0 24px;order
 <section class="hud v-sky" id="hud">
 <div class="fx" id="fx"></div>
 <div class="hud-top"><span class="pin">Wągrowiec</span><span class="date" id="date"></span><button class="opt" id="opt" aria-label="Opcje"></button></div>
-<div class="hud-main"><div class="big" id="temp">–</div><div class="wx" id="wx" title="Kliknij, żeby zobaczyć inne warianty"></div></div>
-<div id="wdesc">Ładuję…</div>
-<div class="chips"><span class="chip" id="wchip"><b id="wind">–</b></span><span class="chip" id="aqchip">Powietrze: <b id="aqshort">–</b></span><span class="chip" id="sunchip"></span><span class="chip" id="moonchip"></span></div>
+<div class="hud-main"><div><div class="big" id="temp">–</div><div id="wdesc">Ładuję…</div><div class="hsub" id="wsub"></div></div><div class="wx" id="wx" title="Słońce i księżyc"></div></div>
+<div class="hours" id="hours"></div>
+<div class="chips"><span class="chip" id="wchip"><b id="wind">–</b></span><span class="chip" id="aqchip">Powietrze: <b id="aqshort">–</b></span><span class="chip" id="sunchip"></span><span id="moonchip" hidden></span></div>
 <div class="fc" id="fc"></div>
-<div class="fcsun" id="fcsun"></div>
+<div class="fcsun" id="fcsun" hidden></div>
 <div class="src" id="wsrc"></div>
 </section>
 
@@ -411,7 +435,7 @@ footer{color:var(--mu);font-size:12px;text-align:center;padding:8px 0 24px;order
 <div class="pi"><span>Wybiel pnie młodych drzewek, żeby chronić je przed pęknięciami od mrozu.</span></div>
 <div class="pi"><span>Zabezpiecz altanę: opróżnij beczki, schowaj narzędzia i sprawdź zamki.</span></div>
 </div>
-<div class="src">Porady są ogólne, ważniejszy jest regulamin Twojego ogrodu. Prognoza pobiera się na żywo na własnym hostingu.</div>
+<div class="src">Porady są ogólne, ważniejszy jest regulamin Twojego ogrodu. Prognoza: Open-Meteo.</div>
 </section>
 <section class="note" id="note"><button class="nfont" id="nfont" type="button">Aa</button><textarea id="nt" maxlength="200" rows="1" placeholder="Kliknij i zapisz notatkę…" aria-label="Notatka"></textarea><span class="saved" id="saved">zapisano ✓</span></section>
 <section class="card">
@@ -589,17 +613,15 @@ footer{color:var(--mu);font-size:12px;text-align:center;padding:8px 0 24px;order
   function fx(k){var h='',i,e=document.getElementById('hud');e.setAttribute('data-w',k);if(k==='sun'||k==='part')h='<div class="glow"></div>';if(k==='rain')for(i=0;i<16;i++)h+='<i class="r" style="left:'+(i*6.2+Math.random()*3).toFixed(1)+'%;animation-delay:-'+Math.random().toFixed(2)+'s;animation-duration:'+(.7+Math.random()*.5).toFixed(2)+'s"></i>';if(k==='snow')for(i=0;i<18;i++)h+='<i class="s" style="left:'+(i*5.5+Math.random()*3).toFixed(1)+'%;animation-delay:-'+(Math.random()*3).toFixed(2)+'s;animation-duration:'+(2.5+Math.random()*2).toFixed(2)+'s"></i>';document.getElementById('fx').innerHTML=h}
   var kinds=['sun','part','cloud','rain','snow'],ki=0;
   setWx('part');
-  document.getElementById('wx').onclick=function(){ki=(ki+1)%kinds.length;setWx(kinds[ki])};
+  document.getElementById('wx').onclick=function(){var f=document.getElementById('fcsun');f.hidden=!f.hidden};
   var codes={0:'Bezchmurnie',1:'Prawie bezchmurnie',2:'Częściowe zachmurzenie',3:'Pochmurno',45:'Mgła',48:'Mgła',51:'Mżawka',53:'Mżawka',55:'Mżawka',61:'Deszcz',63:'Deszcz',65:'Silny deszcz',71:'Śnieg',73:'Śnieg',75:'Silny śnieg',80:'Przelotny deszcz',81:'Przelotny deszcz',82:'Ulewa',95:'Burza'};
   function icon(c){if(c===0||c===1)return '☀️';if(c===2)return '⛅';if(c===3)return '☁️';if(c===45||c===48)return '🌫️';if(c>=51&&c<=65||c>=80&&c<=82)return '🌧️';if(c>=71&&c<=75)return '❄️';if(c>=95)return '⛈️';return '🌤️'}
   function demoWeather(){
-    document.getElementById('temp').textContent='7°C';
-    document.getElementById('wdesc').textContent='Pochmurno';document.getElementById('wind').textContent='14 km/h';setWx('cloud');
-    document.getElementById('wsrc').textContent='Dane przykładowe';
+    document.getElementById('wdesc').textContent='Nie udało się pobrać pogody';
+    document.getElementById('wsrc').textContent='Sprawdź internet i odśwież stronę.';
   }
   function demoAir(){
-    setAir(18,26);
-    document.getElementById('asrc').textContent='Dane przykładowe';
+    document.getElementById('asrc').textContent='Nie udało się pobrać danych o powietrzu.';
   }
   function setAir(p25,p10){
     document.getElementById('pm25').textContent=p25+' µg/m³';
@@ -609,12 +631,21 @@ footer{color:var(--mu);font-size:12px;text-align:center;padding:8px 0 24px;order
     b.textContent=l;b.style.background=c;document.getElementById('aqmark').style.left=Math.min(p25/75,1)*100+'%';document.getElementById('aqadv').textContent=adv;document.getElementById('aqshort').textContent=l;document.getElementById('aqchip').style.borderColor=c;
   }
   try{
-    fetch('https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON+'&current=temperature_2m,weather_code,wind_speed_10m&timezone=Europe%2FWarsaw')
+    fetch('https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON+'&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&forecast_days=2&timezone=Europe%2FWarsaw')
     .then(function(r){return r.json()}).then(function(j){
-      var c=j.current;
-      document.getElementById('temp').textContent=Math.round(c.temperature_2m)+'°C';
-      document.getElementById('wdesc').textContent=codes[c.weather_code]||'Zmienna pogoda';document.getElementById('wind').textContent=Math.round(c.wind_speed_10m)+' km/h';setWx(kindOf(c.weather_code));
-      document.getElementById('wsrc').textContent='Na żywo: Open-Meteo';
+      var c=j.current,H=j.hourly,D=j.daily,$=function(i){return document.getElementById(i)};
+      $('temp').textContent=Math.round(c.temperature_2m)+'°C';
+      var night=c.is_day===0&&(c.weather_code<=1);
+      var start=0,cur=c.time.slice(0,13);for(var i=0;i<H.time.length;i++){if(H.time[i].slice(0,13)===cur){start=i;break}}
+      var rain=null,dry=true;for(i=start;i<Math.min(start+12,H.time.length);i++){if(H.precipitation_probability[i]>=50){rain=H.time[i].slice(11,16);break}}
+      var desc=codes[c.weather_code]||'Zmienna pogoda';if(night&&c.weather_code===0)desc='Bezchmurna noc';
+      $('wdesc').textContent=desc+(rain?(rain.slice(0,2)===cur.slice(11,13)?' · pada lub zaraz zacznie':' · deszcz ok. '+rain.replace(/^0/,'')):' · bez deszczu przez 12\u00a0h');
+      $('wsub').textContent='Odczuwalna '+Math.round(c.apparent_temperature)+'° · dziś '+Math.round(D.temperature_2m_min[0])+'° / '+Math.round(D.temperature_2m_max[0])+'°';
+      $('wind').textContent=Math.round(c.wind_speed_10m)+' km/h';setWx(kindOf(c.weather_code));
+      var hh='';for(i=start;i<Math.min(start+13,H.time.length);i++){var pc=H.precipitation_probability[i],ic=icon(H.weather_code[i]);if(H.is_day[i]===0&&H.weather_code[i]<=1)ic='🌙';if(H.is_day[i]===0&&H.weather_code[i]===2)ic='☁️';
+        hh+='<div class="hr'+(i===start?' now':'')+'">'+(i===start?'teraz':H.time[i].slice(11,13))+'<i>'+ic+'</i><b>'+Math.round(H.temperature_2m[i])+'°</b><small>'+(pc>=20?pc+'%':'')+'</small></div>'}
+      $('hours').innerHTML=hh;
+      $('wsrc').textContent='Open-Meteo · stuknij ikonę po słońce i księżyc';
     }).catch(demoWeather);
   }catch(e){demoWeather()}
   try{
@@ -852,7 +883,7 @@ var bt=document.createElement('button');bt.className='pexp';bt.setAttribute('ari
 var c=document.createElement('div');c.className='pcnt';c.textContent='+'+(items.length-1)+' porad na listopad';f.after(c);
 bt.onclick=function(){var o=h.classList.toggle('open');bt.setAttribute('aria-expanded',o?'true':'false');bt.classList.toggle('on',o)};
 c.onclick=function(){bt.click()};
-function fail(){document.getElementById('fsub').textContent='Prognoza pokaże się na własnym hostingu'}
+function fail(){document.getElementById('fsub').textContent='Nie udało się pobrać prognozy'}
 try{fetch('https://api.open-meteo.com/v1/forecast?latitude=52.81&longitude=17.2&daily=temperature_2m_min&timezone=Europe%2FWarsaw&forecast_days=3').then(function(r){return r.json()}).then(function(j){
 var m=j.daily.temperature_2m_min,a=Math.round(m[0]),b=Math.round(m[1]);
 document.getElementById('fval').textContent=a+'° / '+b+'°';
@@ -1175,7 +1206,8 @@ load();render();
 var el=document.getElementById('fc');
 function IC(c){return (c===0||c===1)?'☀️':c===2?'⛅':c===3?'☁️':(c===45||c===48)?'🌫️':(c>=51&&c<=67)?'🌧️':(c>=71&&c<=77||c===85||c===86)?'❄️':(c>=80&&c<=82)?'🌦️':c>=95?'⛈️':'🌤️'}
 var dn=['niedz.','pon.','wt.','śr.','czw.','pt.','sob.'];
-function fail(){el.innerHTML='<div class="src" style="width:100%">Prognoza na 5 dni pojawi się na własnym hostingu.</div>'}
+function fail(){el.innerHTML='<div class="src" style="width:100%">Nie udało się pobrać prognozy na 5 dni.</div>'}
+el.onclick=function(){var f=document.getElementById('fcsun');f.hidden=!f.hidden};
 try{fetch('https://api.open-meteo.com/v1/forecast?latitude=52.81&longitude=17.2&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FWarsaw&forecast_days=5').then(function(r){return r.json()}).then(function(j){
 var d=j.daily,h='';
 for(var i=0;i<d.time.length;i++){var lab=i===0?'dziś':i===1?'jutro':dn[new Date(d.time[i]+'T12:00:00').getDay()],p=d.precipitation_probability_max?d.precipitation_probability_max[i]:null;
