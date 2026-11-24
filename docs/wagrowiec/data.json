@@ -1,18 +1,6 @@
 {
- "updated": "2026-11-24T19:24:37.559Z",
+ "updated": "2026-11-24T22:18:31.557Z",
  "news": [
-  {
-   "t": "Brak deszczu w Wągrowcu przez następne 10 dni? Zobacz prognozy opadów do 4.12.2026",
-   "l": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOTUlxaUpDaXJwT0dGTGR5b3JtTmQ0TW5pWk1Cd1MycTgyWFJVMllPeTNNNkdBYnN2ZVphdGRFd2ktZG5EUHpyR1RSU1NiVmNBeGliSWVjWGtoMkFXRUNuT1ZRWnh1QTJJZ2ZfWENJdDJId3lZbmVic3FnQUI3Yk9QQkhac1IxeFh1MjFYYW1SNjROVE8yNWIyVnFQd0w1NENBRkc4TG5LX3ZMVzZtbFhhNlhmd0d0UVlWdTFTek1ITHBEc25WTGZabnZyVQ?oc=5",
-   "s": "Wągrowiec Nasze Miasto",
-   "d": "2026-11-24"
-  },
-  {
-   "t": "Klimatyzator nie tylko na upały. LG pokazuje, jak skutecznie ogrzać mieszkanie zimą",
-   "l": "https://news.google.com/rss/articles/CBMizAFBVV95cUxQakRfM3QtaklicEJZM3hEeUU3LUwtT2hCSlFlSjFKSmljU2xnNklWdEs4eWZmVzk2alZaUWpEZ0dheWd3ZHdibE1MTTkzaTZwUE9zMHlNbGhrdWh6cnhqdXhhbEV1NW1rc05qQ1FLZU1XalhkUkhVTW9QTHFHZzdqaW90MlRmMmt4d2V0bzUxM2ZfYS1ZazFJV3dYdGZ5akpDYjlYYlpwMGh5UFF0cjFMQWhiME1ObUdsWi1yS3JOOEJDSzNoUkxVLXRHZ04?oc=5",
-   "s": "Wągrowiec Nasze Miasto",
-   "d": "2026-11-24"
-  },
   {
    "t": "Czy będzie dzisiaj padać śnieg w Wągrowcu? Zobacz, czy dziś (24.11) będzie biało",
    "l": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNeDBQUVE5eDZ4eENpSmJ4UnA1eFdzUzdHdVgtWWZaMV8tNHVWNDZ5Z1lHVGRRVGRublgzV2U3emxtcUVkMnAxc3luLWZJQ3FVb0cxUDlfcnVnVFFTQmY2OXFfcXo0LVNHSDQ2eHJsMHg4XzhadHdodU9yWEwxSldvSGg5eHgtNFVsZkFIZ19tZ0k0dWs4dmVoQmx5cjJfY2ZEcGZLM0lLZ0Voa1pFMXJOLTQ1cVZsOHpWTmZNVzdGdXg3bmlw?oc=5",
@@ -38,14 +26,26 @@
    "d": "2026-11-24"
   },
   {
+   "t": "Rekreacyjne trasy rowerowe w okolicy Wągrowca",
+   "l": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxPLWNqb1RHZzdaTTYtN1FYUFJvcGt2b1Zub3FYbEloS211Mk1qbkpPd2ZZRExNTTFXckRld3doWTU4RmhJelRKR3Y2Vks5TFZVeTgzWEdsU010SUJETm9HbURtODBuWl9HYWNVM2N2S2prZkhOcHA3VU9BRVI5ZWdEcHBtRHNob1c3TEllem8td2llbVVRdG4tbXRsM29aWXlUZWVURWlMMGZhMjJkUldZTUpRbXNKX21CZ3JPd0NXLVBYd2ZZTVprNWwxcHVDd3FRUFVpTDhjS0tjSnZQS1VWM2RVbENTVVU?oc=5",
+   "s": "Wągrowiec Nasze Miasto",
+   "d": "2026-11-24"
+  },
+  {
+   "t": "Przegląd najlepszych tras spacerowych w pobliżu Wągrowca",
+   "l": "https://news.google.com/rss/articles/CBMivgFBVV95cUxPVC1GRWdWWThvZlloMTBhTlpEMlgwUDItdUN3TnZLLWdTNGFacndoazg5dnBVcE9VRG9qY0k1T3RBSjdZTXVRWjhPWXZDOHNVcXY0NEJGSUp4YVItRDI0ZE8xZDhUY0liZm03OTZiRTAzTE56NHBpMEJScXFqbV84UXo5UUF2RHliNTBqZlVXR294ZmF3ckpjcHAyS3RwZnM4cTZGTzZWQ2hNeWh4SDJSY1NLT01SZWw3cjdaNXh3?oc=5",
+   "s": "Wągrowiec Nasze Miasto",
+   "d": "2026-11-24"
+  },
+  {
    "t": "Czy w Wągrowcu wystąpią ograniczenia w dostawie prądu? Sprawdź dostępne komunikaty z 24.11",
    "l": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOeE9UdHluR3R4XzExZFlNYXJ4UFI1TzZlS21vdjhpb3ZsSk54c29zWThZeUJ6M3duZktvVjgtb0ZFWHdQYzVxUXhUTWFnR1FBTGItYi1zRURQVFg5Mm1sZlFkSjN4T2VUNGpONFFoMkxGb00tdDFyMndPZXBPR19sc2xCTjRlVzdJamNmeXhvRm9XWXhvbzMtX0x0dXNkZHBLMGFpdg?oc=5",
    "s": "Wągrowiec Nasze Miasto",
    "d": "2026-11-24"
   },
   {
-   "t": "Gołaniecka Akademia Zdrowia spotkała się po raz ostatni w tym roku",
-   "l": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxOSWR4UWZDaFkzb2haSnY0UXh6UDJHVzQyY1FTTVR3dTU3RzRDMnlaTndNZjA1MDZyeW1tTHlVd0hwZW9mSldEVVpTR0dybXZSZlROZExaYzFtek43SnQydXpZWG9ZckE0b05fWko1VEFCdFd0NTNVUHdXYkh1Ulc4dFhhM3l2MUc2ZTlzM2xJSklzMmZDRVJoUmk1V2J0SldkQUNvY1oyMklPZEpISDAzZHNrQzF4ZlNZ?oc=5",
+   "t": "Wylosowane numery z 24.11.2026 są już dostępne. Sprawdź swoją grę",
+   "l": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxPZVpmVFJpTk1ScXlkcTJncVQ1OFFfbkhpMW45THVNSE5nRHh5UzNRTl9pRXJIdl9NdExuMVhHU1RJSFJYY00yaTh4UjBWU3h6TXFpQk5NbGpvWm5sd19La2V3c3plaHFBVDFpZkROTzgxeExlNXkxR1hyeUdaS3ZxZU1sUFNpTGthUmZPUVZUZ0RwVzQ1THNURDZxMHBIV2lSR1ktOHhQaDhBTXpmb0QwNUpneG1uT0g5anNzT2lLakxibHpUZzRaOQ?oc=5",
    "s": "Wągrowiec Nasze Miasto",
    "d": "2026-11-24"
   }
@@ -66,68 +66,68 @@
   ]
  },
  "lotto": {
-  "date": "2026-11-21",
+  "date": "2026-11-24",
   "games": [
    [
     "Lotto",
     [
-     21,
+     2,
      25,
-     30,
-     36,
-     43,
-     44
+     26,
+     27,
+     41,
+     45
     ],
     []
    ],
    [
     "Lotto Plus",
     [
+     9,
      13,
-     31,
-     35,
-     36,
-     39,
-     46
+     16,
+     18,
+     30,
+     41
     ],
     []
    ],
    [
     "Mini Lotto",
     [
-     1,
-     7,
-     9,
-     27,
-     35
+     2,
+     23,
+     28,
+     33,
+     39
     ],
     []
    ],
    [
     "Eurojackpot",
     [
-     15,
-     28,
-     29,
-     34,
-     35
+     22,
+     32,
+     35,
+     36,
+     40
     ],
     [
-     5,
+     3,
      9
     ]
    ],
    [
     "Ekstra Pensja",
     [
-     1,
-     5,
+     4,
+     9,
+     20,
      25,
-     30,
-     32
+     33
     ],
     [
-     2
+     1
     ]
    ]
   ]
