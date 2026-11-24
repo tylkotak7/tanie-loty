@@ -121,9 +121,36 @@ async function leaflets() {
   return out.length ? out : null;
 }
 
+// ---------- Produkty z gazetek (nazwa + cena) ----------
+const SKIP = /non ?food|zabawk|ozdob|ogr[oó]d|przemys|tekstyl|odzie|katalog|rtv|agd|elektronik|majsterk/i;
+async function offers(L) {
+  const items = [], leaf = [];
+  for (const x of L) {
+    if (SKIP.test(x.name)) continue;
+    try {
+      const h = await get(x.url);
+      const li = leaf.push({ shop: x.shop, name: x.name, from: x.from, to: x.to, url: x.url }) - 1;
+      const seen = new Set();
+      for (const m of h.matchAll(/data-name="([^"]+)" data-price="(\d+)" data-leaflet-id="\d+" data-page-number="(\d+)"/g)) {
+        const name = m[1].replace(/&amp;/g, '&').replace(/&#0?39;/g, "'").replace(/&quot;/g, '"').trim();
+        const k = name + m[2];
+        if (seen.has(k) || +m[2] <= 0) continue;
+        seen.add(k);
+        items.push([li, name, +m[2], +m[3]]);
+      }
+      await new Promise(r => setTimeout(r, 400));
+    } catch (e) { console.log('produkty:', e.message); }
+  }
+  return items.length ? { leaf, items } : null;
+}
+
 const [f, l, n, c, g] = await Promise.allSettled([fuel(), lotto(), news(), cinema(), leaflets()]);
 if (c.value) data.cinema = c.value;
 if (g.value) data.leaflets = g.value;
+if (g.value) {
+  const o = await offers(g.value);
+  if (o) { o.updated = new Date().toISOString(); await writeFile('docs/wagrowiec/promo.json', JSON.stringify(o) + '\n'); console.log('produkty z gazetek:', o.items.length); }
+}
 console.log('kino', c.value ? c.value.length : c.reason?.message, '| gazetki', g.value ? g.value.length : 0);
 
 if (f.value) {
