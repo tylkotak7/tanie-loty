@@ -6,6 +6,7 @@ on:
       - "docs/**"
       - ".github/scripts/**"
       - ".github/workflows/wagrowiec-dane.yml"
+      - ".github/workflows/loty-dane.yml"
   workflow_dispatch:
 permissions:
   contents: write
