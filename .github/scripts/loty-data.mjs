@@ -9,6 +9,9 @@ const BUCKETS = [[1,2],[3,5],[6,8],[9,11],[12,14],[15,21]];
 const WINDOWS = [[1,90],[90,240]];
 const MAX_PRICE = 1000;
 const OUT = "docs/loty/deals.json";
+const STATUS = "docs/loty/status.json";
+const errors = [];
+let sample = "";
 
 const day = n => { const d = new Date(); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0,10); };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -25,11 +28,13 @@ async function fares(origin, [w1, w2], [n1, n2]) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const r = await fetch(url, { headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) Chrome/120 Safari/537.36" } });
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      const j = await r.json();
+      const text = await r.text();
+      if (!sample) sample = `${r.status} ${text.slice(0, 300)}`;
+      if (!r.ok) throw new Error("HTTP " + r.status + " " + text.slice(0, 120));
+      const j = JSON.parse(text);
       return j.fares || [];
     } catch (e) {
-      if (attempt === 1) { console.log(`! ${origin} ${w1}-${w2} ${n1}-${n2}: ${e.message}`); return null; }
+      if (attempt === 1) { console.log(`! ${origin} ${w1}-${w2} ${n1}-${n2}: ${e.message}`); if (errors.length < 10) errors.push(`${origin}: ${e.message}`); return null; }
       await sleep(2000);
     }
   }
@@ -59,6 +64,7 @@ for (const o of ORIGINS) {
   }
 }
 console.log(`zapytania ok: ${ok}, błędy: ${fail}, lotów: ${rows.size}`);
+writeFileSync(STATUS, JSON.stringify({ time: new Date().toISOString(), ok, fail, flights: rows.size, errors, sample }, null, 1));
 if (rows.size === 0) {
   console.log("Brak danych – zostawiam poprzedni plik.");
   process.exit(0);
