@@ -1,0 +1,7 @@
+const UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36';
+async function g(u){try{const r=await fetch(u,{headers:{'User-Agent':UA,'Accept-Language':'pl'}});return [r.status,r.url,await r.text()]}catch(e){return [0,u,e.message]}}
+const P=x=>[...x.matchAll(/<span class="product__name">([^<]+)<\/span>\s*<span class="product__price">\s*([^<]+?)\s*<\/span>/g)].length;
+for(const u of ['https://blix.pl/sklep/kaufland/gazetka/537726/produkty/','https://blix.pl/sklep/kaufland/promocje/','https://blix.pl/sklep/kaufland/oferty/','https://blix.pl/promocje/kaufland/','https://blix.pl/kategoria/artykuly-spozywcze/','https://blix.pl/sklep/kaufland/gazetka/537726/?pageNumber=2','https://www.ding.pl/kaufland/oferty','https://www.ding.pl/oferty/kaufland','https://www.ding.pl/gazetki/kaufland','https://www.ding.pl/sklep/kaufland','https://www.ding.pl/kaufland/gazetki','https://www.ding.pl/','https://okazjum.pl/kaufland/','https://kaufland.okazjum.pl/']){
+ const [st,url,h]=await g(u);console.log('=====',u,'->',url,st,h.length,'blixprods',P(h),'zł',(h.match(/\d+,\d\d\s?(?:&nbsp;)?zł/g)||[]).length);
+ const L=[...new Set([...h.matchAll(/href="([^"]*(?:kaufland|oferta|produkt|promocj)[^"]*)"/gi)].map(m=>m[1]))].slice(0,15);console.log('LINKS',L.join(' '));
+ const i=h.search(/\d+,\d\d\s?(?:&nbsp;)?zł/);if(i>0)console.log('RAW',h.slice(Math.max(0,i-700),i+200).replace(/\s+/g,' '))}
