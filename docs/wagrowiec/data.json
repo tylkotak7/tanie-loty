@@ -1,15 +1,21 @@
 {
- "updated": "2026-11-25T01:45:21.536Z",
+ "updated": "2026-11-25T04:31:23.478Z",
  "news": [
+  {
+   "t": "Czerwone Gitary - The best of w Wągrowcu",
+   "l": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNQ0VYNjNDR3lrcTVLTjlkZ3p5UHE1M0kyVDhHUk8zZkFPaHdFamU3UkFKTm0wX09xSXowVF9ueGpucmdpektJdXBaQUJVYms3VHVCck1fXzZDbjBWTkRSdHlxVFYxVlhNSFFMVGpZTFVzZmptdk9nMnpLcEVOSHNNQg?oc=5",
+   "s": "Wągrowiec Nasze Miasto",
+   "d": "2026-11-25"
+  },
+  {
+   "t": "Dzisiejsza prognoza pogody (25.11) dla Wągrowca. Sprawdź najważniejsze informacje",
+   "l": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxQVUl3WnNkelh3QnZ6OTJpcWx2RFVnRjFocjJhVEdqTDhhQ2t6cXBXQ01iRE5rVWsyTkQ0VzNhT2tsWnZiSFEwUjMxX1ZIU19wLXRPOS1GdjJZem1ETmp5bGxGM0V2VHhzV01FczN5ZzJEdXIyMW02Q0dhX3RUT3dVUUpJM1dwWFo2cjU1ZWNnX2lEUndubnJJUVFfa2JVNWlmMTlmVV9UR3I1R3RoeU5xTnQxN1M0Z2I4eXBF?oc=5",
+   "s": "Wągrowiec Nasze Miasto",
+   "d": "2026-11-25"
+  },
   {
    "t": "Brak deszczu w Wągrowcu przez następne 10 dni? Zobacz prognozy opadów do 4.12.2026",
    "l": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOTUlxaUpDaXJwT0dGTGR5b3JtTmQ0TW5pWk1Cd1MycTgyWFJVMllPeTNNNkdBYnN2ZVphdGRFd2ktZG5EUHpyR1RSU1NiVmNBeGliSWVjWGtoMkFXRUNuT1ZRWnh1QTJJZ2ZfWENJdDJId3lZbmVic3FnQUI3Yk9QQkhac1IxeFh1MjFYYW1SNjROVE8yNWIyVnFQd0w1NENBRkc4TG5LX3ZMVzZtbFhhNlhmd0d0UVlWdTFTek1ITHBEc25WTGZabnZyVQ?oc=5",
-   "s": "Wągrowiec Nasze Miasto",
-   "d": "2026-11-24"
-  },
-  {
-   "t": "Ważniejsze niż Boże Narodzenie w USA? Skąd wzięło się Święto Dziękczynienia i co ląduje tego dnia na stole?",
-   "l": "https://news.google.com/rss/articles/CBMi7AFBVV95cUxQT18zQWowZFpDa3FoamoyRGNvUzVSUXpHUndQU2xHQWQ0Qmp4bjlsVHBuVklNXzEtUjZMVy1GUVpab2hoUDNsVzRFdnFiazFIeGdUMGJPQmtKSEVIYlZKRF93MDhVVHZrOTUzY0JRU0tSNERsb0JYSkh4RXctTTVTN1NIVlR0cWRqNVlmdFN1bVNJSTBXOTZmUlZia3dRbnllZ0lHNTZSSjlBbEJqa29GeDFtVHhXMEduM1ZMQ09nNnBqRl9jbmRrZHRINnBkUUNjSWpsVFVIR2Z5bXVJR3F4WWp6Uk9UeDZoWmJ3Xw?oc=5",
    "s": "Wągrowiec Nasze Miasto",
    "d": "2026-11-24"
   },
@@ -38,12 +44,6 @@
    "d": "2026-11-24"
   },
   {
-   "t": "Rekreacyjne trasy rowerowe w okolicy Wągrowca",
-   "l": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxPLWNqb1RHZzdaTTYtN1FYUFJvcGt2b1Zub3FYbEloS211Mk1qbkpPd2ZZRExNTTFXckRld3doWTU4RmhJelRKR3Y2Vks5TFZVeTgzWEdsU010SUJETm9HbURtODBuWl9HYWNVM2N2S2prZkhOcHA3VU9BRVI5ZWdEcHBtRHNob1c3TEllem8td2llbVVRdG4tbXRsM29aWXlUZWVURWlMMGZhMjJkUldZTUpRbXNKX21CZ3JPd0NXLVBYd2ZZTVprNWwxcHVDd3FRUFVpTDhjS0tjSnZQS1VWM2RVbENTVVU?oc=5",
-   "s": "Wągrowiec Nasze Miasto",
-   "d": "2026-11-24"
-  },
-  {
    "t": "Co było najważniejsze wczoraj? Przegląd mediów dla Wągrowca (24.11).",
    "l": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxOTl84WmFBeVRrVENPRHFhajkwWnh5a24tWVRlTWtCM05sTTNqOFU3Wm5jSU1OOWZ4eVg1ZW9FTndwekVWQW0yNjQxeWhLOGRQbWxNREtnWGtrYy01RDRGX1R1MHQxdjVjeXZybnNQa0VtLV9UY2hZWjAyQ1VZM3hJcndYSkl3VDdfUmFYcFZ2NU5GR3VoMngxTU1pVXBtOXgtSEVvOHNQZnRzNjgweXYwZzc4LXRybHJIY1pCUU5yb3FhOVBZODhtLTBacEx0T09rTDY0X1FLellCU1U0WDFXVGltcGNKWThRS2VoSXhfY29KQlNp?oc=5",
    "s": "Wągrowiec Nasze Miasto",
@@ -52,9 +52,9 @@
  ],
  "fuel": {
   "src": "autocentrum.pl, woj. wielkopolskie",
-  "pb95": 5.89,
+  "pb95": 5.8,
   "on": 7.36,
-  "lpg": 3.87,
+  "lpg": 3.84,
   "date": "2026-11-25",
   "hist": [
    {
@@ -65,9 +65,9 @@
    },
    {
     "d": "2026-11-25",
-    "pb95": 5.89,
+    "pb95": 5.8,
     "on": 7.36,
-    "lpg": 3.87
+    "lpg": 3.84
    }
   ]
  },
