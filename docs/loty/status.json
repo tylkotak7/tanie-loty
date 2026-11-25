@@ -1,8 +1,8 @@
 {
- "time": "2026-11-25T13:31:00.392Z",
- "ok": 144,
+ "time": "2026-11-25T18:15:09.479Z",
+ "ok": 1612,
  "fail": 0,
- "flights": 810,
- "errors": [],
- "sample": "200 {\"arrivalAirportCategories\":null,\"fares\":[{\"outbound\":{\"departureAirport\":{\"countryName\":\"Polska\",\"iataCode\":\"POZ\",\"name\":\"Poznań\",\"seoName\":\"poznan\",\"city\":{\"code\":\"POZNAN\",\"countryCode\":\"pl\",\"name\":\"Poznań\"}},\"arrivalAirport\":{\"countryName\":\"Włochy\",\"iataCode\":\"BGY\",\"name\":\"Mediolan-Bergamo\",\"seoN"
+ "flights": 2336,
+ "destinations": 111,
+ "errors": []
 }
