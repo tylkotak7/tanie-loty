@@ -1,6 +1,12 @@
 {
- "updated": "2026-11-25T07:50:26.659Z",
+ "updated": "2026-11-25T10:27:48.843Z",
  "news": [
+  {
+   "t": "Śmierć na drodze",
+   "l": "https://news.google.com/rss/articles/CBMiYEFVX3lxTFAwa2MtUzNpdmdEeDdsSjhUX21uZy1GQTFnbkJpcUM0MWF3QVRPRkx5RFdZUGZKMjJmakdwVmRvcEpnWHdFQXUxVHU2UDBHa19NdzhvZ28weWlWWmdIa3oyUw?oc=5",
+   "s": "Portal asta24.pl",
+   "d": "2026-11-25"
+  },
   {
    "t": "Czy w Wągrowcu 25.11 można spodziewać się opadów śniegu? Sprawdź, czy dziś lub w najbliższych dniach zawita zima",
    "l": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxNMGxVYmxLcXc1ZjRyNnBJdkFseGxYbzBsb0llSVF4WVpDb1BaNXpBYzBYa2FQcnFtdkQtelYzdlFSWlB3MlFydVdlY0ZSWGUxVU42cWpJV1E0T3lKdkxyeXF4X2F6VWpabEtGNzdmYzRSSDFpXzltRy1MelJ1MHN3MGl6QnVJTDZBV2l5ZDA0M0M5TFNpbThaVlNLajVyVHo5SEphY0RjZDZFQ20tMjA4UnJ0U0k4aU0tSU5UUXczQUtTM292ZXJGTlBQU2RaTy1MbG9tLXZLSFdQOC1Ba0tVdndIUzRwQ1RxLV9oUUZGMC0yUQ?oc=5",
@@ -26,8 +32,8 @@
    "d": "2026-11-25"
   },
   {
-   "t": "Tragiczny wypadek w Dąbkowicach. Nie żyje 45-letni kierowca",
-   "l": "https://news.google.com/rss/articles/CBMihgJBVV95cUxQR3Z3Y25VcXhoWkEzd0JXTGtFbTZrUEVXeGs0WWR6YVRyVzJBcGs5VE5zZzRuNDFrY2M0QXc1dkItU0xVTEU2VTB4RXFJTHY3S0FTb0JvZ3FMWGlLTGp6MlY1Nllwem4yN1pubnFnU3RkNGk0emVLOTFBeUxpMDhITWpGQUM1Rk56VWh0T0dRTDB4WXE5OFBkQ0FabVdac2pmUXZQOTNoalB1WThVUm8zM0xlSm5OQWwzcEttNEJncjdVUkJmcDRKel9ZbFVWRTJKVHRQLUNwSUZQWHRZdXV0OTR5RVBCOUVmMk8xYW1mM0xxV0dVenpQSWRrQjFkYnRnTDFmdTBB?oc=5",
+   "t": "„Dla Polski - Gmina Damasławek w moich oczach”",
+   "l": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQNk1OLS14bTI5SmJ4QngzeGlhN1hOVVBhOHJUSW1PQXNPQ21fUGRnRXJZMzNndGxtXzh5Z01YbmtIRXU1ckdsUjAyLVNTbHh3bnM0YjdJWHYwdHdrX3NmY1ZKMi1ud2tmRERkT3Jka09UZWJ4YUo0cC01REZadFZ6RlRaWDN4SWQ5MlQ2ejk3cWMzYlJ5WWhfeA?oc=5",
    "s": "Wągrowiec Nasze Miasto",
    "d": "2026-11-25"
   },
@@ -38,16 +44,10 @@
    "d": "2026-11-25"
   },
   {
-   "t": "Czy będzie dzisiaj padać śnieg w Wągrowcu? Zobacz, czy dziś (24.11) będzie biało",
-   "l": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNeDBQUVE5eDZ4eENpSmJ4UnA1eFdzUzdHdVgtWWZaMV8tNHVWNDZ5Z1lHVGRRVGRublgzV2U3emxtcUVkMnAxc3luLWZJQ3FVb0cxUDlfcnVnVFFTQmY2OXFfcXo0LVNHSDQ2eHJsMHg4XzhadHdodU9yWEwxSldvSGg5eHgtNFVsZkFIZ19tZ0k0dWs4dmVoQmx5cjJfY2ZEcGZLM0lLZ0Voa1pFMXJOLTQ1cVZsOHpWTmZNVzdGdXg3bmlw?oc=5",
+   "t": "Tragiczny wypadek w Dąbkowicach. Nie żyje 45-letni kierowca",
+   "l": "https://news.google.com/rss/articles/CBMihgJBVV95cUxQR3Z3Y25VcXhoWkEzd0JXTGtFbTZrUEVXeGs0WWR6YVRyVzJBcGs5VE5zZzRuNDFrY2M0QXc1dkItU0xVTEU2VTB4RXFJTHY3S0FTb0JvZ3FMWGlLTGp6MlY1Nllwem4yN1pubnFnU3RkNGk0emVLOTFBeUxpMDhITWpGQUM1Rk56VWh0T0dRTDB4WXE5OFBkQ0FabVdac2pmUXZQOTNoalB1WThVUm8zM0xlSm5OQWwzcEttNEJncjdVUkJmcDRKel9ZbFVWRTJKVHRQLUNwSUZQWHRZdXV0OTR5RVBCOUVmMk8xYW1mM0xxV0dVenpQSWRrQjFkYnRnTDFmdTBB?oc=5",
    "s": "Wągrowiec Nasze Miasto",
-   "d": "2026-11-24"
-  },
-  {
-   "t": "Dzisiejsza prognoza pogody (24.11) dla Wągrowca. Sprawdź najważniejsze informacje",
-   "l": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxNVnRnNGJPajFwU3Vzbl9xSG02NmpWbnA4MWZzRGJiMDlsd3BlWG9GR3NkWXVqbXM0OEkyTjBfSzRaemhqRU0yWDVSOElqbmJqVjRlR3diczhoWXlkOE4wdEhLanBuczhxWlVuQVdXYWZIaGRDcGRwRGV5NkF4WlVSTEQ4T3c4ckwyOC1RczRSUWx4NWctSHI4U3pUdUlBMU5PYml5QXBtV0o1a01falh5aGVfWktXX2lmT1FQZ0dLWXo?oc=5",
-   "s": "Wągrowiec Nasze Miasto",
-   "d": "2026-11-24"
+   "d": "2026-11-25"
   }
  ],
  "fuel": {
@@ -567,21 +567,21 @@
    "name": "Oferta od poniedziałku",
    "from": "2026-11-23",
    "to": "2026-11-25",
-   "url": "https://blix.pl/sklep/lidl/gazetka/537999/"
+   "url": "https://blix.pl/sklep/lidl/gazetka/538512/"
   },
   {
    "shop": "Biedronka",
    "name": "Od poniedziałku, Z ladą tradycyjną",
    "from": "2026-11-23",
    "to": "2026-11-28",
-   "url": "https://blix.pl/sklep/biedronka/gazetka/537987/"
+   "url": "https://blix.pl/sklep/biedronka/gazetka/538446/"
   },
   {
    "shop": "Biedronka",
    "name": "Od poniedziałku",
    "from": "2026-11-23",
    "to": "2026-11-28",
-   "url": "https://blix.pl/sklep/biedronka/gazetka/537984/"
+   "url": "https://blix.pl/sklep/biedronka/gazetka/538422/"
   },
   {
    "shop": "Biedronka",
