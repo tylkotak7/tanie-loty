@@ -1,0 +1,78 @@
+{
+ "nolimit": {
+  "status": 200,
+  "len": 12389,
+  "head": "{\"arrivalAirportCategories\":null,\"fares\":[{\"outbound\":{\"departureAirport\":{\"countryName\":\"Polska\",\"iataCode\":\"POZ\",\"name\":\"Poznań\",\"seoName\":\"poznan\",\"city\":{\"code\":\"POZNAN\",\"countryCode\":\"pl\",\"name\":\"Poznań\"}},\"arrivalAirport\":{\"countryName\":\"Szwecja\",\"iataCode\":\"ARN\",\"name\":\"Sztokholm Arlanda\",\"seoName\":\"stockholm-arlandia\",\"city\":{\"code\":\"STOCKHOLM\",\"countryCode\":\"se\",\"macCode\":\"SLM\",\"name\":\"Sz",
+  "fares": 8,
+  "size": 8
+ },
+ "limit10": {
+  "status": 200,
+  "len": 12389,
+  "head": "{\"arrivalAirportCategories\":null,\"fares\":[{\"outbound\":{\"departureAirport\":{\"countryName\":\"Polska\",\"iataCode\":\"POZ\",\"name\":\"Poznań\",\"seoName\":\"poznan\",\"city\":{\"code\":\"POZNAN\",\"countryCode\":\"pl\",\"name\":\"Poznań\"}},\"arrivalAirport\":{\"countryName\":\"Szwecja\",\"iataCode\":\"ARN\",\"name\":\"Sztokholm Arlanda\",\"seoName\":\"stockholm-arlandia\",\"city\":{\"code\":\"STOCKHOLM\",\"countryCode\":\"se\",\"macCode\":\"SLM\",\"name\":\"Sz",
+  "fares": 8,
+  "size": 8
+ },
+ "limit16": {
+  "status": 200,
+  "len": 17031,
+  "head": "{\"arrivalAirportCategories\":null,\"fares\":[{\"outbound\":{\"departureAirport\":{\"countryName\":\"Polska\",\"iataCode\":\"POZ\",\"name\":\"Poznań\",\"seoName\":\"poznan\",\"city\":{\"code\":\"POZNAN\",\"countryCode\":\"pl\",\"name\":\"Poznań\"}},\"arrivalAirport\":{\"countryName\":\"Dania\",\"iataCode\":\"CPH\",\"name\":\"Kopenhaga\",\"seoName\":\"copenhagen\",\"city\":{\"code\":\"COPENHAGEN\",\"countryCode\":\"dk\",\"name\":\"Copenhagen\"}},\"departureDate\":\"2026",
+  "fares": 11,
+  "size": 11
+ },
+ "limit20": {
+  "status": 200,
+  "len": 20076,
+  "head": "{\"arrivalAirportCategories\":null,\"fares\":[{\"outbound\":{\"departureAirport\":{\"countryName\":\"Polska\",\"iataCode\":\"POZ\",\"name\":\"Poznań\",\"seoName\":\"poznan\",\"city\":{\"code\":\"POZNAN\",\"countryCode\":\"pl\",\"name\":\"Poznań\"}},\"arrivalAirport\":{\"countryName\":\"Dania\",\"iataCode\":\"CPH\",\"name\":\"Kopenhaga\",\"seoName\":\"copenhagen\",\"city\":{\"code\":\"COPENHAGEN\",\"countryCode\":\"dk\",\"name\":\"Copenhagen\"}},\"departureDate\":\"2026",
+  "fares": 13,
+  "size": 13
+ },
+ "limit25": {
+  "status": 400,
+  "len": 49,
+  "head": "{\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}"
+ },
+ "limit50": {
+  "status": 400,
+  "len": 49,
+  "head": "{\"code\":\"InvalidLimit\",\"message\":\"Invalid limit\"}"
+ },
+ "offset16": {
+  "status": 200,
+  "len": 17031,
+  "head": "{\"arrivalAirportCategories\":null,\"fares\":[{\"outbound\":{\"departureAirport\":{\"countryName\":\"Polska\",\"iataCode\":\"POZ\",\"name\":\"Poznań\",\"seoName\":\"poznan\",\"city\":{\"code\":\"POZNAN\",\"countryCode\":\"pl\",\"name\":\"Poznań\"}},\"arrivalAirport\":{\"countryName\":\"Dania\",\"iataCode\":\"CPH\",\"name\":\"Kopenhaga\",\"seoName\":\"copenhagen\",\"city\":{\"code\":\"COPENHAGEN\",\"countryCode\":\"dk\",\"name\":\"Copenhagen\"}},\"departureDate\":\"2026",
+  "fares": 11,
+  "size": 11
+ },
+ "arrival_BCN": {
+  "status": 200,
+  "len": 1664,
+  "head": "{\"arrivalAirportCategories\":null,\"fares\":[{\"outbound\":{\"departureAirport\":{\"countryName\":\"Polska\",\"iataCode\":\"POZ\",\"name\":\"Poznań\",\"seoName\":\"poznan\",\"city\":{\"code\":\"POZNAN\",\"countryCode\":\"pl\",\"name\":\"Poznań\"}},\"arrivalAirport\":{\"countryName\":\"Hiszpania\",\"iataCode\":\"BCN\",\"name\":\"Barcelona-El Prat\",\"seoName\":\"barcelona-el-prat\",\"city\":{\"code\":\"BARCELONA\",\"countryCode\":\"es\",\"macCode\":\"BAR\",\"name\":\"B",
+  "fares": 1,
+  "size": 1
+ },
+ "arrivalCountry_es": {
+  "status": 200,
+  "len": 6252,
+  "head": "{\"arrivalAirportCategories\":null,\"fares\":[{\"outbound\":{\"departureAirport\":{\"countryName\":\"Polska\",\"iataCode\":\"POZ\",\"name\":\"Poznań\",\"seoName\":\"poznan\",\"city\":{\"code\":\"POZNAN\",\"countryCode\":\"pl\",\"name\":\"Poznań\"}},\"arrivalAirport\":{\"countryName\":\"Hiszpania\",\"iataCode\":\"VLC\",\"name\":\"Walencja\",\"seoName\":\"walencja\",\"city\":{\"code\":\"VALENCIA\",\"countryCode\":\"es\",\"macCode\":\"VNC\",\"name\":\"Walencja\"}},\"departu",
+  "fares": 4,
+  "size": 4
+ },
+ "routes_view": {
+  "status": 200,
+  "len": 19910,
+  "head": "[{\"arrivalAirport\":{\"aliases\":[],\"base\":true,\"city\":{\"code\":\"MALAGA\",\"name\":\"Malaga\"},\"code\":\"AGP\",\"coordinates\":{\"latitude\":36.6749,\"longitude\":-4.49911},\"country\":{\"code\":\"es\",\"currency\":\"EUR\",\"defaultAirportCode\":\"BCN\",\"iso3code\":\"ESP\",\"name\":\"Hiszpania\",\"schengen\":true},\"name\":\"Malaga\",\"region\":{\"code\":\"COSTA_DE_SOL\",\"name\":\"Costa del Sol\"},\"seoName\":\"malaga\",\"timeZone\":\"Europe/Madrid\"},\"opera",
+  "items": 42
+ },
+ "routes_locate": {
+  "status": 403,
+  "len": 915,
+  "head": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n<HTML><HEAD><META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=iso-8859-1\">\n<TITLE>ERROR: The request could not be satisfied</TITLE>\n</HEAD><BODY>\n<H1>403 ERROR</H1>\n<H2>The request could not be satisfied.</H2>\n<HR noshade size=\"1px\">\nBad request.\nWe can't connect to the server for this "
+ },
+ "airports_active": {
+  "status": 200,
+  "len": 86825,
+  "head": "[{\"aliases\":[],\"base\":false,\"city\":{\"code\":\"AARHUS\",\"name\":\"Aarhus\"},\"code\":\"AAR\",\"coordinates\":{\"latitude\":56.3,\"longitude\":10.619},\"country\":{\"code\":\"dk\",\"currency\":\"DKK\",\"defaultAirportCode\":\"BLL\",\"iso3code\":\"DNK\",\"name\":\"Dania\",\"schengen\":true},\"name\":\"Aarhus\",\"region\":{\"code\":\"EAST_JUTLAND\",\"name\":\"Wschodnia Jutlandia\"},\"seoName\":\"aarhus\",\"timeZone\":\"Europe/Copenhagen\"},{\"aliases\":[],\"base\":f",
+  "items": 222
+ }
+}
