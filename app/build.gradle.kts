@@ -6,8 +6,8 @@ android {
         applicationId = "pl.lotypoz"
         minSdk = 24
         targetSdk = 35
-        versionCode = 9
-        versionName = "1.8"
+        versionCode = 10
+        versionName = "1.9"
     }
     // Stały klucz podpisu: bez niego każda wersja z GitHuba miała inny podpis
     // i Android nie pozwalał zainstalować aktualizacji na starą wersję.

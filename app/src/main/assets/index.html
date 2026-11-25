@@ -139,6 +139,9 @@ a.plain{color:var(--acc)}
     <button class="chip" data-v="near">Najbliższe 3 mies.</button>
     <button class="chip" data-v="far">Daleko (za 3+ mies.)</button>
   </div>
+  <label>Dokąd chcesz lecieć? (zaznacz kraje albo wpisz miasto)</label>
+  <input id="dealQ" type="search" placeholder="🔎 np. Hiszpania, Londyn, Malta, Oslo…" style="width:100%;background:var(--card2);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:11px;font:15px Inter">
+  <div class="chips" id="dealCountries" style="margin-top:8px"></div>
   <label>Długość wyjazdu (zaznacz kilka)</label>
   <div class="chips" id="dealLen">
     <button class="chip" data-v="1-2">2–3 dni</button>
@@ -727,31 +730,82 @@ function chipGroup(el,cb){el.querySelectorAll(".chip").forEach(c=>c.onclick=()=>
 let dealMonth="all", dealWhen="all", dealWarm=false, dealShown=40;
 let LENS = store.get("deal_lens",["1-2","3-5","6-8","9-11","12-14"]);
 const FAR = addDays(TODAY,90);
+// ---------- DOKĄD: kraje i miasta ----------
+let DEST_C = store.get("deal_countries",[]), DEST_Q = "", showAllC = false;
+const norm = s => (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ł/g,"l");
+const C_FIX = {"Szkocja":"Wielka Brytania","Wyspy Kanaryjskie":"Hiszpania","Sycylia":"Włochy","Niemcy (hub)":"Niemcy","Holandia (hub)":"Holandia"};
+const COUNTRY_OF = {};
+function rebuildCountryMap(){
+  CAT.forEach(d=>{ COUNTRY_OF[norm(d[1])] = C_FIX[d[3]]||d[3]; });
+  DEALS.forEach(d=>{ if(d.live&&d.country) COUNTRY_OF[norm(d.city)] = d.country; });
+}
+function countryOf(d){
+  if(d.country) return d.country;
+  const m=(d.city||"").match(/\(([^)]+)\)/); if(m && !/^z /.test(m[1])) return m[1];
+  const c=norm((d.city||"").replace(/\s*\(.*\)/,""));
+  return COUNTRY_OF[c] || COUNTRY_OF[c.split(" ")[0]] || Object.entries(COUNTRY_OF).find(([k])=>k.startsWith(c)||c.startsWith(k))?.[1] || "";
+}
+function destOk(d){
+  const c=d._c ?? (d._c=countryOf(d));
+  if(DEST_C.length && !DEST_C.includes(c)) return false;
+  if(DEST_Q){ const q=norm(DEST_Q); if(!norm(d.city).includes(q) && !norm(c).includes(q) && !norm(d.to||"").includes(q)) return false; }
+  return true;
+}
+function renderCountries(){
+  const cnt={};
+  DEALS.filter(d=>ORIGS.includes(d.from)&&d.d1>=TODAY&&lenOk(nights(d.d1,d.d2))).forEach(d=>{const c=d._c ?? (d._c=countryOf(d)); if(c) cnt[c]=(cnt[c]||0)+1;});
+  let list=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+  DEST_C.forEach(c=>{ if(!cnt[c]) list.push([c,0]); });
+  const shown = showAllC ? list : list.slice(0,12);
+  $("#dealCountries").innerHTML=`<button class="chip ${DEST_C.length?"":"on"}" data-c="">🌍 Wszędzie</button>`+
+    shown.map(([c,n])=>`<button class="chip ${DEST_C.includes(c)?"on":""}" data-c="${esc(c)}">${esc(c)} <span style="opacity:.6">${n}</span></button>`).join("")+
+    (list.length>12?`<button class="chip" data-more="1" style="border-style:dashed">${showAllC?"mniej ▴":"więcej krajów ("+(list.length-12)+") ▾"}</button>`:"");
+  $("#dealCountries").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+    if(b.dataset.more){ showAllC=!showAllC; renderCountries(); return; }
+    const c=b.dataset.c;
+    DEST_C = !c ? [] : (DEST_C.includes(c) ? DEST_C.filter(x=>x!==c) : [...DEST_C,c]);
+    store.set("deal_countries",DEST_C); dealShown=40; renderCountries(); renderDealMonths(); renderDeals();
+  });
+}
+$("#dealQ").oninput=e=>{DEST_Q=e.target.value.trim(); dealShown=40; renderDealMonths(); renderDeals();};
+
 const isWarm = d => d.warm || /Ciepło|Kanary|Maroko|Egipt|Madera/.test(d.tag) || (DMAP[d.to]&&DMAP[d.to][4].includes("warm"));
 function lenOk(n){ return LENS.some(r=>{const [a,b]=r.split("-").map(Number);return n>=a&&n<=b}); }
 function dealsFor(){
   return DEALS.filter(d=>ORIGS.includes(d.from) && d.d1>=TODAY && lenOk(nights(d.d1,d.d2))
     && (dealWhen==="all" || (dealWhen==="near" ? d.d1<FAR : d.d1>=FAR))
-    && (!dealWarm || isWarm(d)));
+    && (!dealWarm || isWarm(d)) && destOk(d));
 }
 // ---------- CENY NA ŻYWO (automat na GitHubie, co 6 godzin) ----------
 const LIVE_URL="https://tylkotak7.github.io/tanie-loty/loty/deals.json";
 let LIVE_TIME=null;
+const WARM_C=["Hiszpania","Portugalia","Malta","Cypr","Grecja","Maroko","Egipt","Albania","Czarnogóra","Chorwacja","Jordania","Izrael","Turcja"];
+const NORTH_C=["Norwegia","Szwecja","Dania","Finlandia","Islandia","Łotwa","Litwa","Estonia"];
+const UK_C=["Wielka Brytania","Irlandia"];
+function groupsFor(country){ return WARM_C.includes(country)?["warm"]:NORTH_C.includes(country)?["north"]:UK_C.includes(country)?["uk"]:["city"]; }
 function addLive(data){
   const c=data.cols, ix=k=>c.indexOf(k);
+  Object.entries(data.airports||{}).forEach(([code,[city,country]])=>{
+    if(!DMAP[code]){ const e=[code,city,`${city} [${code}]`,country,groupsFor(country),WARM_C.includes(country)?350:250]; CAT.push(e); DMAP[code]=e; }
+  });
+  Object.entries(data.routes||{}).forEach(([from,codes])=>{
+    if(!ORIGINS[from]) return; ROUTES[from]=ROUTES[from]||{};
+    codes.forEach(code=>{ if(!ROUTES[from][code] && DMAP[code]) ROUTES[from][code]=["Ryanair"]; });
+  });
   data.rows.forEach(r=>{
     const from=r[ix("from")], to=r[ix("to")], city=r[ix("city")], country=r[ix("country")];
     if(!ORIGINS[from]) return;
-    if(!DMAP[to]){ const e=[to,city,`${city} [${to}]`,country,[],300]; CAT.push(e); DMAP[to]=e; }
+    if(!DMAP[to]){ const e=[to,city,`${city} [${to}]`,country,groupsFor(country),300]; CAT.push(e); DMAP[to]=e; }
     ROUTES[from]=ROUTES[from]||{}; if(!ROUTES[from][to]) ROUTES[from][to]=["Ryanair"];
     DEALS.push({from,to,en:to,city,country,p:r[ix("price")],d1:r[ix("out")],d2:r[ix("in")],outP:r[ix("outPrice")],inP:r[ix("inPrice")],
       airport:r[ix("airport")]||from,src:"Ryanair na żywo",tag:country||"Ryanair",live:1});
   });
   LIVE_TIME=new Date(data.updated);
+  rebuildCountryMap(); DEALS.forEach(d=>delete d._c);
 }
 function liveStatus(){
   $("#liveStatus").textContent = LIVE_TIME
-    ? `✅ Ceny Ryanair na żywo z 11 lotnisk · aktualizacja ${LIVE_TIME.toLocaleString("pl-PL",{day:"numeric",month:"numeric",hour:"2-digit",minute:"2-digit"})} (co 6 h) + okazje z serwisów`
+    ? `✅ Ceny Ryanair na żywo z 11 lotnisk (${Object.keys(DMAP).length} kierunków) · aktualizacja ${LIVE_TIME.toLocaleString("pl-PL",{day:"numeric",month:"numeric",hour:"2-digit",minute:"2-digit"})} (co 6 h) + okazje z serwisów`
     : "Pokazuję okazje z serwisów (ceny na żywo niedostępne).";
 }
 function bookUrl(d){
@@ -827,7 +881,7 @@ $("#dealLen").querySelectorAll(".chip").forEach(c=>{
     LENS = LENS.includes(v) ? LENS.filter(x=>x!==v) : [...LENS,v];
     if(!LENS.length) LENS=[v];
     $("#dealLen").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",LENS.includes(x.dataset.v)));
-    store.set("deal_lens",LENS); dealShown=40; renderDealMonths(); renderDeals();
+    store.set("deal_lens",LENS); dealShown=40; renderCountries(); renderDealMonths(); renderDeals();
   };
 });
 $("#dealMore").onclick=()=>{dealShown+=40;renderDeals()};
@@ -957,7 +1011,7 @@ function applyOrigins(){
   $("#destH").textContent=sel.length===1?"🗺 Kierunki z "+ORIGINS[sel[0]].gen:"🗺 Kierunki z "+sel.length+" lotnisk";
   $("#origin").querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.v==="ALL"?ORIGS.length===ORDER.length:ORIGS.includes(c.dataset.v)));
   if(sel.length>3){ $("#hOrig").textContent=sel.length===ORDER.length?"całej Polski":sel.length+" lotnisk"; }
-  fillDestSelect(); renderLinks(); renderDest(); renderDealMonths(); renderDeals(); renderThai();
+  fillDestSelect(); renderLinks(); renderDest(); renderCountries(); renderDealMonths(); renderDeals(); renderThai();
 }
 $("#origin").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
   const v=c.dataset.v;
@@ -966,7 +1020,7 @@ $("#origin").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
   else ORIGS=[...ORIGS,v];
   dealShown=40; applyOrigins();
 });
-applyOrigins(); liveStatus();
+rebuildCountryMap(); applyOrigins(); liveStatus();
 // Wczytaj ceny na żywo
 fetch(LIVE_URL,{cache:"no-cache"}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(data=>{
   addLive(data); liveStatus(); applyOrigins();
