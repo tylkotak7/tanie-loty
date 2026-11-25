@@ -7,7 +7,6 @@ on:
       - ".github/scripts/**"
       - ".github/workflows/wagrowiec-dane.yml"
       - ".github/workflows/loty-dane.yml"
-      - ".github/workflows/loty-probe.yml"
   workflow_dispatch:
 permissions:
   contents: write
