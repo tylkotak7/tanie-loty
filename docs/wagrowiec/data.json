@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-26T22:17:47.977Z",
+ "updated": "2026-11-27T01:45:38.311Z",
  "news": [
   {
    "t": "Szatnia na medal w Wągrowcu. To już 400. taka inwestycja w Wielkopolsce",
@@ -52,10 +52,10 @@
  ],
  "fuel": {
   "src": "autocentrum.pl, woj. wielkopolskie",
-  "pb95": 5.83,
+  "pb95": 5.81,
   "on": 7.36,
-  "lpg": 3.84,
-  "date": "2026-11-26",
+  "lpg": 3.81,
+  "date": "2026-11-27",
   "hist": [
    {
     "d": "2026-11-24",
@@ -74,6 +74,12 @@
     "pb95": 5.83,
     "on": 7.36,
     "lpg": 3.84
+   },
+   {
+    "d": "2026-11-27",
+    "pb95": 5.81,
+    "on": 7.36,
+    "lpg": 3.81
    }
   ]
  },
@@ -777,17 +783,17 @@
   },
   {
    "shop": "Dino",
+   "name": "Weekendowe okazje",
+   "from": "2026-11-26",
+   "to": "2026-11-27",
+   "url": "https://blix.pl/sklep/dino/gazetka/539034/"
+  },
+  {
+   "shop": "Dino",
    "name": "Super oferty na świąteczne słodycze!",
    "from": "2026-11-26",
    "to": "2026-12-01",
    "url": "https://blix.pl/sklep/dino/gazetka/538842/"
-  },
-  {
-   "shop": "Dino",
-   "name": "Specjalna oferta na 26.11.2026 - promocje spoza gazetki",
-   "from": "2026-11-26",
-   "to": "2026-11-26",
-   "url": "https://blix.pl/sklep/dino/gazetka/538725/"
   },
   {
    "shop": "Dino",
