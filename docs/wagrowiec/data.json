@@ -1,6 +1,12 @@
 {
- "updated": "2026-11-28T07:39:33.314Z",
+ "updated": "2026-11-28T10:12:44.981Z",
  "news": [
+  {
+   "t": "Sprawdź, czy spadnie dzisiaj (28.11) śnieg w Wągrowcu. Prognoza pogody na najbliższe dni",
+   "l": "https://news.google.com/rss/articles/CBMizwFBVV95cUxOS3ZfelhCNWROTXpYUTRrbFN1MDM5NnlUOG41UXhmaThHUWh4MHIzNGlrTVYtQVFWcFY5eExDR2J3TE1uU0g5MGFRWDV2SVhrWUFGUFVMSXBiYWRMemd2WU81Uk5LMjhYN3d5dUNRSldKMl9CdzFaMlc4MzhwV0VPSmt5SWZncHZjOWl4QVhRSk5HRHV5UGN1a0Jhd0N3VG12Q2c3bVJPbzN3VUxqQ3NjYjAtSlNGODJaNmtaUFplRWZXMzkzVVZqN2xQU3NLUW8?oc=5",
+   "s": "Wągrowiec Nasze Miasto",
+   "d": "2026-11-28"
+  },
   {
    "t": "Jak kształtują się prognozy na dziś (28.11) dla Wągrowca? Poznaj aktualne dane",
    "l": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPWXJjcE0yLW9GcTRUY2s4V1dUX1RmbFV2d2VPemdfV1RxYTN5b0twTjMtenJxTF95Qi1rVC00cGpYVFlZNWEzelBLdW1UZGEyYjkxN1YzdGhyemx3cDBiLVBkR2E0M1Nrb0RiNUc1Tk5SUG1wXzVadmFEb2xGc0ctSFVTQlJwelZFcmQwNXlUTFFvU0NMdEpIM3EtUzRVT2ZQcFVxMzlyQ0NsalR2RnpJZVZRYlRjSFFIWDhWVzhUWU4?oc=5",
@@ -10,12 +16,6 @@
   {
    "t": "Jakiej pogody można spodziewać się w weekend w Wągrowcu? Poznaj przewidywania na najbliższe dni",
    "l": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxPQlc0cE4zVHNrZFR4NmZ2U3NubUFJZnNfRnBwclZPZnRvVlNhR0l0X0pHUmxHbGs2WTVtczUwM2ZkbExiVE9YamxmVkI4cGVtallnTTkwdklTMlVhRlhHZ1NoSUtsYU00VjdQN3B1Rk9EV1REWjdWOENtWm9YckZWRDFhSDA0UkNiMW15MGh0OFRrZ2hCR3JuNWl4S3psb25GbUZHRFM2eExoWVZ0VFd6ZzBPSjZ1UFM3aENXRFdPUUdRczdFOVZpUXR3dWpNYVIwWDBnY0t1SHk5NFAtM0VpR3dlUER1N1ZW?oc=5",
-   "s": "Wągrowiec Nasze Miasto",
-   "d": "2026-11-28"
-  },
-  {
-   "t": "Sprawdź, czy spadnie dzisiaj (28.11) śnieg w Wągrowcu. Prognoza pogody na najbliższe dni",
-   "l": "https://news.google.com/rss/articles/CBMizwFBVV95cUxOS3ZfelhCNWROTXpYUTRrbFN1MDM5NnlUOG41UXhmaThHUWh4MHIzNGlrTVYtQVFWcFY5eExDR2J3TE1uU0g5MGFRWDV2SVhrWUFGUFVMSXBiYWRMemd2WU81Uk5LMjhYN3d5dUNRSldKMl9CdzFaMlc4MzhwV0VPSmt5SWZncHZjOWl4QVhRSk5HRHV5UGN1a0Jhd0N3VG12Q2c3bVJPbzN3VUxqQ3NjYjAtSlNGODJaNmtaUFplRWZXMzkzVVZqN2xQU3NLUW8?oc=5",
    "s": "Wągrowiec Nasze Miasto",
    "d": "2026-11-28"
   },
@@ -852,7 +852,7 @@
    "name": "Oferta od czwartku",
    "from": "2026-11-26",
    "to": "2026-11-28",
-   "url": "https://blix.pl/sklep/lidl/gazetka/539121/"
+   "url": "https://blix.pl/sklep/lidl/gazetka/539577/"
   },
   {
    "shop": "Lidl",
@@ -880,14 +880,14 @@
    "name": "Od czwartku, Z ladą tradycyjną",
    "from": "2026-11-26",
    "to": "2026-12-02",
-   "url": "https://blix.pl/sklep/biedronka/gazetka/539112/"
+   "url": "https://blix.pl/sklep/biedronka/gazetka/539541/"
   },
   {
    "shop": "Biedronka",
    "name": "Od czwartku",
    "from": "2026-11-26",
    "to": "2026-12-02",
-   "url": "https://blix.pl/sklep/biedronka/gazetka/539091/"
+   "url": "https://blix.pl/sklep/biedronka/gazetka/539538/"
   },
   {
    "shop": "Biedronka",
